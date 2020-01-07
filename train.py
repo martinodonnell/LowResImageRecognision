@@ -106,7 +106,8 @@ exp_dir = 'saves'
 def main():
     # TODO what does this do
     device = torch.device('cuda')
-
+    print('Using device:', device)
+    
     # Set up config
     config = {
         'batch_size': 4,
