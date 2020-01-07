@@ -110,12 +110,12 @@ def main():
     
     # Set up config
     config = {
-        'batch_size': 4,
-        'test_batch_size': 4,
+        'batch_size': 32,
+        'test_batch_size': 32,
         'lr': 0.01,
         'weight_decay': 0.0001,
         'momentum': 0.9,
-        'epochs': 60,
+        'epochs': 2,
         'imgsize': (224, 244),
         # 'arch': args.arch,
         # 'version': args.version,

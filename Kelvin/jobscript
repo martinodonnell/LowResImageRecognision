@@ -1,0 +1,26 @@
+#########################
+# jobscript for CUDA job
+#########################
+#!/bin/bash -l
+#SBATCH --job-name=cuda-toolkit
+#SBATCH -p gpu
+#SBATCH --time=00:30:00
+#SBATCH --output=cuda-test-out-%j.log
+#SBATCH --gres gpu:2
+
+module add nvidia-cuda
+
+$CUDA_SAMPLES/bin/x86_64/linux/release/p2pBandwidthLatencyTest
+
+
+#########################
+# Ensure that python3 is installed
+#########################
+module load apps/python3/3.6.4/gcc-4.8.5
+
+#Go back one folder to that all other paths work
+cd ..
+
+
+pyhon3 train.py
+
