@@ -10,7 +10,7 @@ def load_anno(path):
     mat = scipy.io.loadmat(path)
     return mat
 
-def load_class_names(path='data\devkit\cars_meta.mat'):
+def load_class_names(path='data/devkit/cars_meta.mat'):
     cn = load_anno(path)['class_names']
     cn = cn.tolist()[0]
     cn = [str(c[0].item()) for c in cn]
@@ -68,11 +68,11 @@ class CarsDataset(Dataset):
         return img, target
 
 def prepare_loader(config):
-    train_imgdir = 'data\cars_train'
-    test_imgdir = 'data\cars_test'
+    train_imgdir = 'data/cars_train'
+    test_imgdir = 'data/cars_test'
 
-    train_annopath = 'data\devkit/cars_train_annos.mat'
-    test_annopath = 'data\devkit/cars_test_annos_withlabels.mat'
+    train_annopath = 'data/devkit/cars_train_annos.mat'
+    test_annopath = 'data/devkit/cars_test_annos_withlabels.mat'
 
     train_transform = transforms.Compose(
         [
