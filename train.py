@@ -4,7 +4,7 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torch
 import time
-
+import pandas as py
 
 def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
     lr_scheduler.step()  # TODO what does this do
@@ -110,12 +110,12 @@ def main():
     
     # Set up config
     config = {
-        'batch_size': 32,
-        'test_batch_size': 32,
+        'batch_size':10,
+        'test_batch_size': 10,
         'lr': 0.01,
         'weight_decay': 0.0001,
         'momentum': 0.9,
-        'epochs': 2,
+        'epochs': 1,
         'imgsize': (224, 244),
         # 'arch': args.arch,
         # 'version': args.version,
