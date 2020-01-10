@@ -1,3 +1,4 @@
 saves/
 data/cars_*
 __pycache__/
+*.pyc

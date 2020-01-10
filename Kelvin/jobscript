@@ -6,7 +6,7 @@
 #!/bin/bash -l
 #SBATCH --job-name=cuda-toolkit
 #SBATCH -p gpu
-#SBATCH --time=00:10:00
+#SBATCH --time=05:00:00
 #SBATCH --output=cuda-test-out-%j.log
 #SBATCH --gres gpu:1
 # default mem is 7900M
