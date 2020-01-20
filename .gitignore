@@ -1,4 +1,4 @@
-data/cars_*
+data/StanfordCars/car*
 data/BoxCars
 __pycache__/
 *.pyc
