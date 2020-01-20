@@ -4,11 +4,11 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torch
 import time
-
+import pandas as pd
 
 def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
-    lr_scheduler.step()  # TODO what does this do
-    model.train()  # TODO what does this do
+    lr_scheduler.step()
+    model.train()
 
     loss_meter = 0
     acc_meter = 0
@@ -105,7 +105,7 @@ exp_dir = 'saves'
 
 def main():
     # TODO what does this do
-    device = torch.device('cuda')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device:', device)
     
     # Set up config
@@ -115,13 +115,15 @@ def main():
         'lr': 0.01,
         'weight_decay': 0.0001,
         'momentum': 0.9,
-        'epochs': 2,
+        'epochs': 60,
         'imgsize': (224, 244),
         # 'arch': args.arch,
         # 'version': args.version,
         # 'make_loss': args.make_loss,
         # 'type_loss': args.type_loss,
         'finetune': False,
+        'dataset':2,
+        'split':'hard',
         # 'path': args.path
     }
 
@@ -131,23 +133,23 @@ def main():
     # Create model
     model = construct_model('VGG', 196)
 
-    # TODO WHAT DOES THIS DO
+    # Finetune an existing model already trained
     if config['finetune']:
         load_weight(model, config['path'], device)
 
-    # TODO WHAT DOES THIS DO
+    # Addes model to GPU
     model = model.to(device)
 
-    # TODO WHAT DOES THIS DO
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
                           momentum=config['momentum'],  # TODO what is this
                           weight_decay=config['weight_decay'])  # TODO what is this
 
-    # TODO WHAT DOES THIS DO
+    # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
                                                   [100, 150],
                                                   gamma=0.1)
+
 
     # Set up data
     train_loader, test_loader = prepare_loader(config)

@@ -1,3 +1,5 @@
-saves/
 data/cars_*
+data/BoxCars
 __pycache__/
+*.pyc
+saves
