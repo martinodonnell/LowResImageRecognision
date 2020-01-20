@@ -1,4 +1,6 @@
-saves/
-data/cars_*
+data/StanfordCars/car*
+data/BoxCars
 __pycache__/
 *.pyc
+saves
+>>>>>>> 964132e508cb2347eec81c5e3150a11890372884
