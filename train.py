@@ -7,8 +7,11 @@ import time
 import pandas as pd
 
 def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
+
     lr_scheduler.step()
-    model.train()
+    print("---------Training-------")
+
+    model.train() # Set model to training mode
 
     loss_meter = 0
     acc_meter = 0
@@ -16,12 +19,11 @@ def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
     start_time = time.time()
     elapsed = 0
-    
     for data, target in train_loader:
         data = data.to(device)
         target = target.to(device)
 
-        optimizer.zero_grad()
+        optimizer.zero_grad() # zero the parameter gradients
 
         pred = model(data)
 
@@ -110,8 +112,8 @@ def main():
     
     # Set up config
     config = {
-        'batch_size': 32,
-        'test_batch_size': 32,
+        'batch_size': 1,
+        'test_batch_size': 1,
         'lr': 0.01,
         'weight_decay': 0.0001,
         'momentum': 0.9,
@@ -127,15 +129,19 @@ def main():
         # 'path': args.path
     }
 
-    class_names = load_class_names()
-    num_classes = len(class_names)
-
+    if(config['dataset']==1):
+        num_classes = 196 # Stanford
+    elif(config['dataset']==2):
+        num_classes = 694 #- BoxCar Hard
+    else:
+        print("Incorrect dataset")
+        exit(1)
     # Create model
-    model = construct_model('VGG', 196)
+    model = construct_model('VGG', num_classes)
 
     # Finetune an existing model already trained
-    if config['finetune']:
-        load_weight(model, config['path'], device)
+    # if config['finetune']:
+    #     load_weight(model, config['path'], device)
 
     # Addes model to GPU
     model = model.to(device)

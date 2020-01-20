@@ -162,15 +162,15 @@ class BoxCarDataset(object):
 
 def prepare_loader(config):
     if(config['dataset']==1):
-        train_imgdir = 'data/cars_train'
-        test_imgdir = 'data/cars_test'
+        train_imgdir = 'data/StanfordCars/cars_train'
+        test_imgdir = 'data/StanfordCars/cars_test'
 
-        train_annopath = 'data/devkit/cars_train_annos.mat'
-        test_annopath = 'data/devkit/cars_test_annos_withlabels.mat'
+        train_annopath = 'data/StanfordCars/devkit/cars_train_annos.mat'
+        test_annopath = 'data/StanfordCars/devkit/cars_test_annos_withlabels.mat'
 
     elif(config['dataset']==2):
-        train_imgdir = test_imgdir =  'data/BoxCars/images'
-        train_annopath = test_annopath = 'data/BoxCars'
+        train_imgdir = test_imgdir =  'data/BoxCars/BoxCars116k/images'
+        train_annopath = test_annopath = 'data/BoxCars/BoxCars116k'
     else:
         print("No dataset. Leaving")
         exit(1)
