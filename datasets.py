@@ -169,8 +169,8 @@ def prepare_loader(config):
         test_annopath = 'data/devkit/cars_test_annos_withlabels.mat'
 
     elif(config['dataset']==2):
-        train_imgdir = test_imgdir =  'data/BoxCars/images'
-        train_annopath = test_annopath = 'data/BoxCars'
+        train_imgdir = test_imgdir =  '/mnt/scratch/users/40160005/BoxCars/images'
+        train_annopath = test_annopath = '/mnt/scratch/users/40160005/BoxCars/'
     else:
         print("No dataset. Leaving")
         exit(1)
