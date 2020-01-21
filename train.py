@@ -129,9 +129,9 @@ def main():
         'split':'hard',
         # 'path': args.path
     }
-
+    print("------")
     pp.pprint(config)
-
+    print("------")
     if(config['dataset']==1):
         num_classes = 196 # Stanford
     elif(config['dataset']==2):

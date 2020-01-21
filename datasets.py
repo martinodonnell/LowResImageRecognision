@@ -46,7 +46,6 @@ class CarsDataset(Dataset):
         elif(dataset==2):
             boxCarsAnnUtil = BoxCarDataset(imgdir, anno_path, transform, size,dataset,split,part)
             self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
-            print('Size of ' + part + ": "+ str(len(boxCarsAnnUtil.cars_annotations)))
         else:
             print("No dataset. Leaving")
             exit(1)
