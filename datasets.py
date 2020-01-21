@@ -6,6 +6,8 @@ from PIL import Image
 import pickle
 import numpy as np
 
+from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET
+from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
 # Read ain .mat file
 def load_anno(path):
     mat = scipy.io.loadmat(path)
@@ -44,6 +46,7 @@ class CarsDataset(Dataset):
         elif(dataset==2):
             boxCarsAnnUtil = BoxCarDataset(imgdir, anno_path, transform, size,dataset,split,part)
             self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
+            print('Size of ' + part + ": "+ str(len(boxCarsAnnUtil.cars_annotations)))
         else:
             print("No dataset. Leaving")
             exit(1)
@@ -80,8 +83,8 @@ class CarsDataset(Dataset):
 #Boxcar stuff start
 class BoxCarDataset(object):
     def __init__(self, imgdir, anno_path, transform, size,dataset,new_split,new_part):
-        self.split = self.load_cache(anno_path + "/classification_splits.pkl")[new_split]
-        self.dataset = self.load_cache(anno_path +  "/dataset.pkl")
+        self.split = self.load_cache(BOXCARS_CLASSIFICATION_SPLITS)[new_split]
+        self.dataset = self.load_cache(BOXCARS_DATASET)
         self.current_part = new_part
         self.X = {}
         self.Y = {}
@@ -128,7 +131,7 @@ class BoxCarDataset(object):
 
     def load_annotations_boxcars(self):
         
-        self.create_unique_ann_list()
+        # self.create_unique_ann_list()
         self.initialize_data()
 
         ret = {}
@@ -148,34 +151,36 @@ class BoxCarDataset(object):
             
         return ret
 
-    def create_unique_ann_list(self):
+    # def create_unique_ann_list(self):
         
-        for data in self.dataset['samples']:
-            new_ann = data['annotation']
-            if new_ann not in self.cars_annotations:
-                self.cars_annotations.append(new_ann)
+    #     for data in self.dataset['samples']:
+    #         new_ann = data['annotation']
+    #         if new_ann not in self.cars_annotations:
+    #             self.cars_annotations.append(new_ann)
+
+    # def convert_ann_to_num(self,ann):
+    #     return self.cars_annotations.index(ann)
 
     def convert_ann_to_num(self,ann):
+        if ann not in self.cars_annotations:
+            self.cars_annotations.append(ann)
         return self.cars_annotations.index(ann)
 
     #Boxcar stuff end
 
+
+
 def prepare_loader(config):
     if(config['dataset']==1):
-        train_imgdir = 'data/StanfordCars/cars_train'
-        test_imgdir = 'data/StanfordCars/cars_test'
+        train_imgdir = STANFORD_CARS_TRAIN
+        test_imgdir = STANFORD_CARS_TEST
 
-        train_annopath = 'data/StanfordCars/devkit/cars_train_annos.mat'
-        test_annopath = 'data/StanfordCars/devkit/cars_test_annos_withlabels.mat'
+        train_annopath = STANFORD_CARS_TRAIN_ANNOS
+        test_annopath = STANFORD_CARS_TEST_ANNOS
 
     elif(config['dataset']==2):
-<<<<<<< HEAD
-        train_imgdir = test_imgdir =  '/mnt/scratch/users/40160005/BoxCars/images'
-        train_annopath = test_annopath = '/mnt/scratch/users/40160005/BoxCars/'
-=======
-        train_imgdir = test_imgdir =  'data/BoxCars/BoxCars116k/images'
-        train_annopath = test_annopath = 'data/BoxCars/BoxCars116k'
->>>>>>> 0c66bb986c4a4aa5909133aa7f6fdc4482c49195
+        train_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
+        train_annopath = test_annopath = BOXCARS_DATASET_ROOT
     else:
         print("No dataset. Leaving")
         exit(1)
