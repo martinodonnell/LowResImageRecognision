@@ -5,6 +5,7 @@ import torch.nn.functional as F
 import torch
 import time
 import pandas as pd
+import pprint as pp
 
 def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
@@ -124,10 +125,12 @@ def main():
         # 'make_loss': args.make_loss,
         # 'type_loss': args.type_loss,
         'finetune': False,
-        'dataset':1,
+        'dataset':2,
         'split':'hard',
         # 'path': args.path
     }
+
+    pp.pprint(config)
 
     if(config['dataset']==1):
         num_classes = 196 # Stanford
