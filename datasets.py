@@ -6,7 +6,7 @@ from PIL import Image
 import pickle
 import numpy as np
 
-from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET
+from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
 # Read ain .mat file
 def load_anno(path):
@@ -46,6 +46,9 @@ class CarsDataset(Dataset):
         elif(dataset==2):
             boxCarsAnnUtil = BoxCarDataset(imgdir, anno_path, transform, size,dataset,split,part)
             self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
+            # with open('data/' + boxCarsAnnUtil.current_part , 'w') as f:
+            #     for item in boxCarsAnnUtil.cars_annotations:
+            #         f.write("%s\n" % item)
         else:
             print("No dataset. Leaving")
             exit(1)
@@ -130,7 +133,7 @@ class BoxCarDataset(object):
 
     def load_annotations_boxcars(self):
         
-        # self.create_unique_ann_list()
+        self.get_class_names()
         self.initialize_data()
 
         ret = {}
@@ -152,9 +155,19 @@ class BoxCarDataset(object):
 
     def convert_ann_to_num(self,ann):
         if ann not in self.cars_annotations:
+            print("Ann not there. Error occured")
+            exit(1)
             self.cars_annotations.append(ann)
         return self.cars_annotations.index(ann)
 
+    def get_class_names(self):
+        with open(BOXCARS_HARD_CLASS_NAMES, 'r') as filehandle:
+            for line in filehandle:
+                # remove linebreak which is the last character of the string
+                currentPlace = line[:-1]
+
+                # add item to the list
+                self.cars_annotations.append(currentPlace)
     #Boxcar stuff end
 
 

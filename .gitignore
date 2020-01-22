@@ -1,5 +1,7 @@
 data/StanfordCars/car*
-data/BoxCars
+data/BoxCars/images
+data/BoxCars/*.pkl
+data/BoxCars/*.zip
 __pycache__/
 *.pyc
 saves
