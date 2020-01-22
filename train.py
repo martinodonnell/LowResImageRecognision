@@ -174,7 +174,9 @@ def main():
         if best_acc < valres['val_acc']:
             best_acc = valres['val_acc']
             torch.save(model.state_dict(), exp_dir + '/best.pth')
-
+            trainres['overwritten']=1#Work out from excel which epoch the best model from
+        else:
+            trainres['overwritten']=0
         res.append(trainres)
 
     print(f'Best accuracy: {best_acc:.4f}')

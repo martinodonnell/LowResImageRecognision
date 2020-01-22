@@ -150,16 +150,6 @@ class BoxCarDataset(object):
             
         return ret
 
-    # def create_unique_ann_list(self):
-        
-    #     for data in self.dataset['samples']:
-    #         new_ann = data['annotation']
-    #         if new_ann not in self.cars_annotations:
-    #             self.cars_annotations.append(new_ann)
-
-    # def convert_ann_to_num(self,ann):
-    #     return self.cars_annotations.index(ann)
-
     def convert_ann_to_num(self,ann):
         if ann not in self.cars_annotations:
             self.cars_annotations.append(ann)
