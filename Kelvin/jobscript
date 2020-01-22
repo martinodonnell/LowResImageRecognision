@@ -4,14 +4,13 @@
 # jobscript for CUDA job
 #########################
 #!/bin/bash -l
-#SBATCH --job-name=cuda-toolkit
+#SBATCH --job-name=LowResImageClass
 #SBATCH -p gpu
-#SBATCH --time=05:00:00
-#SBATCH --output=cuda-test-out-%j.log
+#SBATCH --time=10:00:00
+#SBATCH --output=LowResImageClass-%j.log
 #SBATCH --gres gpu:1
-# default mem is 7900M
-#SBATCH --mem 30000M
-
+#SBATCH --mem 20000M
+#SBATCH -w gpu02
 module add nvidia-cuda
 module add apps/python3
 
