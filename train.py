@@ -2,6 +2,7 @@ from datasets import load_class_names, prepare_loader
 from models import construct_model
 import torch.optim as optim
 import torch.nn.functional as F
+import torch.nn as nn
 import torch
 import time
 import pandas as pd
@@ -146,8 +147,15 @@ def main():
     # if config['finetune']:
     #     load_weight(model, config['path'], device)
 
+    #Add to multiple paramaters
+    if torch.cuda.device_count() > 1:
+        print("Let's use", torch.cuda.device_count(), "GPUs!")
+        model = nn.DataParallel(model)
+        
     # Addes model to GPU
     model = model.to(device)
+
+
 
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
