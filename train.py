@@ -25,13 +25,13 @@ def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
         data = data.to(device)
         target = target.to(device)
 
-        optimizer.zero_grad() # zero the parameter gradients
+         # zero the parameter gradients
+        optimizer.zero_grad()
 
+        # forward + backward + optimize
         pred = model(data)
-
         loss = F.cross_entropy(pred, target)
         loss.backward()
-
         optimizer.step()
 
         acc = pred.max(1)[1].eq(target).float().mean()
@@ -65,6 +65,12 @@ def test(model, test_loader, device, config):
     acc_meter = 0
     runcount = 0
     elapsed = 0
+    
+    f1_meter = 0
+    percision_meter =0
+    recall_meter = 0
+   
+
     i = 0
 
     with torch.no_grad():
@@ -84,9 +90,16 @@ def test(model, test_loader, device, config):
             elapsed = time.time() - start_time
             runcount += data.size(0)
 
+            f1_meter += f1_score(target, pred, average="samples"))
+            percision_meter += precision_score(target, pred, average="samples"))
+            recall_meter +=  recall_score(target, pred, average="samples"))
+
             print(f'[{i}/{len(test_loader)}]: '
                   f'Loss: {loss_meter / runcount:.4f} '
-                  f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)', end='\r')
+                  f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
+                  f'Per: {percision_meter / runcount:.4f}'
+                  f'Rec: {recall_meter / runcount:.4f}'
+                  f' F1: {f1_meter / runcount:.4f}', end='\r')
 
         print()
 
@@ -96,7 +109,10 @@ def test(model, test_loader, device, config):
     valres = {
         'val_loss': loss_meter,
         'val_acc': acc_meter,
-        'val_time': elapsed
+        'val_time': elapsed,
+        'val_percision':percision_meter,
+        'val_recall':recall_meter,
+        'val_f1':f1_meter,
     }
 
     print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
