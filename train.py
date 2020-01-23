@@ -7,6 +7,7 @@ import torch
 import time
 import pandas as pd
 import pprint as pp
+# from sklearn.metrics import precision_score,f1_score,recall_score
 
 def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
@@ -17,6 +18,11 @@ def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
     loss_meter = 0
     acc_meter = 0
+
+    # f1_meter = 0
+    # percision_meter =0
+    # recall_meter = 0
+
     i = 0
 
     start_time = time.time()
@@ -40,10 +46,18 @@ def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
         acc_meter += acc.item()
         i += 1
         elapsed = time.time() - start_time
+        
+        # f1_meter += f1_score(target, pred, average="macro")
+        # percision_meter += precision_score(target, pred, average="macro")
+        # recall_meter +=  recall_score(target, pred, average="macro")
 
         print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
               f'Loss: {loss_meter / i:.4f} '
-              f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)', end='\r')
+              f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
+            #   f'Per: {percision_meter / runcount:.4f}'
+            #   f'Rec: {recall_meter / runcount:.4f}'
+            #   f' F1: {f1_meter / runcount:.4f}', 
+              end='\r')
 
     print()
     loss_meter /= len(train_loader)
@@ -52,7 +66,10 @@ def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
     trainres = {
         'train_loss': loss_meter,
         'train_acc': acc_meter,
-        'train_time': elapsed
+        'train_time': elapsed,
+        # 'val_percision':percision_meter,
+        # 'val_recall':recall_meter,
+        # 'val_f1':f1_meter,
     }
 
     return trainres
@@ -66,9 +83,9 @@ def test(model, test_loader, device, config):
     runcount = 0
     elapsed = 0
     
-    f1_meter = 0
-    percision_meter =0
-    recall_meter = 0
+    # f1_meter = 0
+    # percision_meter =0
+    # recall_meter = 0
    
 
     i = 0
@@ -89,17 +106,19 @@ def test(model, test_loader, device, config):
             i += 1
             elapsed = time.time() - start_time
             runcount += data.size(0)
-
-            f1_meter += f1_score(target, pred, average="samples")
-            percision_meter += precision_score(target, pred, average="samples")
-            recall_meter +=  recall_score(target, pred, average="samples")
+            print("target",target,type(target))
+            print("pred",pred,type(pred))
+            # f1_meter += f1_score(target, pred, average="macro")
+            # percision_meter += precision_score(target, pred, average="macro")
+            # recall_meter +=  recall_score(target, pred, average="macro")
 
             print(f'[{i}/{len(test_loader)}]: '
                   f'Loss: {loss_meter / runcount:.4f} '
                   f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
-                  f'Per: {percision_meter / runcount:.4f}'
-                  f'Rec: {recall_meter / runcount:.4f}'
-                  f' F1: {f1_meter / runcount:.4f}', end='\r')
+                #   f'Per: {percision_meter / runcount:.4f}'
+                #   f'Rec: {recall_meter / runcount:.4f}'
+                #   f' F1: {f1_meter / runcount:.4f}', 
+                  end='\r')
 
         print()
 
@@ -110,9 +129,9 @@ def test(model, test_loader, device, config):
         'val_loss': loss_meter,
         'val_acc': acc_meter,
         'val_time': elapsed,
-        'val_percision':percision_meter,
-        'val_recall':recall_meter,
-        'val_f1':f1_meter,
+        # 'val_percision':percision_meter,
+        # 'val_recall':recall_meter,
+        # 'val_f1':f1_meter,
     }
 
     print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
