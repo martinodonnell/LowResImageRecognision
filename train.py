@@ -90,9 +90,9 @@ def test(model, test_loader, device, config):
             elapsed = time.time() - start_time
             runcount += data.size(0)
 
-            f1_meter += f1_score(target, pred, average="samples"))
-            percision_meter += precision_score(target, pred, average="samples"))
-            recall_meter +=  recall_score(target, pred, average="samples"))
+            f1_meter += f1_score(target, pred, average="samples")
+            percision_meter += precision_score(target, pred, average="samples")
+            recall_meter +=  recall_score(target, pred, average="samples")
 
             print(f'[{i}/{len(test_loader)}]: '
                   f'Loss: {loss_meter / runcount:.4f} '
