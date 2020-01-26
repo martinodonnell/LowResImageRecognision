@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#########################
+# jobscript for CUDA job
+#########################
+#!/bin/bash -l
+#SBATCH --job-name=Tr_LRIR
+#SBATCH -p gpu
+#SBATCH --time=18:00:00
+#SBATCH --output=Tr_LRIR-%j.log
+#SBATCH --gres gpu:1
+#SBATCH --mem 20000M
+#SBATCH -w gpu02
+module add nvidia-cuda
+module add apps/python3
+
+#Watch hardware usage
+nvidia-smi
+
+
+#Go back one folder to that all other paths work
+cd ..
+
+
+python3 train.py
