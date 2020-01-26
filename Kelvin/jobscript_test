@@ -23,4 +23,4 @@ cd ..
 
 path="saves/004_best_boxcars_60_epoch_0.5Drop.pth"
 echo "Testing $path"
-python3 test.py $path
+python3 test.py --modelPath $path
