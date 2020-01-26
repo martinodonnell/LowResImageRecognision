@@ -57,7 +57,7 @@ def train(ep, model, optimizer, lr_scheduler, train_loader, device, config):
             #   f'Per: {percision_meter / runcount:.4f}'
             #   f'Rec: {recall_meter / runcount:.4f}'
             #   f' F1: {f1_meter / runcount:.4f}', 
-              end='\r')
+              ,end='\r')
 
     print()
     loss_meter /= len(train_loader)
@@ -106,8 +106,8 @@ def test(model, test_loader, device, config):
             i += 1
             elapsed = time.time() - start_time
             runcount += data.size(0)
-            print("target",target,type(target))
-            print("pred",pred,type(pred))
+            #print("target",target,type(target))
+            #print("pred",pred,type(pred))
             # f1_meter += f1_score(target, pred, average="macro")
             # percision_meter += precision_score(target, pred, average="macro")
             # recall_meter +=  recall_score(target, pred, average="macro")
@@ -118,7 +118,7 @@ def test(model, test_loader, device, config):
                 #   f'Per: {percision_meter / runcount:.4f}'
                 #   f'Rec: {recall_meter / runcount:.4f}'
                 #   f' F1: {f1_meter / runcount:.4f}', 
-                  end='\r')
+                 , end='\r')
 
         print()
 

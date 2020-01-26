@@ -205,7 +205,7 @@ def prepare_loader(config):
 
     
     train_dataset = CarsDataset(train_imgdir, train_annopath, train_transform, config['imgsize'],config['dataset'],config['split'],'train')
-    test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'test')
+    test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'validation')
 
     train_loader = DataLoader(train_dataset,
                               batch_size=config['batch_size'],

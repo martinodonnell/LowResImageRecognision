@@ -2,7 +2,8 @@
 import os
 #%%
 # change this to your location
-BOXCARS_DATASET_ROOT = "data/BoxCars" 
+BOXCARS_DATASET_ROOT = "/mnt/scratch/users/40160005/BoxCars/"
+#BOXCARS_DATASET_ROOT = "data/BoxCars" 
 STANFORD_DATASET_ROOT = "data/StanfordCars" 
 
 
