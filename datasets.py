@@ -7,18 +7,19 @@ import pickle
 import numpy as np
 
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
-from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
+from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
 # Read ain .mat file
 def load_anno(path):
     mat = scipy.io.loadmat(path)
     return mat
 
-def load_class_names(path='data/StanfordCars/devkit/cars_meta.mat'):
+def load_class_names(path=STANFORD_CARS_CARS_META):
     cn = load_anno(path)['class_names']
     cn = cn.tolist()[0]
     cn = [str(c[0].item()) for c in cn]
     return cn
 
+#Boxcar
 def load_boxcar_class_names():
     ann = []
     with open(BOXCARS_HARD_CLASS_NAMES, 'r') as filehandle:
@@ -51,17 +52,41 @@ def load_annotations(path):
 
     return ret
 
-class CarsDataset(Dataset):
-    def __init__(self, imgdir, anno_path, transform, size,dataset,split,part):
-        if(dataset==1):
-            self.annos = load_annotations(anno_path)
-        elif(dataset==2):
-            boxCarsAnnUtil = BoxCarDataset(imgdir, anno_path, transform, size,dataset,split,part)
-            self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
-        else:
-            print("No dataset. Leaving")
-            exit(1)
+class CarsDatasetV1(Dataset):
+    def __init__(self, imgdir, anno_path, transform, size):        
+        self.annos = load_annotations(anno_path)     
+        self.imgdir = imgdir
+        self.transform = transform
+        self.resize = transforms.Resize(size)
+        self.cache = {}
 
+    def __len__(self):
+        return len(self.annos)
+
+    def __getitem__(self, idx):
+        r = self.annos[idx]
+
+        target = r['target']
+
+        if idx not in self.cache:
+            fn = r['filename']
+
+            img = Image.open(os.path.join(self.imgdir, fn))
+            img = img.convert('RGB')
+            img = self.resize(img)
+
+            self.cache[idx] = img
+        else:
+            img = self.cache[idx]
+
+        img = self.transform(img)
+
+        return img, target
+
+class BoxCarsDatasetV1(Dataset):
+    def __init__(self, imgdir, anno_path, transform, size,split,part):
+        boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
+        self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
         self.imgdir = imgdir
         self.transform = transform
         self.resize = transforms.Resize(size)
@@ -92,8 +117,8 @@ class CarsDataset(Dataset):
 
 
 #Boxcar stuff start
-class BoxCarDataset(object):
-    def __init__(self, imgdir, anno_path, transform, size,dataset,new_split,new_part):
+class BoxCarDataSetUtil(object):
+    def __init__(self,new_split,new_part):
         self.split = self.load_cache(BOXCARS_CLASSIFICATION_SPLITS)[new_split]
         self.dataset = self.load_cache(BOXCARS_DATASET)
         self.current_part = new_part
@@ -182,19 +207,6 @@ class BoxCarDataset(object):
 
 
 def prepare_loader(config):
-    if(config['dataset']==1):
-        train_imgdir = STANFORD_CARS_TRAIN
-        test_imgdir = STANFORD_CARS_TEST
-
-        train_annopath = STANFORD_CARS_TRAIN_ANNOS
-        test_annopath = STANFORD_CARS_TEST_ANNOS
-
-    elif(config['dataset']==2):
-        train_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
-        train_annopath = test_annopath = BOXCARS_DATASET_ROOT
-    else:
-        print("No dataset. Leaving")
-        exit(1)
 
     train_transform = transforms.Compose(
         [
@@ -212,9 +224,27 @@ def prepare_loader(config):
         ]
     )
 
+    if(config['dataset']==1):#Stanford Cars Dataset
+        train_imgdir = STANFORD_CARS_TRAIN
+        test_imgdir = STANFORD_CARS_TEST
+
+        train_annopath = STANFORD_CARS_TRAIN_ANNOS
+        test_annopath = STANFORD_CARS_TEST_ANNOS
+
+        train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
+        test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'validation')
+
+
+    elif(config['dataset']==2):#BoxCars Dataset
+        train_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
+        train_annopath = test_annopath = BOXCARS_DATASET_ROOT
+        train_dataset = BoxCarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'],config['split'],'train')
+        test_dataset = BoxCarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['split'],'validation')
+    else:
+        print("No dataset. Leaving")
+        exit(1)
     
-    train_dataset = CarsDataset(train_imgdir, train_annopath, train_transform, config['imgsize'],config['dataset'],config['split'],'train')
-    test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'validation')
+    
 
     train_loader = DataLoader(train_dataset,
                               batch_size=config['batch_size'],
@@ -231,6 +261,14 @@ def prepare_loader(config):
 
 
 def prepare_test_loader(config):
+
+    test_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize((0.4706145, 0.46000465, 0.45479808), (0.26668432, 0.26578658, 0.2706199))
+        ]
+    )
+
     if(config['dataset']==1):
         print("NOT SET UP YET")
         exit(1)
@@ -240,22 +278,15 @@ def prepare_test_loader(config):
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
 
+        test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'test')
+
     elif(config['dataset']==2):
         test_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
         test_annopath = test_annopath = BOXCARS_DATASET_ROOT
+        test_dataset = BoxCarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['split'],'test')
     else:
         print("No dataset. Leaving")
-        exit(1)
-
-    test_transform = transforms.Compose(
-        [
-            transforms.ToTensor(),
-            transforms.Normalize((0.4706145, 0.46000465, 0.45479808), (0.26668432, 0.26578658, 0.2706199))
-        ]
-    )
-
-    
-    test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'test')
+        exit(1) 
 
     test_loader = DataLoader(test_dataset,
                              batch_size=config['test_batch_size'],
