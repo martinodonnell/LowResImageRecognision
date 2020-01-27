@@ -157,7 +157,7 @@ def main():
         'epochs': 60,
         'imgsize': (224, 244),
         # 'arch': args.arch,
-        # 'version': args.version,
+        'version': 1,
         # 'make_loss': args.make_loss,
         # 'type_loss': args.type_loss,
         'finetune': False,

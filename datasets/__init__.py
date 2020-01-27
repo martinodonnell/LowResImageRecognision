@@ -7,7 +7,7 @@ import pickle
 import numpy as np
 
 from datasets.StanfordDataset import CarsDatasetV1
-from datasets.BoxCarsDataset import BoxCarsDatasetV1
+from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV2
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
 
@@ -36,15 +36,30 @@ def prepare_loader(config):
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
 
-        train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
-        test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'validation')
+        if(config['version']==1):         
+            train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
+            test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
+        else:
+            print("Have not set up multi-task learning for stanford dataset")
+            exit(1)
+        
+
+        
 
 
     elif(config['dataset']==2):#BoxCars Dataset
-        train_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
-        train_annopath = test_annopath = BOXCARS_DATASET_ROOT
-        train_dataset = BoxCarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'],config['split'],'train')
-        test_dataset = BoxCarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['split'],'validation')
+        imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
+
+        if(config['version']==1):
+            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['split'],'train')
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['split'],'validation')
+        elif(config['version']==2):
+            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['split'],'train')
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['split'],'validation')
+        else:
+            print(version," is not a valid version for boxcars")
+            exit(1)
+            
     else:
         print("No dataset. Leaving")
         exit(1)   

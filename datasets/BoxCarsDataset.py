@@ -5,7 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import pickle
 import numpy as np
-
+import pandas as pd
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 
 def load_boxcar_class_names():
@@ -21,7 +21,7 @@ def load_boxcar_class_names():
     return ann
 
 class BoxCarsDatasetV1(Dataset):
-    def __init__(self, imgdir, anno_path, transform, size,split,part):
+    def __init__(self, imgdir, transform, size,split,part):
         boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
         self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
         self.imgdir = imgdir
@@ -52,6 +52,39 @@ class BoxCarsDatasetV1(Dataset):
 
         return img, target
 
+class BoxCarsDatasetV2(Dataset):
+    def __init__(self, imgdir, transform, size,split,part):
+        boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
+        self.annos  = boxCarsAnnUtil.load_annotations_boxcars_v2()
+        self.imgdir = imgdir
+        self.transform = transform
+        self.resize = transforms.Resize(size)
+        self.cache = {}
+
+    def __len__(self):
+        return len(self.annos)
+
+    def __getitem__(self, idx):
+        r = self.annos[idx]
+
+        target = r['target']
+
+        if idx not in self.cache:
+            fn = r['filename']
+
+            img = Image.open(os.path.join(self.imgdir, fn))
+            img = img.convert('RGB')
+            img = self.resize(img)
+
+            self.cache[idx] = img
+        else:
+            img = self.cache[idx]
+
+        img = self.transform(img)
+
+        return img, target
+
+
 
 #Boxcar stuff start
 class BoxCarDataSetUtil(object):
@@ -64,6 +97,11 @@ class BoxCarDataSetUtil(object):
         self.X[new_part] = None
         self.Y[new_part] = None # for labels as array of 0-1 flags
         self.cars_annotations = []
+        self.v2_info = []
+        self.make = []
+        self.model = []
+        self.submodel = []
+        self.generation = []
         
 
     def load_cache(self,path, encoding="latin-1", fix_imports=True):
@@ -102,11 +140,10 @@ class BoxCarDataSetUtil(object):
 
             return vehicle, instance, 
 
-    def load_annotations_boxcars(self):
+    def load_annotations_boxcars_v1(self):
         
         self.get_class_names()
         self.initialize_data()
-
         ret = {}
         img_counter = 0
         for car_ids in self.X[self.current_part]:
@@ -116,7 +153,7 @@ class BoxCarDataSetUtil(object):
                 'y1': None,
                 'x2':None,
                 'y2': None,
-                'target': self.convert_ann_to_num(vehicle['annotation']),
+                'target': self.get_array_index_of_string(self.cars_annotations,vehicle['annotation']),
                 'filename': instance['path']
             }
             ret[img_counter] = r
@@ -124,12 +161,55 @@ class BoxCarDataSetUtil(object):
             
         return ret
 
-    def convert_ann_to_num(self,ann):
-        if ann not in self.cars_annotations:
-            print("Ann not there. Error occured")
+    def load_annotations_boxcars_v2(self):
+        
+        self.get_class_names()
+        self.initialize_data()
+        self.separate_classes()
+        
+        ret = {}
+        img_counter = 0
+        for car_ids in self.X[self.current_part]:
+            vehicle, instance = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
+            make,model,submodel,generation = vehicle['annotation'].split()
+            r = {
+                'x1': None,
+                'y1': None,
+                'x2':None,
+                'y2': None,
+                'target': self.get_array_index_of_string(self.cars_annotations, vehicle['annotation']),    
+                'make':self.get_array_index_of_string(self.make, make),
+                'model':self.get_array_index_of_string(self.model, model),
+                'submodel':self.get_array_index_of_string(self.submodel, submodel),
+                'generation':  self.get_array_index_of_string(self.generation, generation),    
+                'filename': instance['path']
+            }
+            ret[img_counter] = r
+            img_counter=img_counter+1  
+            
+        return ret
+
+    def separate_classes(self):     
+        for data in self.cars_annotations:
+            t_make,t_model,t_submodel,t_generation = data.split()
+            self.make.append(t_make)
+            self.model.append(t_model)
+            self.submodel.append(t_submodel)
+            self.generation.append(t_generation)
+
+        self.make = list(set(self.make))
+        self.model = list(set(self.model))
+        self.submodel = list(set(self.submodel))
+        self.generation = list(set(self.generation))
+
+
+    
+    def get_array_index_of_string(self,arr,ann):
+        if ann not in arr:
+            print("Ann not in array. Check this. \nError occured",ann,arr)
             exit(1)
-            self.cars_annotations.append(ann)
-        return self.cars_annotations.index(ann)
+            arr.append(ann)
+        return arr.index(ann)
 
     def get_class_names(self):
         with open(BOXCARS_HARD_CLASS_NAMES, 'r') as filehandle:
