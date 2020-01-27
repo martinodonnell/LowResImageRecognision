@@ -1,4 +1,4 @@
-from datasets import load_class_names, prepare_loader
+from datasets import prepare_loader
 from models import construct_model
 import torch.optim as optim
 import torch.nn.functional as F
@@ -189,8 +189,6 @@ def main():
         
     # Addes model to GPU
     model = model.to(device)
-
-
 
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
