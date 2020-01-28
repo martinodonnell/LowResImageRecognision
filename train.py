@@ -194,9 +194,13 @@ def test(model, test_loader, device, config):
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
     csv_hitory_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
-    model_best_fiepath  = os.path.join(SAVE_FOLDER, id_string+'_best_model.pth.csv')
+    model_best_fiepath  = os.path.join(SAVE_FOLDER, id_string+'_model.pth')
 
     return csv_hitory_filepath,model_best_fiepath
+
+def load_weight(model, path, device):
+    sd = torch.load(path,map_location=device)
+    model.load_state_dict(sd)
 
 def main(args):
     # TODO what does this do
@@ -224,17 +228,18 @@ def main(args):
         'submodel_loss':args.submodel_loss,        
     }
 
-    print("------")
+    #Save to log file on Kelvin
     pp.pprint(config)
-    print("------")
+
     #Set up name for output files
     csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
 
-    if(config['dataset_version']==1):
-        num_classes = 196 # Stanford
+
+    if(config['dataset_version']==1):# Stanford
+        num_classes = 196 
         num_makes = num_models = num_submodels = 0
-    elif(config['dataset_version']==2):
-        num_classes = 107 #- BoxCar Hard split['hard']['types_mapping']
+    elif(config['dataset_version']==2):#- BoxCar Hard split['hard']['types_mapping']
+        num_classes = 107 
         num_makes = 1
         num_models = 1
         num_submodels = 1
@@ -246,8 +251,16 @@ def main(args):
 
     # Finetune an existing model already trained
     if config['finetune']:
-        print("Loading existing model",config['model_id'] )
+        print("Loading existing model", )
         load_weight(model, model_best_fiepath, device)
+
+    #Add to multiple gpus if they are there
+    if torch.cuda.device_count() > 1:
+        print("Using", torch.cuda.device_count(), "GPUs!")
+        model = nn.DataParallel(model)
+        
+    # Addes model to GPU
+    model = model.to(device)
 
     #Check if file exists. If so increment the id and try again until a new one is generated. Will create a new file if finetuning to 
     # ensure results are not lost. May have changes the parameters and want to keep them. Will know from the logs
@@ -259,13 +272,7 @@ def main(args):
     df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time'])
     df.to_csv(csv_hitory_filepath)
 
-    #Add to multiple paramaters
-    if torch.cuda.device_count() > 1:
-        print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = nn.DataParallel(model)
-        
-    # Addes model to GPU
-    model = model.to(device)
+    
 
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
@@ -277,7 +284,7 @@ def main(args):
                                                   [100, 150],
                                                   gamma=0.1) 
 
-    # Set up data
+    # Set up data loaders
     train_loader, test_loader = prepare_loader(config)
     
     best_acc = 0
@@ -339,7 +346,7 @@ if __name__ == '__main__':
                         help='required if set dataset-version to 2(default: hard)')
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
-    parser.add_argument('--model-id',default=6,
+    parser.add_argument('--model-id',default=6,type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
 
     # optimizer arg
