@@ -213,7 +213,7 @@ def main(args):
         'dataset_version':args.dataset_version,
         'boxcar_split':args.boxcar_split,
         'finetune': args.finetune,
-        'model_id':args.model_id, 
+        'model_id':args.model_id,
 
         'lr': args.lr,
         'weight_decay': args.weight_decay,
@@ -246,16 +246,18 @@ def main(args):
 
     # Finetune an existing model already trained
     if config['finetune']:
+        print("Loading existing model",config['model_id'] )
         load_weight(model, model_best_fiepath, device)
-    else:
-        #Check if file exists. If so increment the id and try again until a new is there
-        while(os.path.isfile(csv_hitory_filepath)):
-            config['model_id'] = config['model_id']+1
-            csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
-        print("New ID:",config['model_id'])
-        #Set up blank csv in save folder
-        df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time'])
-        df.to_csv(csv_hitory_filepath)
+
+    #Check if file exists. If so increment the id and try again until a new one is generated. Will create a new file if finetuning to 
+    # ensure results are not lost. May have changes the parameters and want to keep them. Will know from the logs
+    while(os.path.isfile(csv_hitory_filepath)):
+        config['model_id'] = config['model_id']+1
+        csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
+    print("New ID:",config['model_id'])
+    #Set up blank csv in save folder
+    df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time'])
+    df.to_csv(csv_hitory_filepath)
 
     #Add to multiple paramaters
     if torch.cuda.device_count() > 1:
