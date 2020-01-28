@@ -1,14 +1,18 @@
 from datasets import prepare_loader
 from models import construct_model
+from config import SAVE_FOLDER
+
+import argparse
+import os
+import pprint as pp
+import time
+
 import torch.optim as optim
 import torch.nn.functional as F
 import torch.nn as nn
 import torch
-import time
 import pandas as pd
-import pprint as pp
-from config import SAVE_FOLDER
-import os
+
 def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
     lr_scheduler.step()
@@ -32,7 +36,7 @@ def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
         # forward + backward + optimize
         pred = model(data)
         loss = F.cross_entropy(pred, target)
-        loss.backward()
+        loss.backward()#How does this instigate back propogation
         optimizer.step()#updates parameters
 
         acc = pred.max(1)[1].eq(target).float().mean()
@@ -190,44 +194,46 @@ def test(model, test_loader, device, config):
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
     csv_hitory_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
-    model_best_fiepath  = os.path.join(SAVE_FOLDER, id_string+'_best_modal.pth.csv')
+    model_best_fiepath  = os.path.join(SAVE_FOLDER, id_string+'_best_model.pth.csv')
 
     return csv_hitory_filepath,model_best_fiepath
 
-def main():
+def main(args):
     # TODO what does this do
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device:', device)
     
     # Set up config
     config = {
-        'batch_size': 32,
-        'test_batch_size': 32,
-        'lr': 0.001, #TODO change this
-        'weight_decay': 0.0001,
-        'momentum': 0.9,
-        'epochs': 60,
-        'imgsize': (224, 244),
-        'version': 1,
-        'make_loss': 0.2,
-        'model_loss': 0.2,
-        'submodel_loss':0.2,
-        'finetune': False,
-        'dataset':1,
-        'split':'hard',
-        'id':6  
+        'batch_size': args.batch_size,
+        'test_batch_size': args.batch_size,
+        'epochs': args.epochs,
+        'imgsize': (args.imgsize, args.imgsize),
+        'model_version': args.model_version,
+        'dataset_version':args.dataset_version,
+        'boxcar_split':args.boxcar_split,
+        'finetune': args.finetune,
+        'model_id':args.model_id, 
+
+        'lr': args.lr,
+        'weight_decay': args.weight_decay,
+        'momentum': args.momentum,
+
+        'make_loss': args.make_loss,
+        'model_loss': args.model_loss,
+        'submodel_loss':args.submodel_loss,        
     }
+
     print("------")
     pp.pprint(config)
     print("------")
-
     #Set up name for output files
-    csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['id'])
+    csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
 
-    if(config['dataset']==1):
+    if(config['dataset_version']==1):
         num_classes = 196 # Stanford
         num_makes = num_models = num_submodels = 0
-    elif(config['dataset']==2):
+    elif(config['dataset_version']==2):
         num_classes = 107 #- BoxCar Hard split['hard']['types_mapping']
         num_makes = 1
         num_models = 1
@@ -244,9 +250,9 @@ def main():
     else:
         #Check if file exists. If so increment the id and try again until a new is there
         while(os.path.isfile(csv_hitory_filepath)):
-            config['id'] = config['id']+1
-            csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['id'])
-        print("New ID:",config['id'])
+            config['model_id'] = config['model_id']+1
+            csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
+        print("New ID:",config['model_id'])
         #Set up blank csv in save folder
         df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time'])
         df.to_csv(csv_hitory_filepath)
@@ -275,10 +281,10 @@ def main():
     best_acc = 0
     res = []
 
-    if config['version'] == 1:
+    if config['model_version'] == 1:
         train_fn = train_v1
         test_fn = test
-    elif config['version'] == 2:
+    elif config['model_version'] == 2:
         train_fn = train_v2
         test_fn = test
     else:
@@ -310,4 +316,45 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Training and finetuning script for Cars classification task')
+
+    # training arg
+    parser.add_argument('--batch-size', default=32, type=int,
+                        help='training batch size (default: 32)')
+    parser.add_argument('--epochs', default=60, type=int,
+                        help='training epochs (default: 60)')
+    parser.add_argument('--imgsize', default=224, type=int,
+                        help='Input image size (default: 224)')
+    parser.add_argument('--model-version', default=1, type=int, choices=[1,2],
+                        help='Classification version (default: 1)\n'
+                             '1. Full Annotation only\n'
+                             '2. Multitask Learning Cars Model + Make + Model + Submodel')
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],
+                        help='Classification version (default: 1)\n'
+                             '1. Stanford Dataset\n'
+                             '2. BoxCar Dataset')
+    parser.add_argument('--boxcar-split',default='hard',
+                        help='required if set dataset-version to 2(default: hard)')
+    parser.add_argument('--finetune', default=False, action='store_true',
+                        help='fine tune an existing model (default: False)')
+    parser.add_argument('--model-id',default=6,
+                        help='id to lined to previous model to fine tune. Required if it is a fine tune task')
+
+    # optimizer arg
+    parser.add_argument('--lr', default=0.001, type=float,
+                        help='SGD learning rate (default: 0.01)')
+    parser.add_argument('--weight-decay', default=0.0001, type=float,
+                        help='SGD weight decay (default: 0.0001)')
+    parser.add_argument('--momentum', default=0.9, type=float,
+                        help='SGD momentum (default: 0.9)')
+
+    # multi-task learning arg
+    parser.add_argument('--make-loss', default=0.2, type=float,
+                        help='loss$_{make}$ lambda')
+    parser.add_argument('--model-loss', default=0.2, type=float,
+                        help='loss$_{model}$ lambda')
+    parser.add_argument('--submodel-loss', default=0.2, type=float,
+                        help='loss$_{submodel}$ lambda')
+
+    args = parser.parse_args()
+    main(args)

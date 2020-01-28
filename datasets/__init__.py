@@ -29,14 +29,14 @@ def prepare_loader(config):
         ]
     )
 
-    if(config['dataset']==1):#Stanford Cars Dataset
+    if(config['dataset_version']==1):#Stanford Cars Dataset
         train_imgdir = STANFORD_CARS_TRAIN
         test_imgdir = STANFORD_CARS_TEST
 
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
 
-        if(config['version']==1):         
+        if(config['model_version']==1):         
             train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
             test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
         else:
@@ -47,15 +47,15 @@ def prepare_loader(config):
         
 
 
-    elif(config['dataset']==2):#BoxCars Dataset
+    elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['version']==1):
-            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['split'],'train')
-            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['split'],'validation')
-        elif(config['version']==2):
-            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['split'],'train')
-            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['split'],'validation')
+        if(config['model_version']==1):
+            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+        elif(config['model_version']==2):
+            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
         else:
             print(version," is not a valid version for boxcars")
             exit(1)
@@ -88,7 +88,7 @@ def prepare_test_loader(config):
         ]
     )
 
-    if(config['dataset']==1):
+    if(config['dataset_version']==1):
         print("NOT SET UP YET")
         exit(1)
         train_imgdir = STANFORD_CARS_TRAIN
@@ -97,12 +97,12 @@ def prepare_test_loader(config):
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
 
-        test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset'],config['split'],'test')
+        test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset_version'],config['boxcar_split'],'test')
 
-    elif(config['dataset']==2):
+    elif(config['dataset_version']==2):
         test_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
         test_annopath = test_annopath = BOXCARS_DATASET_ROOT
-        test_dataset = BoxCarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['split'],'test')
+        test_dataset = BoxCarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['boxcar_split'],'test')
     else:
         print("No dataset. Leaving")
         exit(1) 

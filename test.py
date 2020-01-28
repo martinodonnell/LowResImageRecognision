@@ -145,12 +145,12 @@ def main(args):
         'epochs': 60,
         'imgsize': (224, 244),
         # 'arch': args.arch,
-        # 'version': args.version,
+        # 'model_version': args.version,
         # 'make_loss': args.make_loss,
         # 'type_loss': args.type_loss,
         'finetune': False,
-        'dataset':2,
-        'split':'hard',
+        'dataset_version':2,
+        'boxcar_split':'hard',
         # 'path': args.path
     }
     # config = json.load(open(args.config))
