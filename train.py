@@ -252,17 +252,8 @@ def main():
     # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
                                                   [100, 150],
-                                                  gamma=0.1)
+                                                  gamma=0.1) 
 
-    print(lr_scheduler.get_lr())
-    lr_scheduler.step()
-    print(lr_scheduler.get_lr())   
-    lr_scheduler.step()
-    print(lr_scheduler.get_lr())   
-
-  
-
-    exit(1)
 
 
     # Set up data
