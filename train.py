@@ -7,8 +7,8 @@ import torch
 import time
 import pandas as pd
 import pprint as pp
-# from sklearn.metrics import precision_score,f1_score,recall_score
-
+from config import SAVE_FOLDER
+import os
 def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
     lr_scheduler.step()
@@ -42,10 +42,11 @@ def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
         i += 1
         elapsed = time.time() - start_time
 
-        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
-              f'Loss: {loss_meter / i:.4f} '
-              f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
-              ,end='\r')
+    #Moved this out of for as I don't watch it all the time and will speed up performace
+    print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+        f'Loss: {loss_meter / i:.4f} '
+        f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
+        ,end='\r')
 
     print()
     loss_meter /= len(train_loader)
@@ -109,14 +110,15 @@ def train_v2(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
         i += 1
         elapsed = time.time() - start_time
-
-        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
-              f'Loss: {loss_meter / i:.4f} '
-              f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
-              f'Make: {make_acc_meter / i:.4f} '
-              f'model: {model_acc_meter / i:.4f} '
-              f'Subtype: {submodel_acc_meter / i:.4f} '
-              ,end='\r')
+        
+    #Moved this out of for as I don't watch it all the time and will speed up performace
+    print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+            f'Loss: {loss_meter / i:.4f} '
+            f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
+            f'Make: {make_acc_meter / i:.4f} '
+            f'model: {model_acc_meter / i:.4f} '
+            f'Subtype: {submodel_acc_meter / i:.4f} '
+            ,end='\r')
 
     print()
     loss_meter /= len(train_loader)
@@ -164,10 +166,11 @@ def test(model, test_loader, device, config):
             i += 1
             elapsed = time.time() - start_time
             runcount += data.size(0)
-            print(f'[{i}/{len(test_loader)}]: '
-                  f'Loss: {loss_meter / runcount:.4f} '
-                  f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
-                 , end='\r')
+        #Moved this out of for as I don't watch it all the time and will speed up performace
+        print(f'[{i}/{len(test_loader)}]: '
+                f'Loss: {loss_meter / runcount:.4f} '
+                f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
+                , end='\r')
 
         print()
 
@@ -178,18 +181,18 @@ def test(model, test_loader, device, config):
         'val_loss': loss_meter,
         'val_acc': acc_meter,
         'val_time': elapsed,
-        # 'val_percision':percision_meter,
-        # 'val_recall':recall_meter,
-        # 'val_f1':f1_meter,
     }
 
-    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
+    # print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')# printed twice
 
     return valres
 
+def get_output_filepaths(id):
+    id_string = str(id).zfill(3)
+    csv_hitory_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
+    model_best_fiepath  = os.path.join(SAVE_FOLDER, id_string+'_best_modal.pth.csv')
 
-exp_dir = 'saves'
-
+    return csv_hitory_filepath,model_best_fiepath
 
 def main():
     # TODO what does this do
@@ -205,7 +208,6 @@ def main():
         'momentum': 0.9,
         'epochs': 60,
         'imgsize': (224, 244),
-        # 'arch': args.arch,
         'version': 1,
         'make_loss': 0.2,
         'model_loss': 0.2,
@@ -213,11 +215,15 @@ def main():
         'finetune': False,
         'dataset':1,
         'split':'hard',
-        # 'path': args.path
+        'id':6  
     }
     print("------")
     pp.pprint(config)
     print("------")
+
+    #Set up name for output files
+    csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['id'])
+
     if(config['dataset']==1):
         num_classes = 196 # Stanford
         num_makes = num_models = num_submodels = 0
@@ -233,8 +239,17 @@ def main():
     model = construct_model(config, num_classes,num_makes,num_models,num_submodels)
 
     # Finetune an existing model already trained
-    # if config['finetune']:
-    #     load_weight(model, config['path'], device)
+    if config['finetune']:
+        load_weight(model, model_best_fiepath, device)
+    else:
+        #Check if file exists. If so increment the id and try again until a new is there
+        while(os.path.isfile(csv_hitory_filepath)):
+            config['id'] = config['id']+1
+            csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['id'])
+        print("New ID:",config['id'])
+        #Set up blank csv in save folder
+        df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time'])
+        df.to_csv(csv_hitory_filepath)
 
     #Add to multiple paramaters
     if torch.cuda.device_count() > 1:
@@ -253,8 +268,6 @@ def main():
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
                                                   [100, 150],
                                                   gamma=0.1) 
-
-
 
     # Set up data
     train_loader, test_loader = prepare_loader(config)
@@ -278,15 +291,22 @@ def main():
 
         if best_acc < valres['val_acc']:
             best_acc = valres['val_acc']
-            torch.save(model.state_dict(), exp_dir + '/best.pth')
+            torch.save(model.state_dict(), model_best_fiepath)
             trainres['overwritten']=1#Work out from excel which epoch the best model from
         else:
             trainres['overwritten']=0
-        res.append(trainres)
+        
+        res.append(trainres)#TODO Going to keep to ensure it works then change over
+        
+        #This should save each result as we go along instead of at the end
+        new_res = pd.DataFrame([trainres])
+        new_res.to_csv(csv_hitory_filepath, mode='a')
 
     print(f'Best accuracy: {best_acc:.4f}')
+
+    #TODO May be reducdent
     res = pd.DataFrame(res)
-    res.to_csv(exp_dir + '/history.csv')
+    res.to_csv(SAVE_FOLDER + '/history')
 
 
 if __name__ == '__main__':
