@@ -8,7 +8,8 @@ import torch.nn.functional as F
 
 import time
 
-from datasets import load_boxcar_class_names, prepare_test_loader
+from datasets import prepare_test_loader
+from datasets.BoxCarsDataset import load_boxcar_class_names
 from models import construct_model
 
 

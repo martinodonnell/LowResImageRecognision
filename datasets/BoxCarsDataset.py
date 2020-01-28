@@ -68,6 +68,10 @@ class BoxCarsDatasetV2(Dataset):
         r = self.annos[idx]
 
         target = r['target']
+        make_target = r['make']
+        model_target = r['model']
+        submodel_target = r['submodel']
+        generation_target =r['generation']
 
         if idx not in self.cache:
             fn = r['filename']
@@ -82,7 +86,7 @@ class BoxCarsDatasetV2(Dataset):
 
         img = self.transform(img)
 
-        return img, target
+        return img, target,make_target,model_target,submodel_target,generation_target
 
 
 
