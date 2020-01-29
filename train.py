@@ -226,7 +226,6 @@ def main(args):
         'model_loss': args.model_loss,
         'submodel_loss':args.submodel_loss,        
     }
-
     
     #Save to log file on Kelvin
     pp.pprint(config)
@@ -272,7 +271,7 @@ def main(args):
     print("Pth output file:",model_best_filepath)
 
     #Set up blank csv in save folder
-    df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','overwritten'])
+    df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
     df.to_csv(csv_history_filepath)    
     
     optimizer = optim.SGD(model.parameters(),
@@ -282,9 +281,6 @@ def main(args):
 
     # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
-
-    for param_group in optimizer.param_groups:
-        print("Optimizer Learning Rate",param_group['lr'])
 
     # Set up data loaders
     train_loader, test_loader = prepare_loader(config)
@@ -305,27 +301,23 @@ def main(args):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
         valres = test_fn(model, test_loader, device, config)
         trainres.update(valres)
+        trainres['lr'] = optimizer.param_groups[0]['lr']
         lr_scheduler.step()
 
 
-       # if best_acc < valres['val_acc']:
-        best_acc = valres['val_acc']
-        torch.save(model.state_dict(), model_best_filepath)
-        trainres['overwritten']=1#Work out from excel which epoch the best model from
-       # else:
-        #    trainres['overwritten']=0
+        if best_acc < valres['val_acc']:
+            best_acc = valres['val_acc']
+            torch.save(model.state_dict(), model_best_filepath)
+            trainres['overwritten']=1#Work out from excel which epoch the best model from
+        else:
+            trainres['overwritten']=0
         trainres['epoch'] = ep
-        res.append(trainres)#TODO Going to keep to ensure it works then change over
         
         #This should save each result as we go along instead of at the end
-        new_res = pd.DataFrame([trainres])
-        new_res.to_csv(csv_history_filepath, mode='a',header=None)
+        res = pd.DataFrame([trainres])
+        res.to_csv(csv_history_filepath, mode='a',header=None)
 
     print(f'Best accuracy: {best_acc:.4f}')
-
-    #TODO May be reducdent
-    res = pd.DataFrame(res)
-    res.to_csv(SAVE_FOLDER + '/history')
 
 
 if __name__ == '__main__':
