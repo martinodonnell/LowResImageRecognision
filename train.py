@@ -247,7 +247,8 @@ def main(args):
         exit(1)
     # Create model
     model = construct_model(config, num_classes,num_makes,num_models,num_submodels)
-
+    print(model)
+    exit(1)
     # Finetune an existing model already trained
     if config['finetune']:
         print("Loading existing model", )
@@ -302,7 +303,7 @@ def main(args):
         valres = test_fn(model, test_loader, device, config)
         trainres.update(valres)
         trainres['lr'] = optimizer.param_groups[0]['lr']
-        lr_scheduler.step()
+        lr_scheduler.step(trainres['val_loss'])
 
 
         if best_acc < valres['val_acc']:
@@ -330,7 +331,7 @@ if __name__ == '__main__':
                         help='training epochs (default: 60)')
     parser.add_argument('--imgsize', default=224, type=int,
                         help='Input image size (default: 224)')
-    parser.add_argument('--model-version', default=1, type=int, choices=[1,2],
+    parser.add_argument('--model-version', default=1, type=int, choices=[1,2,3,4,5],
                         help='Classification version (default: 1)\n'
                              '1. Full Annotation only\n'
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')
