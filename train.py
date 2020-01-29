@@ -304,12 +304,12 @@ def main(args):
         valres = test_fn(model, test_loader, device, config)
         trainres.update(valres)
 
-        if best_acc < valres['val_acc']:
-            best_acc = valres['val_acc']
-            torch.save(model.state_dict(), model_best_fiepath)
-            trainres['overwritten']=1#Work out from excel which epoch the best model from
-        else:
-            trainres['overwritten']=0
+       # if best_acc < valres['val_acc']:
+        best_acc = valres['val_acc']
+        torch.save(model.state_dict(), model_best_fiepath)
+        trainres['overwritten']=1#Work out from excel which epoch the best model from
+       # else:
+        #    trainres['overwritten']=0
         
         res.append(trainres)#TODO Going to keep to ensure it works then change over
         

@@ -6,7 +6,7 @@
 #!/bin/bash -l
 #SBATCH --job-name=Tr_LRIR
 #SBATCH -p gpu
-#SBATCH --time=18:00:00
+#SBATCH --time=32:00:00
 #SBATCH --output=Tr_LRIR-%j.log
 #SBATCH --gres gpu:1
 #SBATCH --mem 20000M
@@ -22,4 +22,4 @@ nvidia-smi
 cd ..
 
 
-python3 train.py
+python3 train.py --epochs 600 --lr 0.000001
