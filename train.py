@@ -13,9 +13,8 @@ import torch.nn as nn
 import torch
 import pandas as pd
 
-def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
+def train_v1(ep, model, optimizer, train_loader, device, config):
 
-    lr_scheduler.step()
     print("---------Training-------")
 
     model.train() # Set model to training mode
@@ -45,6 +44,7 @@ def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
         acc_meter += acc.item()
         i += 1
         elapsed = time.time() - start_time
+    
 
     #Moved this out of for as I don't watch it all the time and will speed up performace
     print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
@@ -64,9 +64,8 @@ def train_v1(ep, model, optimizer, lr_scheduler, train_loader, device, config):
 
     return trainres
 
-def train_v2(ep, model, optimizer, lr_scheduler, train_loader, device, config):
+def train_v2(ep, model, optimizer, train_loader, device, config):
 
-    lr_scheduler.step()
     print("---------Training-------")
 
     model.train() # Set model to training mode
@@ -268,7 +267,7 @@ def main(args):
     while(os.path.isfile(csv_history_filepath)):
         config['model_id'] = config['model_id']+1
         csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
-    print("New ID:",config['model_id'])
+    print("Current ID:",config['model_id'])
     print("CSV output file:",csv_history_filepath)
     print("Pth output file:",model_best_filepath)
 
@@ -282,12 +281,10 @@ def main(args):
                           weight_decay=config['weight_decay'])  # TODO what is this
 
     # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
-    lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
-                                                  [100, 150],
-                                                  gamma=0.1) 
+    lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
 
     for param_group in optimizer.param_groups:
-        print(param_group['lr'])
+        print("Optimizer Learning Rate",param_group['lr'])
 
     # Set up data loaders
     train_loader, test_loader = prepare_loader(config)
@@ -305,9 +302,11 @@ def main(args):
         print(version, "is not a valid version number")
         exit(1)
     for ep in range(1, config['epochs'] + 1):
-        trainres = train_fn(ep, model, optimizer, lr_scheduler, train_loader, device, config)
+        trainres = train_fn(ep, model, optimizer, train_loader, device, config)
         valres = test_fn(model, test_loader, device, config)
         trainres.update(valres)
+        lr_scheduler.step()
+
 
        # if best_acc < valres['val_acc']:
         best_acc = valres['val_acc']
@@ -355,7 +354,7 @@ if __name__ == '__main__':
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
 
     # optimizer arg
-    parser.add_argument('--lr', default=0.001, type=float,
+    parser.add_argument('--lr', default=1e-4, type=float,
                         help='SGD learning rate (default: 0.01)')
     parser.add_argument('--weight-decay', default=0.0001, type=float,
                         help='SGD weight decay (default: 0.0001)')
