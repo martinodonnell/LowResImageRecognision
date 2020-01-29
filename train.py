@@ -193,10 +193,10 @@ def test(model, test_loader, device, config):
 
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
-    csv_hitory_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
-    model_best_fiepath  = os.path.join(SAVE_FOLDER, id_string+'_model.pth')
+    csv_history_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
+    model_best_filepath  = os.path.join(SAVE_FOLDER, id_string+'_model.pth')
 
-    return csv_hitory_filepath,model_best_fiepath
+    return csv_history_filepath,model_best_filepath
 
 def load_weight(model, path, device):
     sd = torch.load(path,map_location=device)
@@ -228,11 +228,12 @@ def main(args):
         'submodel_loss':args.submodel_loss,        
     }
 
+    
     #Save to log file on Kelvin
     pp.pprint(config)
 
     #Set up name for output files
-    csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
+    csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
 
 
     if(config['dataset_version']==1):# Stanford
@@ -252,7 +253,7 @@ def main(args):
     # Finetune an existing model already trained
     if config['finetune']:
         print("Loading existing model", )
-        load_weight(model, model_best_fiepath, device)
+        load_weight(model, model_best_filepath, device)
 
     #Add to multiple gpus if they are there
     if torch.cuda.device_count() > 1:
@@ -264,16 +265,17 @@ def main(args):
 
     #Check if file exists. If so increment the id and try again until a new one is generated. Will create a new file if finetuning to 
     # ensure results are not lost. May have changes the parameters and want to keep them. Will know from the logs
-    while(os.path.isfile(csv_hitory_filepath)):
+    while(os.path.isfile(csv_history_filepath)):
         config['model_id'] = config['model_id']+1
-        csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
+        csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
     print("New ID:",config['model_id'])
+    print("CSV output file:",csv_history_filepath)
+    print("Pth output file:",model_best_filepath)
+
     #Set up blank csv in save folder
     df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','overwritten'])
-    df.to_csv(csv_hitory_filepath)
-
+    df.to_csv(csv_history_filepath)    
     
-
     optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
                           momentum=config['momentum'],  # TODO what is this
@@ -283,6 +285,9 @@ def main(args):
     lr_scheduler = optim.lr_scheduler.MultiStepLR(optimizer,
                                                   [100, 150],
                                                   gamma=0.1) 
+
+    for param_group in optimizer.param_groups:
+        print(param_group['lr'])
 
     # Set up data loaders
     train_loader, test_loader = prepare_loader(config)
@@ -306,7 +311,7 @@ def main(args):
 
        # if best_acc < valres['val_acc']:
         best_acc = valres['val_acc']
-        torch.save(model.state_dict(), model_best_fiepath)
+        torch.save(model.state_dict(), model_best_filepath)
         trainres['overwritten']=1#Work out from excel which epoch the best model from
        # else:
         #    trainres['overwritten']=0
@@ -315,7 +320,7 @@ def main(args):
         
         #This should save each result as we go along instead of at the end
         new_res = pd.DataFrame([trainres])
-        new_res.to_csv(csv_hitory_filepath, mode='a',header=None)
+        new_res.to_csv(csv_history_filepath, mode='a',header=None)
 
     print(f'Best accuracy: {best_acc:.4f}')
 
