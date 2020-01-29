@@ -248,7 +248,7 @@ def main(args):
     # Create model
     model = construct_model(config, num_classes,num_makes,num_models,num_submodels)
     print(model)
-    exit(1)
+
     # Finetune an existing model already trained
     if config['finetune']:
         print("Loading existing model", )
@@ -289,7 +289,7 @@ def main(args):
     best_acc = 0
     res = []
 
-    if config['model_version'] == 1:
+    if config['model_version'] in [1,3,4,5]:
         train_fn = train_v1
         test_fn = test
     elif config['model_version'] == 2:
