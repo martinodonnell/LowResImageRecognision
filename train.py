@@ -269,7 +269,7 @@ def main(args):
         csv_hitory_filepath,model_best_fiepath  = get_output_filepaths(config['model_id'])
     print("New ID:",config['model_id'])
     #Set up blank csv in save folder
-    df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time'])
+    df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','overwritten'])
     df.to_csv(csv_hitory_filepath)
 
     
@@ -310,12 +310,12 @@ def main(args):
         trainres['overwritten']=1#Work out from excel which epoch the best model from
        # else:
         #    trainres['overwritten']=0
-        
+        trainres['epoch'] = ep
         res.append(trainres)#TODO Going to keep to ensure it works then change over
         
         #This should save each result as we go along instead of at the end
         new_res = pd.DataFrame([trainres])
-        new_res.to_csv(csv_hitory_filepath, mode='a')
+        new_res.to_csv(csv_hitory_filepath, mode='a',header=None)
 
     print(f'Best accuracy: {best_acc:.4f}')
 
