@@ -343,7 +343,7 @@ if __name__ == '__main__':
                         help='required if set dataset-version to 2(default: hard)')
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
-    parser.add_argument('--model-id',default=6,type=int,
+    parser.add_argument('--model-id',default=15,type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
 
     # optimizer arg

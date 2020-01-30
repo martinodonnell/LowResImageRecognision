@@ -34,14 +34,14 @@ class NetworkV1_1(nn.Module):
         self.base.classifier[2] = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(4096, 4096),
-            nn.ReLU(),
+            # nn.ReLU(),
             nn.Dropout(0.5),
         )
 
         self.base.classifier[5] = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(4096, 4096),
-            nn.ReLU(),
+            # nn.ReLU(),
             nn.Dropout(0.5),
         )
 
@@ -68,7 +68,7 @@ class NetworkV1_2(nn.Module):
         self.base.classifier[2] = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(4096, 4096),
-            nn.ReLU(),
+            # nn.ReLU(),
             nn.Dropout(0.5),
         )
 
@@ -96,7 +96,7 @@ class NetworkV1_3(nn.Module):
         self.base.classifier[5] = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(4096, 4096),
-            nn.ReLU(),
+            # nn.ReLU(),
             nn.Dropout(0.5),
         )
 
