@@ -21,5 +21,4 @@ nvidia-smi
 #Go back one folder to that all other paths work
 cd ..
 
-
-python3 train.py --epochs 600 --lr 0.000001
+python3 train.py $@
