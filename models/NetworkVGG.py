@@ -117,10 +117,12 @@ class NetworkV1_4(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/rep
 
         self.base = base
 
-        self.base = nn.Sequential(
+        self.base.classifier = nn.Sequential(
             nn.Linear(in_features=25088, out_features=25088,bias=True),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=25088, out_features=512,bias=True),
+            nn.ReLU(inplace=True),
+
             nn.Dropout(0.5),
             nn.Linear(512, num_classes),
         )
