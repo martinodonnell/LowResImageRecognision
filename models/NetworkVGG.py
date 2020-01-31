@@ -111,6 +111,24 @@ class NetworkV1_3(nn.Module):
         fc = self.base(x)
         return fc
 
+class NetworkV1_4(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/reports/18681590.pdf
+    def __init__(self, base, num_classes):
+        super().__init__()
+
+        self.base = base
+
+        self.base = nn.Sequential(
+            nn.Linear(in_features=25088, out_features=25088,bias=True),
+            nn.ReLU(inplace=True),
+            nn.Linear(in_features=25088, out_features=512,bias=True),
+            nn.Dropout(0.5),
+            nn.Linear(512, num_classes),
+        )
+
+    def forward(self, x):
+        fc = self.base(x)
+        return fc
+
 
 class NetworkV2(nn.Module):
     def __init__(self, base, num_classes,num_makes,num_models,num_submodels):

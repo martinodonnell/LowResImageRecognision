@@ -35,7 +35,7 @@ def prepare_loader(config):
 
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
-
+        
         # if(config['model_version']==1):         
         train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
         test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
