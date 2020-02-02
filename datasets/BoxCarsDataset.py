@@ -23,7 +23,7 @@ def load_boxcar_class_names():
 class BoxCarsDatasetV1(Dataset):
     def __init__(self, imgdir, transform, size,split,part):
         boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
-        self.annos  = boxCarsAnnUtil.load_annotations_boxcars()
+        self.annos  = boxCarsAnnUtil.load_annotations_boxcars_v1()
         self.imgdir = imgdir
         self.transform = transform
         self.resize = transforms.Resize(size)
@@ -223,3 +223,4 @@ class BoxCarDataSetUtil(object):
 
                 # add item to the list
                 self.cars_annotations.append(currentPlace)
+

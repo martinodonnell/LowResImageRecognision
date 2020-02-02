@@ -6,8 +6,6 @@ class NetworkV1(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__() #Running initialisation from super(NN.module)
 
-        # base = torchvision.models.vgg16(pretrained=True)
-
         self.base = base
 
         in_features = self.base.classifier[6].in_features
@@ -27,7 +25,6 @@ class NetworkV1_1(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__() #Running initialisation from super(NN.module)
 
-        # base = torchvision.models.vgg16(pretrained=True)
 
         self.base = base
 
@@ -61,8 +58,6 @@ class NetworkV1_2(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__() #Running initialisation from super(NN.module)
 
-        # base = torchvision.models.vgg16(pretrained=True)
-
         self.base = base
 
         self.base.classifier[2] = nn.Sequential(
@@ -88,7 +83,6 @@ class NetworkV1_3(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__() #Running initialisation from super(NN.module)
 
-        # base = torchvision.models.vgg16(pretrained=True)
 
         self.base = base
 
@@ -106,7 +100,7 @@ class NetworkV1_3(nn.Module):
             nn.Dropout(0.5),
             nn.Linear(in_features, num_classes),
         )
-
+        
     def forward(self, x):
         fc = self.base(x)
         return fc

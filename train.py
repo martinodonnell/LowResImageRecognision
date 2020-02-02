@@ -201,6 +201,36 @@ def load_weight(model, path, device):
     sd = torch.load(path,map_location=device)
     model.load_state_dict(sd)
 
+# def load_weight(model, path, device):
+#     pretrained_dict = torch.load(path,map_location=device)
+#     model_dict=model.state_dict()
+#     model_dict.pop('base.classifier.6.1.bias',None)
+
+#     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+#     # 2. overwrite entries in the existing state dict
+#     model_dict.update(pretrained_dict) 
+#     # 3. load the new state dict
+#     model.load_state_dict(model_dict)
+#     # model.load_state_dict(sd)
+
+#     exit(1)
+
+def load_weight_stan_boxcars(model, path, device):
+    pretrained_dict = torch.load(path,map_location=device)
+    pretrained_dict_ids = [0,2,5,7,10,12,14,17,19,21,24,26,28]
+    #Add features
+    for i in pretrained_dict_ids:
+        key='base.features.'+str(i)
+        model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+        model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.bias'])
+
+    # #Add classififers
+    # pretrained_dict_ids = [0,3,5.1,6.1]
+
+    # for i in pretrained_dict_ids:
+    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
+
 def main(args):
     # TODO what does this do
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -217,6 +247,7 @@ def main(args):
         'boxcar_split':args.boxcar_split,
         'finetune': args.finetune,
         'model_id':args.model_id,
+        'finetune_stan_box':args.finetune_stan_box,
 
         'lr': args.lr,
         'weight_decay': args.weight_decay,
@@ -226,7 +257,11 @@ def main(args):
         'model_loss': args.model_loss,
         'submodel_loss':args.submodel_loss,        
     }
-    
+
+
+    # Set up data loaders
+    train_loader, test_loader = prepare_loader(config)
+
     #Save to log file on Kelvin
     pp.pprint(config)
 
@@ -245,14 +280,18 @@ def main(args):
     else:
         print("Incorrect dataset")
         exit(1)
+
     # Create model
     model = construct_model(config, num_classes,num_makes,num_models,num_submodels)
-    print(model)
 
-    # Finetune an existing model already trained
+     # Finetune an existing model already trained
     if config['finetune']:
         print("Loading existing model", )
-        load_weight(model, model_best_filepath, device)
+        if config['finetune_stan_box']:
+            load_weight_stan_boxcars(model, model_best_filepath, device)  
+        else:
+            load_weight(model, model_best_filepath, device)  
+
 
     #Add to multiple gpus if they are there
     if torch.cuda.device_count() > 1:
@@ -283,8 +322,7 @@ def main(args):
     # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
 
-    # Set up data loaders
-    train_loader, test_loader = prepare_loader(config)
+    
     
     best_acc = 0
     res = []
@@ -327,7 +365,7 @@ if __name__ == '__main__':
     # training arg
     parser.add_argument('--batch-size', default=32, type=int,
                         help='training batch size (default: 32)')
-    parser.add_argument('--epochs', default=60, type=int,
+    parser.add_argument('--epochs', default=150, type=int,
                         help='training epochs (default: 60)')
     parser.add_argument('--imgsize', default=224, type=int,
                         help='Input image size (default: 224)')
@@ -343,6 +381,8 @@ if __name__ == '__main__':
                         help='required if set dataset-version to 2(default: hard)')
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
+    parser.add_argument('--finetune-stan-box', default=False, action='store_true',
+                        help='Fix arhetecture for boxcars(default: False)')
     parser.add_argument('--model-id',default=15,type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
 
