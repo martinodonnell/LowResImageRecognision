@@ -97,9 +97,8 @@ def prepare_test_loader(config):
         test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset_version'],config['boxcar_split'],'test')
 
     elif(config['dataset_version']==2):
-        test_imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
-        test_annopath = test_annopath = BOXCARS_DATASET_ROOT
-        test_dataset = BoxCarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'],config['boxcar_split'],'test')
+        imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
+        test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
     else:
         print("No dataset. Leaving")
         exit(1) 

@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import pprint as pp
 
 import torch
 import torch.nn as nn
@@ -11,6 +12,8 @@ import time
 from datasets import prepare_test_loader
 from datasets.BoxCarsDataset import load_boxcar_class_names
 from models import construct_model
+from config import SAVE_FOLDER
+
 
 
 def test_v1(model, test_loader, device, config):
@@ -137,36 +140,22 @@ def main(args):
     device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
 
     config = {
-        'batch_size': 32,
-        'test_batch_size': 32,
-        'lr': 0.01,
-        'weight_decay': 0.0001,
-        'momentum': 0.9,
-        'epochs': 60,
-        'imgsize': (224, 244),
-        # 'arch': args.arch,
-        # 'model_version': args.version,
-        # 'make_loss': args.make_loss,
-        # 'type_loss': args.type_loss,
-        'finetune': False,
-        'dataset_version':2,
+        'model_id':args.model_id,
+        'model_version':args.model_version,
+        'dataset_version':args.dataset_version,
+        'imgsize': (244,244),
         'boxcar_split':'hard',
-        # 'path': args.path
+        'test_batch_size':60,
     }
-    # config = json.load(open(args.config))
-    # config['imgsize'] = (args.imgsize, args.imgsize)
-    # exp_dir = os.path.dirname(args.config)
-    # modelpath = exp_dir + '/best.pth'
 
-    modelpath = args.modelPath
+    pp.pprint(config)
+
+    modelpath = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3)+'_model.pth')
 
     class_names = load_boxcar_class_names()
     num_classes = len(class_names)
-    # v2_info = separate_class(class_names)
-    # num_makes = len(v2_info['make'].unique())
-    # num_types = len(v2_info['model_type'].unique())
 
-    model = construct_model(config, num_classes)
+    model = construct_model(config, num_classes,1,1,1)
     load_weight(model, modelpath, device)
     model = model.to(device)
 
@@ -180,8 +169,16 @@ def main(args):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script for Cars dataset')
 
-    parser.add_argument('--modelPath', required=True,
-                        help='path to modelPath')
+    parser.add_argument('--model-id',default=15,type=int,required=True,
+                        help='id to lined to previous model to fine tune. Required if it is a fine tune task')
+    parser.add_argument('--model-version', default=2, type=int, choices=[1,2,3,4,5,6],required=True,
+                        help='Classification version (default: 2)\n'
+                             '1. Full Annotation only\n'
+                             '2. Multitask Learning Cars Model + Make + Model + Submodel')
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],required=True,
+                        help='Classification version (default: 1)\n'
+                             '1. Stanford Dataset\n'
+                             '2. BoxCar Dataset')
 
     args = parser.parse_args()
 
