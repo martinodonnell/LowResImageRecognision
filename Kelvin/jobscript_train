@@ -9,7 +9,7 @@
 #SBATCH --time=32:00:00
 #SBATCH --output=Tr_LRIR-%j.log
 #SBATCH --gres gpu:1
-#SBATCH --mem 20000M
+#SBATCH --mem 30000M
 #SBATCH -w gpu02
 module add nvidia-cuda
 module add apps/python3
