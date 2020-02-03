@@ -21,6 +21,5 @@ nvidia-smi
 #Go back one folder to that all other paths work
 cd ..
 
-path="saves/Experiments/004_best_boxcars_60_epoch_0.5Drop.pth"
-echo "Testing $path"
-python3 test.py --modelPath $path
+echo $@
+python3 test.py $@

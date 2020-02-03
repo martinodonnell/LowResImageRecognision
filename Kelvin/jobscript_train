@@ -21,4 +21,5 @@ nvidia-smi
 #Go back one folder to that all other paths work
 cd ..
 
+echo $@
 python3 train.py $@
