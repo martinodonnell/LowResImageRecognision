@@ -138,8 +138,6 @@ class NetworkV1_5(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/rep
             nn.Linear(512, num_classes),
         )
 
-        print(self.base)
-        exit(1)
         
 
     def forward(self, x):

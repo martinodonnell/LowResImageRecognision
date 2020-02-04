@@ -23,7 +23,6 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels):
     elif config['model_version'] == 6:
         model = NetworkV1_4(base, num_classes)
     elif config['model_version'] == 7:
-        print("hello")
         model = NetworkV1_5(base, num_classes)
     
 
