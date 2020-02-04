@@ -106,20 +106,41 @@ class NetworkV1_3(nn.Module):
         return fc
 
 class NetworkV1_4(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/reports/18681590.pdf
-    def __init__(self, base, num_classes):
+    def __init__(self, base, num_classes):#Define the layers
         super().__init__()
 
         self.base = base
-
+        print(base)
         self.base.classifier = nn.Sequential(
             nn.Linear(in_features=25088, out_features=25088,bias=True),
             nn.ReLU(inplace=True),
             nn.Linear(in_features=25088, out_features=512,bias=True),
             nn.ReLU(inplace=True),
-
             nn.Dropout(0.5),
             nn.Linear(512, num_classes),
         )
+
+        
+
+    def forward(self, x):
+        fc = self.base(x)
+        return fc
+
+class NetworkV1_5(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/reports/18681590.pdf Take 2
+    def __init__(self, base, num_classes):#Define the layers
+        super().__init__()
+
+        self.base = base
+        self.base.classifier = nn.Sequential(
+            nn.Linear(in_features=25088, out_features=512,bias=True),
+            nn.ReLU(inplace=True),
+            nn.Dropout(0.7),
+            nn.Linear(512, num_classes),
+        )
+
+        print(self.base)
+        exit(1)
+        
 
     def forward(self, x):
         fc = self.base(x)

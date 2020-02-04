@@ -369,7 +369,7 @@ if __name__ == '__main__':
                         help='training epochs (default: 60)')
     parser.add_argument('--imgsize', default=224, type=int,
                         help='Input image size (default: 224)')
-    parser.add_argument('--model-version', default=1, type=int, choices=[1,2,3,4,5,6],
+    parser.add_argument('--model-version', default=1, type=int, choices=[1,2,3,4,5,6,7],
                         help='Classification version (default: 1)\n'
                              '1. Full Annotation only\n'
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')
