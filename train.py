@@ -252,7 +252,8 @@ def main(args):
         'lr': args.lr,
         'weight_decay': args.weight_decay,
         'momentum': args.momentum,
-
+        'adam':args.adam,
+        
         'make_loss': args.make_loss,
         'model_loss': args.model_loss,
         'submodel_loss':args.submodel_loss,        
@@ -314,10 +315,19 @@ def main(args):
     df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
     df.to_csv(csv_history_filepath)    
     
-    optimizer = optim.SGD(model.parameters(),
+    if(config['adam']):
+        optimizer = optim.Adam(model.parameters(),
+                                betas=(0.9, 0.999), 
+                                lr = config['lr'], 
+                                weight_decay = config['weight_decay'])
+    else:
+        optimizer = optim.SGD(model.parameters(),
                           lr=config['lr'],
                           momentum=config['momentum'],  # TODO what is this
                           weight_decay=config['weight_decay'])  # TODO what is this
+
+   
+
 
     # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
@@ -393,6 +403,8 @@ if __name__ == '__main__':
                         help='SGD weight decay (default: 0.0001)')
     parser.add_argument('--momentum', default=0.9, type=float,
                         help='SGD momentum (default: 0.9)')
+    parser.add_argument('--adam', default=False, action='store_true',
+                        help='Use adam over SVG(SVG by default)')
 
     # multi-task learning arg
     parser.add_argument('--make-loss', default=0.2, type=float,
