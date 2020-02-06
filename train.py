@@ -277,7 +277,6 @@ def load_weight(model, path, device):
     sd = torch.load(path,map_location=device)
     model.load_state_dict(sd)
 
-
 def load_weight_stan_boxcars(model, path, device):
     pretrained_dict = torch.load(path,map_location=device)
     pretrained_dict_ids = [0,2,5,7,10,12,14,17,19,21,24,26,28]
