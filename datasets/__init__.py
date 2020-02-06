@@ -42,7 +42,13 @@ def prepare_loader(config):
         # else:
             # print("Have not set up multi-task learning for stanford dataset")
             # exit(1)
-        
+        multi_nums = {
+            'num_classes':196, 
+            'num_makes':-1,
+            'num_models':-1,
+            'num_submodels':-1,
+            'generation':-1,
+        }
 
         
 
@@ -57,10 +63,16 @@ def prepare_loader(config):
             train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
        
+        multi_nums = {
+            'num_classes':107, 
+            'num_makes':16,
+            'num_models':68,
+            'num_submodels':6,
+            'generation':7,
+        }
     else:
         print("No dataset. Leaving")
         exit(1)   
-    
 
     train_loader = DataLoader(train_dataset,
                               batch_size=config['batch_size'],
@@ -73,7 +85,7 @@ def prepare_loader(config):
                              pin_memory=False,
                              num_workers=12)
 
-    return train_loader, test_loader
+    return multi_nums,train_loader, test_loader
 
 
 def prepare_test_loader(config):

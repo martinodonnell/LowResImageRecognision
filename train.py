@@ -72,6 +72,9 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
     loss_meter = 0
     acc_meter = 0
+    make_acc_meter = 0
+    model_acc_meter = 0 
+    submodel_acc_meter = 0
     i = 0
 
     start_time = time.time()
@@ -79,7 +82,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
     for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
         data = data.to(device)
         target = target.to(device)
-        make_target = target.to(device)
+        make_target = make_target.to(device)
         model_target = model_target.to(device)
         submodel_target = submodel_target.to(device)
         # generation_target = generation_target.to(device) #TODO ADD THIS ONE TOO 
@@ -142,7 +145,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-def test(model, test_loader, device, config):
+def test_v1(model, test_loader, device, config):
     model.eval()
 
     loss_meter = 0
@@ -190,6 +193,79 @@ def test(model, test_loader, device, config):
 
     return valres
 
+def test_v2(model, test_loader, device, config):
+    model.eval()
+
+    loss_meter = 0
+    acc_meter = 0
+    make_acc_meter = 0
+    model_acc_meter = 0 
+    submodel_acc_meter = 0
+
+    runcount = 0
+    elapsed = 0
+   
+
+    i = 0
+
+    with torch.no_grad():
+        start_time = time.time()
+        for data, target,make_target,model_target,submodel_target,generation_target in test_loader:
+            data = data.to(device)
+            target = target.to(device)
+            data = data.to(device)
+            target = target.to(device)
+            make_target = make_target.to(device)
+            model_target = model_target.to(device)
+            submodel_target = submodel_target.to(device)
+            # generation_target = generation_target.to(device) #TODO ADD THIS ONE TOO 
+
+
+            pred, make_pred, model_pred,submodel_pred = model(data)
+
+            loss_main = F.cross_entropy(pred, target)
+            loss_make = F.cross_entropy(make_pred, make_target)
+            loss_model = F.cross_entropy(model_pred, model_target)
+            loss_submodel = F.cross_entropy(submodel_pred, submodel_target)
+
+            acc = pred.max(1)[1].eq(target).float().mean()
+            make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
+            model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
+            submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
+
+            loss_meter += loss.item()
+            acc_meter += acc.item()
+            make_acc_meter += make_acc.item()
+            model_acc_meter += model_acc.item()
+            submodel_acc_meter += submodel_acc.item()
+
+            i += 1
+            elapsed = time.time() - start_time
+            runcount += data.size(0)
+
+        print(f'[{i}/{len(test_loader)}]: '
+                f'Loss: {loss_meter / runcount:.4f} '
+                f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
+                , end='\r')
+
+        print()
+
+        loss_meter /= runcount
+        acc_meter /= runcount
+
+    valres = {
+        'val_loss': loss_meter,
+        'val_acc': acc_meter,
+        'train_make_acc': make_acc_meter,
+        'train_model_acc': model_acc_meter,
+        'train_submodel_acc': submodel_acc_meter,
+        'val_time': elapsed,
+    }
+
+    # print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')# printed twice
+
+    return valres
+
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
     csv_history_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
@@ -201,19 +277,6 @@ def load_weight(model, path, device):
     sd = torch.load(path,map_location=device)
     model.load_state_dict(sd)
 
-# def load_weight(model, path, device):
-#     pretrained_dict = torch.load(path,map_location=device)
-#     model_dict=model.state_dict()
-#     model_dict.pop('base.classifier.6.1.bias',None)
-
-#     pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-#     # 2. overwrite entries in the existing state dict
-#     model_dict.update(pretrained_dict) 
-#     # 3. load the new state dict
-#     model.load_state_dict(model_dict)
-#     # model.load_state_dict(sd)
-
-#     exit(1)
 
 def load_weight_stan_boxcars(model, path, device):
     pretrained_dict = torch.load(path,map_location=device)
@@ -261,7 +324,7 @@ def main(args):
 
 
     # Set up data loaders
-    train_loader, test_loader = prepare_loader(config)
+    multi_nums, train_loader, test_loader = prepare_loader(config)
 
     #Save to log file on Kelvin
     pp.pprint(config)
@@ -271,13 +334,13 @@ def main(args):
 
 
     if(config['dataset_version']==1):# Stanford
-        num_classes = 196 
+        num_classes = multi_nums['num_classes'] 
         num_makes = num_models = num_submodels = 0
     elif(config['dataset_version']==2):#- BoxCar Hard split['hard']['types_mapping']
-        num_classes = 107 
-        num_makes = 1
-        num_models = 1
-        num_submodels = 1
+        num_classes = multi_nums['num_classes']  
+        num_makes = multi_nums['num_makes'] 
+        num_models = multi_nums['num_models'] 
+        num_submodels = multi_nums['num_submodels']
     else:
         print("Incorrect dataset")
         exit(1)
@@ -308,16 +371,14 @@ def main(args):
         config['model_id'] = config['model_id']+1
         csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
     print("Current ID:",config['model_id'])
-    print("CSV output file:",csv_history_filepath)
-    print("Pth output file:",model_best_filepath)
 
     #Set up blank csv in save folder
     df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
     df.to_csv(csv_history_filepath)    
     
     if(config['adam']):
-        optimizer = optim.Adam(model.parameters(),
-                                betas=(0.9, 0.999), 
+        optimizer = optim.Adam(model.parameters(),#Contains link to learnable parameters
+                                betas=(0.9, 0.999), #Other parameters are other optimiser parameters
                                 lr = config['lr'], 
                                 weight_decay = config['weight_decay'])
     else:
@@ -329,20 +390,17 @@ def main(args):
    
 
 
-    # Change the learning reate at 100/150 milestones(epochs). Decrease by 10*
-    lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
-
-    
+    lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')    
     
     best_acc = 0
     res = []
 
     if config['model_version'] in [1,3,4,5,6,7,8,9,10]:
         train_fn = train_v1
-        test_fn = test
+        test_fn = test_v1
     elif config['model_version'] == 2:
         train_fn = train_v2
-        test_fn = test
+        test_fn = test_v2
     else:
         print(version, "is not a valid version number")
         exit(1)

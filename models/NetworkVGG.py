@@ -149,11 +149,10 @@ class NetworkV2(nn.Module):
     def __init__(self, base, num_classes,num_makes,num_models,num_submodels):
         super().__init__() #Running initialisation from super(NN.module)
 
-        # base = torchvision.models.vgg16(pretrained=True)
         self.base = base
 
-        in_features = self.base.classifier.in_features
-        self.base.classifier = nn.Sequential()
+        in_features = self.base.classifier[6].in_features
+        self.base.classifier[6] = nn.Sequential()
 
         self.make_fc = nn.Sequential(
             nn.Dropout(0.2),
@@ -174,14 +173,13 @@ class NetworkV2(nn.Module):
             nn.Dropout(0.2),
             nn.ReLU(),
             nn.Linear(in_features + num_makes + num_models+ num_submodels, num_classes)
-        )
-        
+        )        
 
     def forward(self, x):
         out = self.base(x)
-        make_fc = self.make_fc
-        model_fc = self.model_fc
-        submodel_fc = self.submodel_fc
+        make_fc = self.make_fc(out)
+        model_fc = self.model_fc(out)
+        submodel_fc = self.submodel_fc(out)
 
         concat =  torch.cat([out,make_fc,model_fc,submodel_fc],dim=1)
 

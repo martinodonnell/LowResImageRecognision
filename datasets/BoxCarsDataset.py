@@ -85,7 +85,6 @@ class BoxCarsDatasetV2(Dataset):
             img = self.cache[idx]
 
         img = self.transform(img)
-
         return img, target,make_target,model_target,submodel_target,generation_target
 
 
@@ -181,7 +180,7 @@ class BoxCarDataSetUtil(object):
                 'y1': None,
                 'x2':None,
                 'y2': None,
-                'target': self.get_array_index_of_string(self.cars_annotations, vehicle['annotation']),    
+                'target': self.get_array_index_of_string(self.cars_annotations, vehicle['annotation']),  
                 'make':self.get_array_index_of_string(self.make, make),
                 'model':self.get_array_index_of_string(self.model, model),
                 'submodel':self.get_array_index_of_string(self.submodel, submodel),
@@ -190,7 +189,6 @@ class BoxCarDataSetUtil(object):
             }
             ret[img_counter] = r
             img_counter=img_counter+1  
-            
         return ret
 
     def separate_classes(self):     
