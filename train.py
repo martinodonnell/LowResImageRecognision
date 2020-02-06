@@ -233,7 +233,7 @@ def test_v2(model, test_loader, device, config):
             model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
 
-            loss_meter += loss.item()
+            loss_meter += loss_main.item()
             acc_meter += acc.item()
             make_acc_meter += make_acc.item()
             model_acc_meter += model_acc.item()
