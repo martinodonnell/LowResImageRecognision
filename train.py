@@ -120,7 +120,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
     #Moved this out of for as I don't watch it all the time and will speed up performace
     print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
             f'Loss: {loss_meter / i:.4f} '
-            f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
+            f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s) '
             f'Make: {make_acc_meter / i:.4f} '
             f'model: {model_acc_meter / i:.4f} '
             f'Subtype: {submodel_acc_meter / i:.4f} '
@@ -153,7 +153,6 @@ def test_v1(model, test_loader, device, config):
     runcount = 0
     elapsed = 0
    
-
     i = 0
 
     with torch.no_grad():
@@ -233,7 +232,7 @@ def test_v2(model, test_loader, device, config):
             model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
 
-            loss_meter += loss_main + (config['make_loss'] * loss_make) + (config['model_loss'] * loss_model) + (config['submodel_loss'] * loss_submodel)
+            loss_meter += (loss_main + (config['make_loss'] * loss_make) + (config['model_loss'] * loss_model) + (config['submodel_loss'] * loss_submodel))* data.size(0)
             acc_meter += acc.item()
             make_acc_meter += make_acc.item()
             model_acc_meter += model_acc.item()
@@ -246,6 +245,9 @@ def test_v2(model, test_loader, device, config):
         print(f'[{i}/{len(test_loader)}]: '
                 f'Loss: {loss_meter / runcount:.4f} '
                 f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
+                f'Make: {make_acc_meter / i:.4f} '
+                f'model: {model_acc_meter / i:.4f} '
+                f'Subtype: {submodel_acc_meter / i:.4f} '
                 , end='\r')
 
         print()
