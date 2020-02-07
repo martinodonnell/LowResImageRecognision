@@ -98,7 +98,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
         loss_model = F.cross_entropy(model_pred, model_target)
         loss_submodel = F.cross_entropy(submodel_pred, submodel_target)
 
-        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model * config['submodel_loss'] * loss_submodel
+        loss = loss_main + (config['make_loss'] * loss_make) + (config['model_loss'] * loss_model) + (config['submodel_loss'] * loss_submodel)
         loss.backward()
         optimizer.step()
 
@@ -233,7 +233,7 @@ def test_v2(model, test_loader, device, config):
             model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
 
-            loss_meter += loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model * config['submodel_loss'] * loss_submodel
+            loss_meter += loss_main + (config['make_loss'] * loss_make) + (config['model_loss'] * loss_model) + (config['submodel_loss'] * loss_submodel)
             acc_meter += acc.item()
             make_acc_meter += make_acc.item()
             model_acc_meter += model_acc.item()
