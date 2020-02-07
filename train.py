@@ -145,6 +145,73 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
+def train_v3(ep, model, optimizer, train_loader, device, config):
+    model.train()
+
+    loss_meter = 0
+    acc_meter = 0
+    make_acc_meter = 0
+    type_acc_meter = 0
+
+    i = 0
+
+    start_time = time.time()
+    elapsed = 0
+
+    for data, target, make_target, type_target in train_loader:
+        data = data.to(device)
+        target = target.to(device)
+        make_target = make_target.to(device)
+        type_target = type_target.to(device)
+
+        optimizer.zero_grad()
+
+        pred, make_pred, type_pred = model(data)
+        
+        loss_main = F.cross_entropy(pred, target)
+        loss_make = F.cross_entropy(make_pred, make_target)
+        loss_type = F.cross_entropy(type_pred, type_target)
+
+        loss = loss_main + config['make_loss'] * loss_make + config['make_loss'] * loss_type
+        loss.backward()
+
+        optimizer.step()
+
+        acc = pred.max(1)[1].eq(target).float().mean()
+        make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
+        type_acc = type_pred.max(1)[1].eq(type_target).float().mean()
+
+        loss_meter += loss.item()
+        acc_meter += acc.item()
+        make_acc_meter += make_acc.item()
+        type_acc_meter += type_acc.item()
+
+        i += 1
+        elapsed = time.time() - start_time
+
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+              f'Loss: {loss_meter / i:.4f} '
+              f'Acc: {acc_meter / i:.4f} '
+              f'Make: {make_acc_meter / i:.4f} '
+              f'Type: {type_acc_meter / i:.4f} '
+              f'({elapsed:.2f}s)', end='\r')
+
+    print()
+    loss_meter /= len(train_loader)
+    acc_meter /= len(train_loader)
+    make_acc_meter /= len(train_loader)
+    type_acc_meter /= len(train_loader)
+
+    trainres = {
+        'train_loss': loss_meter,
+        'train_acc': acc_meter,
+        'train_make_acc': make_acc_meter,
+        'train_type_acc': type_acc_meter,
+        'train_time': elapsed
+    }
+
+    return trainres
+
 def test_v1(model, test_loader, device, config):
     model.eval()
 
@@ -242,7 +309,7 @@ def test_v2(model, test_loader, device, config):
             elapsed = time.time() - start_time
             runcount += data.size(0)
 
-        print(f'[{i}/{len(test_loader)}]: '
+            print(f'[{i}/{len(test_loader)}]: '
                 f'Loss: {loss_meter / runcount:.4f} '
                 f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
                 f'Make: {make_acc_meter / i:.4f} '
@@ -265,6 +332,74 @@ def test_v2(model, test_loader, device, config):
     }
 
     # print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')# printed twice
+
+    return valres
+
+def test_v3(model, test_loader, device, config):
+    model.eval()
+
+    loss_meter = 0
+    acc_meter = 0
+    make_acc_meter = 0
+    type_acc_meter = 0
+    runcount = 0
+
+    i = 0
+
+    with torch.no_grad():
+        start_time = time.time()
+        for data, target, make_target, type_target in test_loader:
+            data = data.to(device)
+            target = target.to(device)
+            make_target = make_target.to(device)
+            type_target = type_target.to(device)
+
+            pred, make_pred, type_pred = model(data)
+
+            loss_main = F.cross_entropy(pred, target)
+            loss_make = F.cross_entropy(make_pred, make_target)
+            loss_type = F.cross_entropy(type_pred, type_target)
+
+            loss = loss_main + config['make_loss'] * loss_make + config['make_loss'] * loss_type
+
+            acc = pred.max(1)[1].eq(target).float().sum()
+            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
+            type_acc = type_pred.max(1)[1].eq(type_target).float().sum()
+
+            loss_meter += loss.item() * data.size(0)
+            acc_meter += acc.item()
+            make_acc_meter += make_acc.item()
+            type_acc_meter += type_acc.item()
+
+            runcount += data.size(0)
+            i += 1
+            elapsed = time.time() - start_time
+
+            print(f'[{i}/{len(test_loader)}]: '
+                  f'Loss: {loss_meter / runcount:.4f} '
+                  f'Acc: {acc_meter / runcount:.4f} '
+                  f'Make: {make_acc_meter / runcount:.4f} '
+                  f'Type: {type_acc_meter / runcount:.4f} '
+                  f'({elapsed:.2f}s)', end='\r')
+
+        print()
+
+        elapsed = time.time() - start_time
+
+        loss_meter /= runcount
+        acc_meter /= runcount
+        make_acc_meter /= runcount
+        type_acc_meter /= runcount
+
+    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
+
+    valres = {
+        'val_loss': loss_meter,
+        'val_acc': acc_meter,
+        'val_make_acc': make_acc_meter,
+        'val_type_acc': type_acc_meter,
+        'val_time': elapsed
+    }
 
     return valres
 
@@ -326,28 +461,14 @@ def main(args):
 
     # Set up data loaders
     multi_nums, train_loader, test_loader = prepare_loader(config)
-
     #Save to log file on Kelvin
     pp.pprint(config)
 
     #Set up name for output files
     csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
 
-
-    if(config['dataset_version']==1):# Stanford
-        num_classes = multi_nums['num_classes'] 
-        num_makes = num_models = num_submodels = 0
-    elif(config['dataset_version']==2):#- BoxCar Hard split['hard']['types_mapping']
-        num_classes = multi_nums['num_classes']  
-        num_makes = multi_nums['num_makes'] 
-        num_models = multi_nums['num_models'] 
-        num_submodels = multi_nums['num_submodels']
-    else:
-        print("Incorrect dataset")
-        exit(1)
-
     # Create model
-    model = construct_model(config, num_classes,num_makes,num_models,num_submodels)
+    model = construct_model(config, multi_nums['num_classes'],multi_nums['num_makes'],multi_nums['num_models'],multi_nums['num_submodels'])
 
      # Finetune an existing model already trained
     if config['finetune']:
@@ -395,16 +516,19 @@ def main(args):
     
     best_acc = 0
     res = []
-
-    if config['model_version'] in [1,3,4,5,6,7,8,9,10]:
+       
+    if config['model_version'] in [2,8]:
+        if(config['dataset_version']==1):
+            train_fn = train_v3
+            test_fn = test_v3
+        else:        
+            train_fn = train_v2
+            test_fn = test_v2
+    else:
         train_fn = train_v1
         test_fn = test_v1
-    elif config['model_version'] == 2:
-        train_fn = train_v2
-        test_fn = test_v2
-    else:
-        print(version, "is not a valid version number")
-        exit(1)
+
+
     for ep in range(1, config['epochs'] + 1):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
         valres = test_fn(model, test_loader, device, config)
@@ -438,7 +562,7 @@ if __name__ == '__main__':
                         help='training epochs (default: 60)')
     parser.add_argument('--imgsize', default=224, type=int,
                         help='Input image size (default: 224)')
-    parser.add_argument('--model-version', default=1, type=int, choices=[1,2,3,4,5,6,7],
+    parser.add_argument('--model-version', default=1, type=int,
                         help='Classification version (default: 1)\n'
                              '1. Full Annotation only\n'
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')

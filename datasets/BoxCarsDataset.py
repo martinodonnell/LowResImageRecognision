@@ -66,7 +66,6 @@ class BoxCarsDatasetV2(Dataset):
 
     def __getitem__(self, idx):
         r = self.annos[idx]
-
         target = r['target']
         make_target = r['make']
         model_target = r['model']
