@@ -653,12 +653,15 @@ def main(args):
        
     if config['model_version'] in [2,8]:
         if(config['dataset_version']==1):
+            print("Version 3")
             train_fn = train_v3
             test_fn = test_v3
         else:        
+            print("Version 2")
             train_fn = train_v2
             test_fn = test_v2
     else:
+        print("Version 1")
         train_fn = train_v1
         test_fn = test_v1
 

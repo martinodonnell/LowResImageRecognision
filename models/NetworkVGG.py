@@ -188,7 +188,7 @@ class NetworkV1_5(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/rep
         # return fc,make_fc,model_fc,submodel_fc
 
 class NetworkV2(nn.Module):
-    def __init__(self, base, num_classes, num_makes, num_models):
+    def __init__(self, base, num_classes, num_makes, num_models,num_submodels):
         super().__init__()
         self.base = base
 
