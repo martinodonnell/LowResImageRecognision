@@ -173,7 +173,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
         loss_make = F.cross_entropy(make_pred, make_target)
         loss_type = F.cross_entropy(model_pred, model_target)
 
-        loss = loss_main + config['make_loss'] * loss_make + config['modelloss'] * loss_type
+        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_type
         loss.backward()
 
         optimizer.step()
@@ -389,7 +389,7 @@ def test_v2(model, test_loader, device, config):
         'val_loss': loss_meter,
         'val_acc': acc_meter,
         'val_make_acc': make_acc_meter,
-        'val_type_acc': type_acc_meter,
+        'val_type_acc': model_acc_meter,
         'val_time': elapsed
     }
 
