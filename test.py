@@ -284,6 +284,7 @@ def load_weight(model, path, device):
 
 def main(args):
     device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+    print('Using device:', device)
 
     config = {
         'model_id':args.model_id,
@@ -298,14 +299,11 @@ def main(args):
 
     modelpath = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3)+'_model.pth')
 
-    class_names = load_boxcar_class_names()
-    num_classes = len(class_names)
+    multi_nums,test_loader = prepare_test_loader(config)
 
-    model = construct_model(config, num_classes,1,1,1)
+    model = construct_model(config, multi_nums['num_classes'],multi_nums['num_makes'],multi_nums['num_models'],multi_nums['num_submodels'])
     load_weight(model, modelpath, device)
     model = model.to(device)
-
-    test_loader = prepare_test_loader(config)
 
     if config['model_version'] in [2]: 
         print("Train/Test Version 2 for boxcars (Multitask learning - 2 features) ")

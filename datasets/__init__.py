@@ -96,30 +96,49 @@ def prepare_test_loader(config):
         ]
     )
 
-    if(config['dataset_version']==1):
-        print("NOT SET UP YET")
-        exit(1)
-        train_imgdir = STANFORD_CARS_TRAIN
+    if(config['dataset_version']==1):#Stanford Cars Dataset
         test_imgdir = STANFORD_CARS_TEST
-
-        train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
+        
+        if(config['model_version']!=8):         
+            test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
+        else:
+            test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])
+            
+        multi_nums = {
+            'num_classes':196, 
+            'num_makes':49,
+            'num_models':18,
+            'num_submodels':1,
+            'generation':1,
+        }      
 
-        test_dataset = CarsDataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['dataset_version'],config['boxcar_split'],'test')
 
-    elif(config['dataset_version']==2):
+    elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
-        test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
+
+        if(config['model_version']==2):
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
+        else:
+            test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
+       
+        multi_nums = {
+            'num_classes':107, 
+            'num_makes':16,
+            'num_models':68,
+            'num_submodels':6,
+            'generation':7,
+        }
     else:
         print("No dataset. Leaving")
-        exit(1) 
+        exit(1)   
 
+    
     test_loader = DataLoader(test_dataset,
                              batch_size=config['test_batch_size'],
                              shuffle=False,
                              pin_memory=False,
                              num_workers=12)
 
-    return test_loader
-    
+    return multi_nums, test_loader    
 
