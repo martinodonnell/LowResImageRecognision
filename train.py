@@ -393,7 +393,7 @@ def main(args):
         train_fn = train_v2
         test_fn = test_v2
     elif config['model_version'] in [9]:
-        print("Train/Test Version 2 for boxcars (Multitask learning - 3 features)")
+        print("Train/Test Version 4 for boxcars (Multitask learning - 3 features)")
         train_fn = train_v4
         test_fn = test_v4
     elif config['model_version'] in [8]:

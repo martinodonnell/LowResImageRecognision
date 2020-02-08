@@ -55,7 +55,7 @@ def prepare_loader(config):
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['model_version']==2):
+        if(config['model_version'] in [2,9]):
             train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
         else:
