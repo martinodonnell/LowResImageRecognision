@@ -144,50 +144,8 @@ class NetworkV1_5(nn.Module):#http://cs230.stanford.edu/projects_spring_2019/rep
         fc = self.base(x)
         return fc
 
-
-# class NetworkV2(nn.Module):
-#     def __init__(self, base, num_classes,num_makes,num_models,num_submodels):
-#         super().__init__() #Running initialisation from super(NN.module)
-
-#         self.base = base
-
-#         in_features = self.base.classifier[6].in_features
-#         self.base.classifier[6] = nn.Sequential()
-
-#         self.make_fc = nn.Sequential(
-#             nn.Dropout(0.2),
-#             nn.Linear(in_features, num_makes)
-#         )
-
-#         self.model_fc = nn.Sequential(
-#             nn.Dropout(0.2),
-#             nn.Linear(in_features, num_models)
-#         )
-
-#         self.submodel_fc = nn.Sequential(
-#             nn.Dropout(0.2),
-#             nn.Linear(in_features, num_submodels)
-#         )
-
-#         self.class_fc = nn.Sequential(
-#             nn.Dropout(0.2),
-#             nn.ReLU(),
-#             nn.Linear(in_features + num_makes + num_models+ num_submodels, num_classes)
-#         )        
-
-#     def forward(self, x):
-#         out = self.base(x)
-#         make_fc = self.make_fc(out)
-#         model_fc = self.model_fc(out)
-#         submodel_fc = self.submodel_fc(out)
-
-#         concat =  torch.cat([out,make_fc,model_fc,submodel_fc],dim=1)
-
-#         fc = self.class_fc(concat)
-
-        # return fc,make_fc,model_fc,submodel_fc
-
-class NetworkV2(nn.Module):
+#Multitask learning with Boxcars. Just the make and model
+class NetworkV2_ML_Boxcars1(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_models,num_submodels):
         super().__init__()
         self.base = base
@@ -222,7 +180,49 @@ class NetworkV2(nn.Module):
 
         return fc, brand_fc, model_fc
 
-class NetworkV2_Stan(nn.Module):
+#Multitask learning with Boxcars. Just the make and model
+class NetworkV2_ML_Boxcars2(nn.Module):
+    def __init__(self, base, num_classes, num_makes, num_models,num_submodels):
+        super().__init__()
+        self.base = base
+
+        in_features = self.base.classifier[6].in_features
+        self.base.classifier[6] = nn.Sequential()
+
+        self.brand_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_makes)
+        )
+
+        self.model_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_models)
+        )
+
+        self.submodel_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_submodels)
+        )
+
+        self.class_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.Linear(in_features + num_makes + num_models + num_submodels, num_classes)
+        )
+
+    def forward(self, x):
+        out = self.base(x)
+        brand_fc = self.brand_fc(out)
+        model_fc = self.model_fc(out)
+        submodel_fc = self.submodel_fc(out)
+
+        concat = torch.cat([out, brand_fc, model_fc,submodel_fc], dim=1)
+
+        fc = self.class_fc(concat)
+
+        return fc, brand_fc, model_fc,submodel_fc
+
+class NetworkV2_ML_Stan(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_types):
         super().__init__()
         self.base = base

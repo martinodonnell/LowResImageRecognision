@@ -1,7 +1,7 @@
 from datasets import prepare_loader
 from models import construct_model
 from config import SAVE_FOLDER
-
+from test import test_v1,test_v2,test_v3,test_v4
 import argparse
 import os
 import pprint as pp
@@ -12,6 +12,35 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 import pandas as pd
+
+
+def get_output_filepaths(id):
+    id_string = str(id).zfill(3)
+    csv_history_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
+    model_best_filepath  = os.path.join(SAVE_FOLDER, id_string+'_model.pth')
+
+    return csv_history_filepath,model_best_filepath
+
+def load_weight(model, path, device):
+    sd = torch.load(path,map_location=device)
+    model.load_state_dict(sd)
+
+def load_weight_stan_boxcars(model, path, device):
+    pretrained_dict = torch.load(path,map_location=device)
+    pretrained_dict_ids = [0,2,5,7,10,12,14,17,19,21,24,26,28]
+    #Add features
+    for i in pretrained_dict_ids:
+        key='base.features.'+str(i)
+        model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+        model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.bias'])
+
+    # #Add classififers
+    # pretrained_dict_ids = [0,3,5.1,6.1]
+
+    # for i in pretrained_dict_ids:
+    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
+
 
 def train_v1(ep, model, optimizer, train_loader, device, config):
 
@@ -64,88 +93,6 @@ def train_v1(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-# def train_v2(ep, model, optimizer, train_loader, device, config):
-
-#     print("---------Training-------")
-
-#     model.train() # Set model to training mode
-
-#     loss_meter = 0
-#     acc_meter = 0
-#     make_acc_meter = 0
-#     model_acc_meter = 0 
-#     submodel_acc_meter = 0
-#     i = 0
-
-#     start_time = time.time()
-#     elapsed = 0
-#     for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
-#         data = data.to(device)
-#         target = target.to(device)
-#         make_target = make_target.to(device)
-#         model_target = model_target.to(device)
-#         submodel_target = submodel_target.to(device)
-#         # generation_target = generation_target.to(device) #TODO ADD THIS ONE TOO 
-
-#          # zero the parameter gradients
-#         optimizer.zero_grad()
-
-#         # forward + backward + optimize
-#         pred, make_pred, model_pred,submodel_pred = model(data)
-
-#         loss_main = F.cross_entropy(pred, target)
-#         loss_make = F.cross_entropy(make_pred, make_target)
-#         loss_model = F.cross_entropy(model_pred, model_target)
-#         loss_submodel = F.cross_entropy(submodel_pred, submodel_target)
-
-#         loss = loss_main + (config['make_loss'] * loss_make) + (config['model_loss'] * loss_model) + (config['submodel_loss'] * loss_submodel)
-#         loss.backward()
-#         optimizer.step()
-
-#         acc = pred.max(1)[1].eq(target).float().mean()
-#         make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
-#         model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
-#         submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
-
-#         loss_meter += loss.item()
-#         acc_meter += acc.item()
-#         make_acc_meter += make_acc.item()
-#         model_acc_meter += model_acc.item()
-#         submodel_acc_meter += submodel_acc.item()
-
-
-#         i += 1
-#         elapsed = time.time() - start_time
-        
-#     #Moved this out of for as I don't watch it all the time and will speed up performace
-#     print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
-#             f'Loss: {loss_meter / i:.4f} '
-#             f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s) '
-#             f'Make: {make_acc_meter / i:.4f} '
-#             f'model: {model_acc_meter / i:.4f} '
-#             f'Subtype: {submodel_acc_meter / i:.4f} '
-#             ,end='\r')
-
-#     print()
-#     loss_meter /= len(train_loader)
-#     acc_meter /= len(train_loader)
-#     make_acc_meter /= len(train_loader)
-#     model_acc_meter /= len(train_loader)
-#     submodel_acc_meter /= len(train_loader)
-
-
-#     trainres = {
-#         'train_loss': loss_meter,
-#         'train_acc': acc_meter,
-#         'train_make_acc': make_acc_meter,
-#         'train_model_acc': model_acc_meter,
-#         'train_submodel_acc': submodel_acc_meter,
-#         'train_time': elapsed,
-#     }
-
-#     return trainres
-
-
 def train_v2(ep, model, optimizer, train_loader, device, config):
     model.train()
 
@@ -171,9 +118,9 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
         
         loss_main = F.cross_entropy(pred, target)
         loss_make = F.cross_entropy(make_pred, make_target)
-        loss_type = F.cross_entropy(model_pred, model_target)
+        loss_model = F.cross_entropy(model_pred, model_target)
 
-        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_type
+        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model
         loss.backward()
 
         optimizer.step()
@@ -194,7 +141,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
               f'Loss: {loss_meter / i:.4f} '
               f'Acc: {acc_meter / i:.4f} '
               f'Make: {make_acc_meter / i:.4f} '
-              f'Type: {model_acc_meter / i:.4f} '
+              f'Model: {model_acc_meter / i:.4f} '
               f'({elapsed:.2f}s)', end='\r')
 
     print()
@@ -280,289 +227,79 @@ def train_v3(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-def test_v1(model, test_loader, device, config):
-    model.eval()
 
-    loss_meter = 0
-    acc_meter = 0
-    runcount = 0
-    elapsed = 0
-   
-    i = 0
-
-    with torch.no_grad():
-        start_time = time.time()
-        for data, target in test_loader:
-            data = data.to(device)
-            target = target.to(device)
-
-            pred = model(data)
-
-            loss = F.cross_entropy(pred, target) * data.size(0)
-            acc = pred.max(1)[1].eq(target).float().sum()
-
-            loss_meter += loss.item()
-            acc_meter += acc.item()
-            i += 1
-            elapsed = time.time() - start_time
-            runcount += data.size(0)
-        #Moved this out of for as I don't watch it all the time and will speed up performace
-        print(f'[{i}/{len(test_loader)}]: '
-                f'Loss: {loss_meter / runcount:.4f} '
-                f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
-                , end='\r')
-
-        print()
-
-        loss_meter /= runcount
-        acc_meter /= runcount
-
-    valres = {
-        'val_loss': loss_meter,
-        'val_acc': acc_meter,
-        'val_time': elapsed,
-    }
-
-    # print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')# printed twice
-
-    return valres
-
-def test_v2(model, test_loader, device, config):
-    model.eval()
+def train_v4(ep, model, optimizer, train_loader, device, config):
+    model.train()
 
     loss_meter = 0
     acc_meter = 0
     make_acc_meter = 0
     model_acc_meter = 0
-    runcount = 0
-
+    submodel_acc_meter = 0
     i = 0
 
-    with torch.no_grad():
-        start_time = time.time()
-        for data, target, make_target, model_target, submodel_target, generation_target in test_loader:
-            data = data.to(device)
-            target = target.to(device)
-            make_target = make_target.to(device)
-            model_target = model_target.to(device)
+    start_time = time.time()
+    elapsed = 0
 
-            pred, make_pred, model_pred = model(data)
+    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+        data = data.to(device)
+        target = target.to(device)
+        make_target = make_target.to(device)
+        model_target = model_target.to(device)
+        submodel_target = submodel_target.to(device)
 
-            loss_main = F.cross_entropy(pred, target)
-            loss_make = F.cross_entropy(make_pred, make_target)
-            loss_type = F.cross_entropy(model_pred, model_target)
+        optimizer.zero_grad()
 
-            loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_type
+        pred, make_pred, model_pred,submodel_pred = model(data)
+        
+        loss_main = F.cross_entropy(pred, target)
+        loss_make = F.cross_entropy(make_pred, make_target)
+        loss_model = F.cross_entropy(model_pred, model_target)
+        loss_submodel = F.cross_entropy(submodel_target, model_target)
 
-            acc = pred.max(1)[1].eq(target).float().sum()
-            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-            model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
+        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model + config['submodel_loss'] * loss_submodel
+        loss.backward()
 
-            loss_meter += loss.item() * data.size(0)
-            acc_meter += acc.item()
-            make_acc_meter += make_acc.item()
-            model_acc_meter += model_acc.item()
+        optimizer.step()
 
-            runcount += data.size(0)
-            i += 1
-            elapsed = time.time() - start_time
+        acc = pred.max(1)[1].eq(target).float().mean()
+        make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
+        model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
+        submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
 
-            print(f'[{i}/{len(test_loader)}]: '
-                  f'Loss: {loss_meter / runcount:.4f} '
-                  f'Acc: {acc_meter / runcount:.4f} '
-                  f'Make: {make_acc_meter / runcount:.4f} '
-                  f'Type: {model_acc_meter / runcount:.4f} '
-                  f'({elapsed:.2f}s)', end='\r')
+        loss_meter += loss.item()
+        acc_meter += acc.item()
+        make_acc_meter += make_acc.item()
+        model_acc_meter += model_acc.item()
+        submodel_acc_meter += submodel_acc.item()
 
-        print()
-
+        i += 1
         elapsed = time.time() - start_time
 
-        loss_meter /= runcount
-        acc_meter /= runcount
-        make_acc_meter /= runcount
-        model_acc_meter /= runcount
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+              f'Loss: {loss_meter / i:.4f} '
+              f'Acc: {acc_meter / i:.4f} '
+              f'Make: {make_acc_meter / i:.4f} '
+              f'Model: {model_acc_meter / i:.4f} '
+              f'SubModel: {submodel_acc_meter / i:.4f} '
+              f'({elapsed:.2f}s)', end='\r')
 
-    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
+    print()
+    loss_meter /= len(train_loader)
+    acc_meter /= len(train_loader)
+    make_acc_meter /= len(train_loader)
+    model_acc_meter /= len(train_loader)
+    submodel_acc_meter /= len(train_loader)
 
-    valres = {
-        'val_loss': loss_meter,
-        'val_acc': acc_meter,
-        'val_make_acc': make_acc_meter,
-        'val_type_acc': model_acc_meter,
-        'val_time': elapsed
-    }
-
-    return valres
-    model.eval()
-
-    loss_meter = 0
-    acc_meter = 0
-    make_acc_meter = 0
-    model_acc_meter = 0 
-    submodel_acc_meter = 0
-
-    runcount = 0
-    elapsed = 0
-   
-
-    i = 0
-
-    with torch.no_grad():
-        start_time = time.time()
-        for data, target,make_target,model_target,submodel_target,generation_target in test_loader:
-            data = data.to(device)
-            target = target.to(device)
-            data = data.to(device)
-            target = target.to(device)
-            make_target = make_target.to(device)
-            model_target = model_target.to(device)
-            submodel_target = submodel_target.to(device)
-            # generation_target = generation_target.to(device) #TODO ADD THIS ONE TOO 
-
-
-            pred, make_pred, model_pred,submodel_pred = model(data)
-
-            loss_main = F.cross_entropy(pred, target)
-            loss_make = F.cross_entropy(make_pred, make_target)
-            loss_model = F.cross_entropy(model_pred, model_target)
-            loss_submodel = F.cross_entropy(submodel_pred, submodel_target)
-
-            acc = pred.max(1)[1].eq(target).float().mean()
-            make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
-            model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
-            submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
-
-            loss_meter += (loss_main + (config['make_loss'] * loss_make) + (config['model_loss'] * loss_model) + (config['submodel_loss'] * loss_submodel))* data.size(0)
-            acc_meter += acc.item()
-            make_acc_meter += make_acc.item()
-            model_acc_meter += model_acc.item()
-            submodel_acc_meter += submodel_acc.item()
-
-            i += 1
-            elapsed = time.time() - start_time
-            runcount += data.size(0)
-
-            print(f'[{i}/{len(test_loader)}]: '
-                f'Loss: {loss_meter / runcount:.4f} '
-                f'Acc: {acc_meter / runcount:.4f} ({elapsed:.2f}s)'
-                f'Make: {make_acc_meter / i:.4f} '
-                f'model: {model_acc_meter / i:.4f} '
-                f'Subtype: {submodel_acc_meter / i:.4f} '
-                , end='\r')
-
-        print()
-
-        loss_meter /= runcount
-        acc_meter /= runcount
-
-    valres = {
-        'val_loss': loss_meter,
-        'val_acc': acc_meter,
+    trainres = {
+        'train_loss': loss_meter,
+        'train_acc': acc_meter,
         'train_make_acc': make_acc_meter,
         'train_model_acc': model_acc_meter,
-        'train_submodel_acc': submodel_acc_meter,
-        'val_time': elapsed,
+        'train_time': elapsed
     }
 
-    # print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')# printed twice
-
-    return valres
-
-def test_v3(model, test_loader, device, config):
-    model.eval()
-
-    loss_meter = 0
-    acc_meter = 0
-    make_acc_meter = 0
-    type_acc_meter = 0
-    runcount = 0
-
-    i = 0
-
-    with torch.no_grad():
-        start_time = time.time()
-        for data, target, make_target, type_target in test_loader:
-            data = data.to(device)
-            target = target.to(device)
-            make_target = make_target.to(device)
-            type_target = type_target.to(device)
-
-            pred, make_pred, type_pred = model(data)
-
-            loss_main = F.cross_entropy(pred, target)
-            loss_make = F.cross_entropy(make_pred, make_target)
-            loss_type = F.cross_entropy(type_pred, type_target)
-
-            loss = loss_main + config['make_loss'] * loss_make + config['make_loss'] * loss_type
-
-            acc = pred.max(1)[1].eq(target).float().sum()
-            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-            type_acc = type_pred.max(1)[1].eq(type_target).float().sum()
-
-            loss_meter += loss.item() * data.size(0)
-            acc_meter += acc.item()
-            make_acc_meter += make_acc.item()
-            type_acc_meter += type_acc.item()
-
-            runcount += data.size(0)
-            i += 1
-            elapsed = time.time() - start_time
-
-            print(f'[{i}/{len(test_loader)}]: '
-                  f'Loss: {loss_meter / runcount:.4f} '
-                  f'Acc: {acc_meter / runcount:.4f} '
-                  f'Make: {make_acc_meter / runcount:.4f} '
-                  f'Type: {type_acc_meter / runcount:.4f} '
-                  f'({elapsed:.2f}s)', end='\r')
-
-        print()
-
-        elapsed = time.time() - start_time
-
-        loss_meter /= runcount
-        acc_meter /= runcount
-        make_acc_meter /= runcount
-        type_acc_meter /= runcount
-
-    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
-
-    valres = {
-        'val_loss': loss_meter,
-        'val_acc': acc_meter,
-        'val_make_acc': make_acc_meter,
-        'val_type_acc': type_acc_meter,
-        'val_time': elapsed
-    }
-
-    return valres
-
-def get_output_filepaths(id):
-    id_string = str(id).zfill(3)
-    csv_history_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
-    model_best_filepath  = os.path.join(SAVE_FOLDER, id_string+'_model.pth')
-
-    return csv_history_filepath,model_best_filepath
-
-def load_weight(model, path, device):
-    sd = torch.load(path,map_location=device)
-    model.load_state_dict(sd)
-
-def load_weight_stan_boxcars(model, path, device):
-    pretrained_dict = torch.load(path,map_location=device)
-    pretrained_dict_ids = [0,2,5,7,10,12,14,17,19,21,24,26,28]
-    #Add features
-    for i in pretrained_dict_ids:
-        key='base.features.'+str(i)
-        model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-        model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.bias'])
-
-    # #Add classififers
-    # pretrained_dict_ids = [0,3,5.1,6.1]
-
-    # for i in pretrained_dict_ids:
-    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
+    return trainres
 
 def main(args):
     # TODO what does this do
@@ -592,12 +329,12 @@ def main(args):
         'submodel_loss':args.submodel_loss,        
     }
 
-
-    # Set up data loaders
-    multi_nums, train_loader, test_loader = prepare_loader(config)
     #Save to log file on Kelvin
     pp.pprint(config)
 
+    # Set up data loaders
+    multi_nums, train_loader, test_loader = prepare_loader(config)
+    
     #Set up name for output files
     csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
 
@@ -645,23 +382,26 @@ def main(args):
 
    
 
-
+    #May need to use a different one. This one is not cutting it
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')    
     
     best_acc = 0
     res = []
        
-    if config['model_version'] in [2,8]:
-        if(config['dataset_version']==1):
-            print("Version 3")
-            train_fn = train_v3
-            test_fn = test_v3
-        else:        
-            print("Version 2")
-            train_fn = train_v2
-            test_fn = test_v2
+    if config['model_version'] in [2]: 
+        print("Train/Test Version 2 for boxcars (Multitask learning - 2 features) ")
+        train_fn = train_v2
+        test_fn = test_v2
+    elif config['model_version'] in [9]:
+        print("Train/Test Version 2 for boxcars (Multitask learning - 3 features)")
+        train_fn = train_v4
+        test_fn = test_v4
+    elif config['model_version'] in [8]:
+        print("Train/Test Version 3 for stanford (Multitask learning)")
+        train_fn = train_v3
+        test_fn = test_v3
     else:
-        print("Version 1")
+        print("Train/Test Version 1 for normal models")
         train_fn = train_v1
         test_fn = test_v1
 
@@ -677,7 +417,7 @@ def main(args):
         if best_acc < valres['val_acc']:
             best_acc = valres['val_acc']
             torch.save(model.state_dict(), model_best_filepath)
-            trainres['overwritten']=1#Work out from excel which epoch the best model from
+            trainres['overwritten']=1
         else:
             trainres['overwritten']=0
         trainres['epoch'] = ep
