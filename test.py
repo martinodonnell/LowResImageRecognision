@@ -293,6 +293,10 @@ def main(args):
         'imgsize': (244,244),
         'boxcar_split':'hard',
         'test_batch_size':60,
+
+        'make_loss': args.make_loss,
+        'model_loss': args.model_loss,
+        'submodel_loss':args.submodel_loss,    
     }
 
     pp.pprint(config)
@@ -306,16 +310,16 @@ def main(args):
     model = model.to(device)
 
     if config['model_version'] in [2]: 
-        print("Train/Test Version 2 for boxcars (Multitask learning - 2 features) ")
+        print("Test Version 2 for boxcars (Multitask learning - 2 features) ")
         test_fn = test_v2
     elif config['model_version'] in [9]:
-        print("Train/Test Version 2 for boxcars (Multitask learning - 3 features)")
+        print("Test Version 2 for boxcars (Multitask learning - 3 features)")
         test_fn = test_v4
     elif config['model_version'] in [8]:
-        print("Train/Test Version 3 for stanford (Multitask learning)")
+        print("Test Version 3 for stanford (Multitask learning)")
         test_fn = test_v3
     else:
-        print("Train/Test Version 1 for normal models")
+        print("Test Version 1 for normal models")
         test_fn = test_v1
 
     test_fn(model, test_loader, device, config)
@@ -334,6 +338,14 @@ if __name__ == '__main__':
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset')
+
+     # multi-task learning arg
+    parser.add_argument('--make-loss', default=0.2, type=float,
+                        help='loss$_{make}$ lambda')
+    parser.add_argument('--model-loss', default=0.2, type=float,
+                        help='loss$_{model}$ lambda')
+    parser.add_argument('--submodel-loss', default=0.2, type=float,
+                        help='loss$_{submodel}$ lambda')
 
     args = parser.parse_args()
 
