@@ -255,7 +255,7 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
         loss_main = F.cross_entropy(pred, target)
         loss_make = F.cross_entropy(make_pred, make_target)
         loss_model = F.cross_entropy(model_pred, model_target)
-        loss_submodel = F.cross_entropy(submodel_target, model_target)
+        loss_submodel = F.cross_entropy(submodel_pred, submodel_target)
 
         loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model + config['submodel_loss'] * loss_submodel
         loss.backward()
@@ -334,6 +334,7 @@ def main(args):
 
     # Set up data loaders
     multi_nums, train_loader, test_loader = prepare_loader(config)
+    
     
     #Set up name for output files
     csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
@@ -453,7 +454,7 @@ if __name__ == '__main__':
                         help='fine tune an existing model (default: False)')
     parser.add_argument('--finetune-stan-box', default=False, action='store_true',
                         help='Fix arhetecture for boxcars(default: False)')
-    parser.add_argument('--model-id',default=15,type=int,
+    parser.add_argument('--model-id',default=32,type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
 
     # optimizer arg
