@@ -117,7 +117,7 @@ def prepare_test_loader(config):
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['model_version']==2):
+        if(config['model_version']in [2,9]):
             test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
         else:
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')

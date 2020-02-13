@@ -313,7 +313,7 @@ def main(args):
         print("Test Version 2 for boxcars (Multitask learning - 2 features) ")
         test_fn = test_v2
     elif config['model_version'] in [9]:
-        print("Test Version 2 for boxcars (Multitask learning - 3 features)")
+        print("Test Version 4 for boxcars (Multitask learning - 3 features)")
         test_fn = test_v4
     elif config['model_version'] in [8]:
         print("Test Version 3 for stanford (Multitask learning)")
@@ -321,7 +321,6 @@ def main(args):
     else:
         print("Test Version 1 for normal models")
         test_fn = test_v1
-
     test_fn(model, test_loader, device, config)
 
 
