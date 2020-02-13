@@ -17,9 +17,10 @@ module add apps/python3
 #Watch hardware usage
 nvidia-smi
 
-
-#Go back one folder to that all other paths work
 cd ..
-
 echo $@
 python3 train.py $@
+
+cd Kelvin
+#Set it up to rest right away
+sbatch jobscript_test $@

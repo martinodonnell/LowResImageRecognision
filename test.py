@@ -330,7 +330,7 @@ if __name__ == '__main__':
 
     parser.add_argument('--model-id',default=15,type=int,required=True,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
-    parser.add_argument('--model-version', default=2, type=int, choices=[1,2,3,4,5,6],required=True,
+    parser.add_argument('--model-version', default=2, type=int,required=True,
                         help='Classification version (default: 2)\n'
                              '1. Full Annotation only\n'
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')
@@ -346,6 +346,21 @@ if __name__ == '__main__':
                         help='loss$_{model}$ lambda')
     parser.add_argument('--submodel-loss', default=0.2, type=float,
                         help='loss$_{submodel}$ lambda')
+
+    #Not used but added so I didn;t need to add conditions in bash file to remove them
+    parser.add_argument('--epochs', default=150, type=int,
+                        help='training epochs (default: 60)')
+    parser.add_argument('--batch-size', default=32, type=int,
+                        help='training batch size (default: 32)')
+    # optimizer arg
+    parser.add_argument('--lr', default=1e-4, type=float,
+                        help='SGD learning rate (default: 0.01)')
+    parser.add_argument('--weight-decay', default=0.0001, type=float,
+                        help='SGD weight decay (default: 0.0001)')
+    parser.add_argument('--momentum', default=0.9, type=float,
+                        help='SGD momentum (default: 0.9)')
+    parser.add_argument('--adam', default=False, action='store_true',
+                        help='Use adam over SVG(SVG by default)')
 
     args = parser.parse_args()
 

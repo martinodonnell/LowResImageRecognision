@@ -17,8 +17,6 @@ module add apps/python3
 #Watch hardware usage
 nvidia-smi
 
-
-#Go back one folder to that all other paths work
 cd ..
 
 echo $@
