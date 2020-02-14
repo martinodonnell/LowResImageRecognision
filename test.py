@@ -135,7 +135,11 @@ def test_v2(model, test_loader, device, config):
         model_loss_meter /= runcount
         model_acc_meter /= runcount
 
-    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
+    print(f'Test Result: '
+          f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
+          f'Make L: {make_loss_meter:.4f} Make L: {make_acc_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model L: {model_loss_meter:.4f} '
+          f'({elapsed:.2f}s)')
 
     valres = {
         'val_loss': loss_meter,
@@ -223,15 +227,23 @@ def test_v3(model, test_loader, device, config):
         model_loss_meter /= runcount
         model_acc_meter /= runcount
 
-    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
+    print(f'Test Result: '
+          f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
+          f'Make L: {make_loss_meter:.4f} Make L: {make_acc_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model L: {model_loss_meter:.4f} '
+          f'({elapsed:.2f}s)')
+
 
     valres = {
         'val_loss': loss_meter,
         'val_acc': acc_meter,
+
         'val_make_loss': make_loss_meter,
         'val_make_acc': make_acc_meter,
+
         'val_model_loss': model_loss_meter,
         'val_model_acc': model_acc_meter,
+
         'val_time': elapsed
     }
 
@@ -324,11 +336,18 @@ def test_v4(model, test_loader, device, config):
         submodel_acc_meter /= runcount
 
 
-    print(f'Test Result: Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} ({elapsed:.2f}s)')
+    print(f'Test Result: '
+          f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
+          f'Make L: {make_loss_meter:.4f} Make L: {make_acc_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model L: {model_loss_meter:.4f} '
+          f'Submodel L: {submodel_loss_meter:.4f} Submodel L: {submodel_loss_meter:.4f} '
+          f'({elapsed:.2f}s)')
+
 
     valres = {
         'val_loss': loss_meter,
         'val_acc': acc_meter,
+        
         'val_make_loss': make_loss_meter,
         'val_make_acc': make_acc_meter,
 
