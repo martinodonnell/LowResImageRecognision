@@ -98,7 +98,11 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
     loss_meter = 0
     acc_meter = 0
+
+    make_loss_meter = 0
     make_acc_meter = 0
+
+    model_loss_meter = 0
     model_acc_meter = 0
 
     i = 0
@@ -116,22 +120,28 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
         pred, make_pred, model_pred = model(data)
         
-        loss_main = F.cross_entropy(pred, target)
-        loss_make = F.cross_entropy(make_pred, make_target)
-        loss_model = F.cross_entropy(model_pred, model_target)
+        main_loss = F.cross_entropy(pred, target)
+        make_loss = F.cross_entropy(make_pred, make_target)
+        model_loss = F.cross_entropy(model_pred, model_target)
 
-        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model
+        loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss
         loss.backward()
 
         optimizer.step()
 
+        #Save accuracy/loss for each feature
         acc = pred.max(1)[1].eq(target).float().mean()
         make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
         model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
 
+        
         loss_meter += loss.item()
         acc_meter += acc.item()
+
+        make_loss_meter += make_loss.item()
         make_acc_meter += make_acc.item()
+
+        model_loss_meter += model_loss.item()
         model_acc_meter += model_acc.item()
 
         i += 1
@@ -140,21 +150,34 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
         print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
               f'Loss: {loss_meter / i:.4f} '
               f'Acc: {acc_meter / i:.4f} '
-              f'Make: {make_acc_meter / i:.4f} '
-              f'Model: {model_acc_meter / i:.4f} '
+
+              f'Make L: {make_loss_meter / i:.4f} '
+              f'Make A: {make_acc_meter / i:.4f} '
+
+              f'Model L: {model_loss_meter / i:.4f} '
+              f'Model A: {model_acc_meter / i:.4f} '
               f'({elapsed:.2f}s)', end='\r')
 
     print()
     loss_meter /= len(train_loader)
     acc_meter /= len(train_loader)
+
+    make_loss_meter /= len(train_loader)
     make_acc_meter /= len(train_loader)
+
+    model_loss_meter /= len(train_loader)
     model_acc_meter /= len(train_loader)
 
     trainres = {
         'train_loss': loss_meter,
         'train_acc': acc_meter,
+        
+        'train_make_loss': make_loss_meter,
         'train_make_acc': make_acc_meter,
+
+        'train_model_loss': model_loss_meter,
         'train_model_acc': model_acc_meter,
+
         'train_time': elapsed
     }
 
@@ -165,41 +188,51 @@ def train_v3(ep, model, optimizer, train_loader, device, config):
 
     loss_meter = 0
     acc_meter = 0
+
+    make_loss_meter = 0
     make_acc_meter = 0
-    type_acc_meter = 0
+
+    model_loss_meter = 0
+    model_acc_meter = 0
 
     i = 0
 
     start_time = time.time()
     elapsed = 0
 
-    for data, target, make_target, type_target in train_loader:
+    for data, target, make_target, model_target in train_loader:
         data = data.to(device)
         target = target.to(device)
         make_target = make_target.to(device)
-        type_target = type_target.to(device)
+        model_target = model_target.to(device)
 
         optimizer.zero_grad()
 
-        pred, make_pred, type_pred = model(data)
+        pred, make_pred, model_pred = model(data)
         
-        loss_main = F.cross_entropy(pred, target)
-        loss_make = F.cross_entropy(make_pred, make_target)
-        loss_type = F.cross_entropy(type_pred, type_target)
+        main_loss = F.cross_entropy(pred, target)
+        make_loss = F.cross_entropy(make_pred, make_target)
+        model_loss = F.cross_entropy(model_pred, model_target)
 
-        loss = loss_main + config['make_loss'] * loss_make + config['make_loss'] * loss_type
+        loss = main_loss + config['make_loss'] * make_loss + config['make_loss'] * model_loss
         loss.backward()
 
         optimizer.step()
-
+        
         acc = pred.max(1)[1].eq(target).float().mean()
         make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
-        type_acc = type_pred.max(1)[1].eq(type_target).float().mean()
+        model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
 
+
+        #Save accuracy/loss for each feature
         loss_meter += loss.item()
         acc_meter += acc.item()
+
         make_acc_meter += make_acc.item()
-        type_acc_meter += type_acc.item()
+        make_loss_meter += make_loss.item()
+
+        model_loss_meter += model_loss.item()
+        model_acc_meter += model_acc.item()
 
         i += 1
         elapsed = time.time() - start_time
@@ -207,21 +240,35 @@ def train_v3(ep, model, optimizer, train_loader, device, config):
         print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
               f'Loss: {loss_meter / i:.4f} '
               f'Acc: {acc_meter / i:.4f} '
-              f'Make: {make_acc_meter / i:.4f} '
-              f'Type: {type_acc_meter / i:.4f} '
+
+              f'Make L: {make_loss_meter / i:.4f} '
+              f'Make A: {make_acc_meter / i:.4f} '
+              
+              f'Model L: {model_loss_meter / i:.4f} '
+              f'Model A: {model_acc_meter / i:.4f} '
+
               f'({elapsed:.2f}s)', end='\r')
 
     print()
     loss_meter /= len(train_loader)
     acc_meter /= len(train_loader)
+
+    make_loss_meter /= len(train_loader)
     make_acc_meter /= len(train_loader)
-    type_acc_meter /= len(train_loader)
+
+    model_loss_meter /= len(train_loader)
+    model_acc_meter /= len(train_loader)
 
     trainres = {
         'train_loss': loss_meter,
         'train_acc': acc_meter,
+
+        'train_make_loss': make_loss_meter,
         'train_make_acc': make_acc_meter,
-        'train_type_acc': type_acc_meter,
+
+        'train_model_loss': model_loss_meter,
+        'train_model_acc': model_acc_meter,
+
         'train_time': elapsed
     }
 
@@ -233,8 +280,14 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
 
     loss_meter = 0
     acc_meter = 0
+
+    make_loss_meter = 0
     make_acc_meter = 0
+
+    model_loss_meter = 0
     model_acc_meter = 0
+
+    submodel_loss_meter = 0
     submodel_acc_meter = 0
     i = 0
 
@@ -252,12 +305,12 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
 
         pred, make_pred, model_pred,submodel_pred = model(data)
         
-        loss_main = F.cross_entropy(pred, target)
-        loss_make = F.cross_entropy(make_pred, make_target)
-        loss_model = F.cross_entropy(model_pred, model_target)
-        loss_submodel = F.cross_entropy(submodel_pred, submodel_target)
+        main_loss = F.cross_entropy(pred, target)
+        make_loss = F.cross_entropy(make_pred, make_target)
+        model_loss = F.cross_entropy(model_pred, model_target)
+        submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
 
-        loss = loss_main + config['make_loss'] * loss_make + config['model_loss'] * loss_model + config['submodel_loss'] * loss_submodel
+        loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss
         loss.backward()
 
         optimizer.step()
@@ -267,10 +320,20 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
         model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
         submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
 
+        #Main
         loss_meter += loss.item()
         acc_meter += acc.item()
+
+        #Make
+        make_loss_meter += make_loss.item()
         make_acc_meter += make_acc.item()
+
+        #Model
+        model_loss_meter = model_loss.item()
         model_acc_meter += model_acc.item()
+
+        #Submodel
+        submodel_loss_meter = submodel_loss.item()
         submodel_acc_meter += submodel_acc.item()
 
         i += 1
@@ -279,24 +342,43 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
         print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
               f'Loss: {loss_meter / i:.4f} '
               f'Acc: {acc_meter / i:.4f} '
-              f'Make: {make_acc_meter / i:.4f} '
-              f'Model: {model_acc_meter / i:.4f} '
-              f'SubModel: {submodel_acc_meter / i:.4f} '
+            
+              f'Make L: {make_loss_meter / i:.4f} '
+              f'Make A: {make_acc_meter / i:.4f} '
+
+              f'Model L: {model_loss_meter / i:.4f} '
+              f'Model A: {model_acc_meter / i:.4f} '
+              
+              f'SubModel L: {submodel_loss_meter / i:.4f} '
+              f'SubModel A: {submodel_acc_meter / i:.4f} '
               f'({elapsed:.2f}s)', end='\r')
 
     print()
     loss_meter /= len(train_loader)
     acc_meter /= len(train_loader)
+
+    make_loss_meter /= len(train_loader)
     make_acc_meter /= len(train_loader)
+
+    model_loss_meter /= len(train_loader)
     model_acc_meter /= len(train_loader)
+
+    submodel_loss_meter /= len(train_loader)
     submodel_acc_meter /= len(train_loader)
 
     trainres = {
         'train_loss': loss_meter,
         'train_acc': acc_meter,
-        'train_make_acc': make_acc_meter,
-        'train_model_acc': model_acc_meter,
-        'submodel_acc_meter':submodel_acc_meter,
+
+        'train_make_loss': make_loss_meter,
+        'train_make_acc':make_acc_meter,
+
+        'train_model_loss': model_loss_meter,
+        'train_model_acc':model_acc_meter,
+
+        'submodel_acc_loss':submodel_loss_meter,
+        'submodel_acc_acc':submodel_acc_meter,
+
         'train_time': elapsed
     }
 
@@ -368,7 +450,12 @@ def main(args):
     print("Current ID:",config['model_id'])
 
     #Set up blank csv in save folder
-    df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
+    if config['model_version'] in [2,8]:#Multitask learning (2 features) Boxcars or #Multitask learning 2 features Stanford
+        df = pd.DataFrame(columns=['train_loss','train_acc','train_make_acc','train_model_acc','train_time','val_loss','val_acc','val_make_acc','val_model_acc','val_time','lr','overwritten','epoch'])
+    elif config['model_version'] in [9]:#Multitask learning (3 features) Boxcars
+        df = pd.DataFrame(columns=['train_loss','train_acc','train_make_acc','train_model_acc','train_submodel_acc','train_time','val_loss','val_acc','val_make_acc','val_model_acc','val_time','lr','overwritten','epoch'])
+    else:# Normal
+        df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
     df.to_csv(csv_history_filepath)    
     
     if(config['adam']):
