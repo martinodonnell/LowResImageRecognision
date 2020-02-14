@@ -296,6 +296,7 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
         'train_acc': acc_meter,
         'train_make_acc': make_acc_meter,
         'train_model_acc': model_acc_meter,
+        'submodel_acc_meter':submodel_acc_meter,
         'train_time': elapsed
     }
 
@@ -389,19 +390,19 @@ def main(args):
     best_acc = 0
     res = []
        
-    if config['model_version'] in [2]: 
+    if config['model_version'] in [2]: #Multitask learning (2 features) Boxcars
         print("Train/Test Version 2 for boxcars (Multitask learning - 2 features) ")
         train_fn = train_v2
         test_fn = test_v2
-    elif config['model_version'] in [9]:
+    elif config['model_version'] in [9]: #Multitask learning (3 features) Boxcars
         print("Train/Test Version 4 for boxcars (Multitask learning - 3 features)")
         train_fn = train_v4
         test_fn = test_v4
-    elif config['model_version'] in [8]:
+    elif config['model_version'] in [8]: #Multitask learning 2 features Stanford
         print("Train/Test Version 3 for stanford (Multitask learning)")
         train_fn = train_v3
         test_fn = test_v3
-    else:
+    else: #normal
         print("Train/Test Version 1 for normal models")
         train_fn = train_v1
         test_fn = test_v1

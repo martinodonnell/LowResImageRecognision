@@ -249,8 +249,8 @@ def test_v4(model, test_loader, device, config):
                   f'Loss: {loss_meter / runcount:.4f} '
                   f'Acc: {acc_meter / runcount:.4f} '
                   f'Make: {make_acc_meter / runcount:.4f} '
-                  f'Type: {model_acc_meter / runcount:.4f} '
-                  f'Type: {submodel_acc_meter / runcount:.4f} '
+                  f'Model: {model_acc_meter / runcount:.4f} '
+                  f'SubModel: {submodel_acc_meter / runcount:.4f} '
                   f'({elapsed:.2f}s)', end='\r')
 
         print()
@@ -270,7 +270,8 @@ def test_v4(model, test_loader, device, config):
         'val_loss': loss_meter,
         'val_acc': acc_meter,
         'val_make_acc': make_acc_meter,
-        'val_type_acc': model_acc_meter,
+        'val_model_acc': model_acc_meter,
+        'val_submodel_acc':submodel_acc_meter,
         'val_time': elapsed
     }
 
