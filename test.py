@@ -249,7 +249,6 @@ def test_v3(model, test_loader, device, config):
 
     return valres
 
-
 def test_v4(model, test_loader, device, config):
     model.eval()
 
