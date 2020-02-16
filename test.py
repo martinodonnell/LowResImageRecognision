@@ -137,8 +137,8 @@ def test_v2(model, test_loader, device, config):
 
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
-          f'Make L: {make_loss_meter:.4f} Make L: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model L: {model_loss_meter:.4f} '
+          f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
           f'({elapsed:.2f}s)')
 
     valres = {
@@ -229,8 +229,8 @@ def test_v3(model, test_loader, device, config):
 
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
-          f'Make L: {make_loss_meter:.4f} Make L: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model L: {model_loss_meter:.4f} '
+          f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
           f'({elapsed:.2f}s)')
 
 
@@ -337,9 +337,9 @@ def test_v4(model, test_loader, device, config):
 
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
-          f'Make L: {make_loss_meter:.4f} Make L: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model L: {model_loss_meter:.4f} '
-          f'Submodel L: {submodel_loss_meter:.4f} Submodel L: {submodel_loss_meter:.4f} '
+          f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
+          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_loss_meter:.4f} '
           f'({elapsed:.2f}s)')
 
 
@@ -396,7 +396,7 @@ def main(args):
     if config['model_version'] in [2]: 
         print("Test Version 2 for boxcars (Multitask learning - 2 features) ")
         test_fn = test_v2
-    elif config['model_version'] in [9]:
+    elif config['model_version'] in [9,10]:
         print("Test Version 4 for boxcars (Multitask learning - 3 features)")
         test_fn = test_v4
     elif config['model_version'] in [8]:

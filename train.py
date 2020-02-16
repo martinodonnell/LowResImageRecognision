@@ -451,7 +451,7 @@ def main(args):
     #Set up blank csv in save folder
     if config['model_version'] in [2,8]:#Multitask learning (2 features) Boxcars or #Multitask learning 2 features Stanford
         df = pd.DataFrame(columns=['train_loss','train_acc','train_make_loss','train_make_acc','train_model_loss','train_model_acc','train_time','val_loss','val_acc','val_make_acc','val_make_loss','val_model_acc','val_model_loss','val_time','lr','overwritten','epoch'])
-    elif config['model_version'] in [9]:#Multitask learning (3 features) Boxcars
+    elif config['model_version'] in [9,10]:#Multitask learning (3 features) Boxcars
         df = pd.DataFrame(columns=['train_loss','train_acc','train_make_loss','train_make_acc','train_model_loss','train_model_acc','train_submodel_loss','train_submodel_acc','train_time','val_loss','val_acc','val_make_acc','val_make_loss','val_model_acc','val_model_loss','val_submodel_acc','val_submodel_loss','val_time','lr','overwritten','epoch'])
     else:# Normal
         df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
@@ -480,7 +480,7 @@ def main(args):
         print("Train/Test Version 2 for boxcars (Multitask learning - 2 features) ")
         train_fn = train_v2
         test_fn = test_v2
-    elif config['model_version'] in [9]: #Multitask learning (3 features) Boxcars
+    elif config['model_version'] in [9,10]: #Multitask learning (3 features) Boxcars
         print("Train/Test Version 4 for boxcars (Multitask learning - 3 features)")
         train_fn = train_v4
         test_fn = test_v4

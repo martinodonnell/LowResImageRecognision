@@ -1,5 +1,5 @@
 import torchvision
-from models.NetworkVGG import NetworkV1,NetworkV1_1,NetworkV1_2,NetworkV1_3,NetworkV1_4,NetworkV1_5,NetworkV2_ML_Boxcars1,NetworkV2_ML_Stan,NetworkV2_ML_Boxcars2
+from models.NetworkVGG import NetworkV1,NetworkV1_1,NetworkV1_2,NetworkV1_3,NetworkV1_4,NetworkV1_5,NetworkV2_ML_Boxcars1,NetworkV2_ML_Stan,NetworkV2_ML_Boxcars2,NetworkV2_ML_Boxcars3
 
 
 # Set up config for other models in the future
@@ -23,6 +23,8 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels):
         model = NetworkV2_ML_Stan(base,num_classes,num_makes,num_models)
     elif config['model_version'] == 9:
         model = NetworkV2_ML_Boxcars2(base,num_classes,num_makes,num_models,num_submodels)
+    elif config['model_version'] == 10:
+        model = NetworkV2_ML_Boxcars3(base,num_classes,num_makes,num_models,num_submodels)
     
 
     return model
