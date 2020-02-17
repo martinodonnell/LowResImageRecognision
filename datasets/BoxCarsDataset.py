@@ -7,6 +7,7 @@ import pickle
 import numpy as np
 import pandas as pd
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
+from datasets.boxcars_image_transformations import alter_HSV, image_drop
 
 def load_boxcar_class_names():
     ann = []
@@ -42,6 +43,13 @@ class BoxCarsDatasetV1(Dataset):
 
             img = Image.open(os.path.join(self.imgdir, fn))
             img = img.convert('RGB')
+            #_______
+
+            # #Added to see if this improves on the base
+            img = alter_HSV(img) # randomly alternate color
+            img = image_drop(img) # randomly remove part of the image
+
+            #_______
             img = self.resize(img)
 
             self.cache[idx] = img
