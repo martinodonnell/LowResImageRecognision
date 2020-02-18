@@ -48,14 +48,14 @@ def prepare_loader(config):
             'num_makes':49,
             'num_models':18,
             'num_submodels':1,
-            'generation':1,
+            'num_generations':1,
         }      
 
 
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['model_version'] in [2,9,10]):
+        if(config['model_version'] in [2,9,10,11]):
             train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
         else:
@@ -67,7 +67,7 @@ def prepare_loader(config):
             'num_makes':16,
             'num_models':68,
             'num_submodels':6,
-            'generation':7,
+            'num_generations':7,
         }
     else:
         print("No dataset. Leaving")

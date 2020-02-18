@@ -94,6 +94,12 @@ class BoxCarsDatasetV2(Dataset):
         img = self.transform(img)
         return img, target,make_target,model_target,submodel_target,generation_target
 
+    def calculate_full_label(make,model,submodel,generation):
+        print(make)
+        print(model)
+        print(submodel)
+        print(generation)
+
 
 
 #Boxcar stuff start
@@ -228,4 +234,3 @@ class BoxCarDataSetUtil(object):
 
                 # add item to the list
                 self.cars_annotations.append(currentPlace)
-

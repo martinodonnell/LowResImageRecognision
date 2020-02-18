@@ -256,17 +256,58 @@ class NetworkV2_ML_Boxcars3(nn.Module):
     #Out -> Make - >Model/Submodel -> main
     def forward(self, x):
         out = self.base(x)
-        brand_fc = self.make_fc(out)
-        concat = torch.cat([out, brand_fc], dim=1)
+        make_fc = self.make_fc(out)
+        concat = torch.cat([out, make_fc], dim=1)
 
         model_fc = self.model_fc(concat)
         submodel_fc = self.submodel_fc(concat)
 
-        concat = torch.cat([out, brand_fc, model_fc,submodel_fc], dim=1)
+        concat = torch.cat([out, make_fc, model_fc,submodel_fc], dim=1)
 
         fc = self.class_fc(concat)
 
-        return fc, brand_fc, model_fc,submodel_fc
+        return fc, make_fc, model_fc,submodel_fc
+
+
+#Classic multitask learning. Pass fector vector from CNN/Some fc to each feacture. Then get prediction
+class NetworkV2_ML_Boxcars4(nn.Module):
+    def __init__(self, base, num_classes, num_makes, num_models,num_submodels,num_generation):
+        super().__init__()
+        self.base = base
+
+        in_features = self.base.classifier[6].in_features
+        self.base.classifier[6] = nn.Sequential()
+
+        self.make_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_makes)
+        )
+
+        self.model_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_models)
+        )
+
+        self.submodel_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_submodels)
+        )
+
+        self.generation_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_generation)
+        )
+
+        
+    def forward(self, x):
+        out = self.base(x)
+        
+        make_fc = self.make_fc(out)
+        model_fc = self.model_fc(out)
+        submodel_fc = self.submodel_fc(out)
+        generation_fc = self.generation_fc(out)
+
+        return make_fc, model_fc,submodel_fc,generation_fc
 
 class NetworkV2_ML_Stan(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_types):
