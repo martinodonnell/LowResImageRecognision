@@ -297,6 +297,12 @@ class NetworkV2_ML_Boxcars4(nn.Module):
             nn.Dropout(0.2),
             nn.Linear(in_features, num_generation)
         )
+        
+        self.class_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.Linear(in_features + num_makes + num_models + num_submodels, num_classes)
+        )
 
         
     def forward(self, x):
@@ -307,7 +313,11 @@ class NetworkV2_ML_Boxcars4(nn.Module):
         submodel_fc = self.submodel_fc(out)
         generation_fc = self.generation_fc(out)
 
-        return make_fc, model_fc,submodel_fc,generation_fc
+        concat = torch.cat([out, make_fc, model_fc,submodel_fc], dim=1)
+
+        fc = self.class_fc(concat)
+
+        return fc,make_fc, model_fc,submodel_fc,generation_fc
 
 class NetworkV2_ML_Stan(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_types):

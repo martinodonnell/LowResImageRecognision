@@ -1,7 +1,6 @@
 from datasets import prepare_loader
 from models import construct_model
-from config import SAVE_FOLDER
-from test import test_v1,test_v2,test_v3,test_v4,test_v5
+from trainTestUtil import get_train_test_methods,set_up_output_filepaths,get_output_filepaths
 import argparse
 import os
 import pprint as pp
@@ -13,13 +12,6 @@ import torch.nn as nn
 import torch
 import pandas as pd
 
-
-def get_output_filepaths(id):
-    id_string = str(id).zfill(3)
-    csv_history_filepath = os.path.join(SAVE_FOLDER, id_string+'_history.csv')
-    model_best_filepath  = os.path.join(SAVE_FOLDER, id_string+'_model.pth')
-
-    return csv_history_filepath,model_best_filepath
 
 def load_weight(model, path, device):
     sd = torch.load(path,map_location=device)
@@ -40,7 +32,6 @@ def load_weight_stan_boxcars(model, path, device):
     # for i in pretrained_dict_ids:
     #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
     #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
-
 
 def train_v1(ep, model, optimizer, train_loader, device, config):
 
@@ -329,11 +320,11 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
         make_acc_meter += make_acc.item()
 
         #Model
-        model_loss_meter = model_loss.item()
+        model_loss_meter += model_loss.item()
         model_acc_meter += model_acc.item()
 
         #Submodel
-        submodel_loss_meter = submodel_loss.item()
+        submodel_loss_meter += submodel_loss.item()
         submodel_acc_meter += submodel_acc.item()
 
         i += 1
@@ -384,13 +375,9 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-def calculate_full_label(make,model,submodel,generation):
-    print(make)
-    print(model)
-    print(submodel)
-    print(generation)
-
-    exit(1)
+# ---------------------------
+# Classic multitask learning
+# ---------------------------
 
 #Predicit each feature for label and backpropogate with combined loss
 def train_v5(ep, model, optimizer, train_loader, device, config):
@@ -453,15 +440,15 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
         make_acc_meter += make_acc.item()
 
         #Model
-        model_loss_meter = model_loss.item()
+        model_loss_meter += model_loss.item()
         model_acc_meter += model_acc.item()
 
         #Submodel
-        submodel_loss_meter = submodel_loss.item()
+        submodel_loss_meter += submodel_loss.item()
         submodel_acc_meter += submodel_acc.item()
 
         #Generation
-        generation_loss_meter = generation_acc.item()
+        generation_loss_meter += generation_acc.item()
         generation_acc_meter += generation_acc.item()
 
         i += 1
@@ -497,6 +484,9 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
     model_loss_meter /= len(train_loader)
     model_acc_meter /= len(train_loader)
 
+    submodel_loss_meter /=len(train_loader)
+    submodel_acc_meter /=len(train_loader)
+
     generation_loss_meter /= len(train_loader)
     generation_acc_meter /= len(train_loader)
 
@@ -521,135 +511,292 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
+#ML Learning but train best model for just make
+def train_v6(ep, model, optimizer, train_loader, device, config):
+    model.train()
 
+    loss_meter = 0
+    make_loss_meter = 0
+    make_acc_meter = 0
 
-# #Predicit each feature for label and backpropogate with combined loss
-# def train_v6(ep, model, optimizer, train_loader, device, config,boxcars):
-#     model.train()
+    i = 0
 
-#     loss_meter = 0
-#     acc_meter = 0
+    start_time = time.time()
+    elapsed = 0
 
-#     make_loss_meter = 0
-#     make_acc_meter = 0
+    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+        data = data.to(device)
+        make_target = make_target.to(device)
 
-#     model_loss_meter = 0
-#     model_acc_meter = 0
+        optimizer.zero_grad()
 
-#     submodel_loss_meter = 0
-#     submodel_acc_meter = 0
-
-#     generation_loss_meter = 0
-#     generation_acc_meter = 0
-
-#     i = 0
-
-#     start_time = time.time()
-#     elapsed = 0
-
-#     for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
-#         data = data.to(device)
-#         target = target.to(device)
-#         make_target = make_target.to(device)
-#         model_target = model_target.to(device)
-#         submodel_target = submodel_target.to(device)
-#         generation_target = generation_target.to(device)
-
-#         optimizer.zero_grad()
-
-#         make_pred, model_pred,submodel_pred,generation_pred = model(data)
+        make_pred, model_pred,submodel_pred,generation_pred = model(data)
         
-#         #Calucalate individual loss for part labels
-#         make_loss = F.cross_entropy(make_pred, make_target)
-#         model_loss = F.cross_entropy(model_pred, model_target)
-#         submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
-#         generation_loss = F.cross_entropy(generation_pred, generation_target)
+        #Calucalate individual loss for part labels
+        make_loss = F.cross_entropy(make_pred, make_target)
         
-#         loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
-#         loss.backward()
-
-#         optimizer.step()
         
-#         acc = pred.max(1)[1].eq(target).float().mean()
-#         make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
-#         model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
-#         submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
-#         generation_acc = generation_pred.max(1)[1].eq(generation_target).float().mean()
-#         #Main
-#         loss_meter += loss.item()
-#         acc_meter += acc.item()
+        loss = config['make_loss'] * make_loss
+        loss.backward()
 
-#         #Make
-#         make_loss_meter += make_loss.item()
-#         make_acc_meter += make_acc.item()
+        optimizer.step()
+        
+        make_acc = make_pred.max(1)[1].eq(make_target).float().mean()
 
-#         #Model
-#         model_loss_meter = model_loss.item()
-#         model_acc_meter += model_acc.item()
+        loss_meter += loss.item()
+        make_loss_meter += make_loss.item()
+        make_acc_meter += make_acc.item()
 
-#         #Submodel
-#         submodel_loss_meter = submodel_loss.item()
-#         submodel_acc_meter += submodel_acc.item()
+        i += 1
+        elapsed = time.time() - start_time
 
-#         #Generation
-#         generation_loss_meter = generation_acc.item()
-#         generation_acc_meter += generation_acc.item()
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+              f'Loss: {loss_meter / i:.4f} '
+              f'Make L: {make_loss_meter / i:.4f} '
+              f'Make A: {make_acc_meter / i:.4f} '
 
-#         i += 1
-#         elapsed = time.time() - start_time
+              f'({elapsed:.2f}s)', end='\r')
 
-#         print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
-#               f'Loss: {loss_meter / i:.4f} '
-#               f'Acc: {acc_meter / i:.4f} '
-            
-#               f'Make L: {make_loss_meter / i:.4f} '
-#               f'Make A: {make_acc_meter / i:.4f} '
+    print()
+    loss_meter /= len(train_loader)
+    make_loss_meter /= len(train_loader)
+    make_acc_meter /= len(train_loader)
 
-#               f'Model L: {model_loss_meter / i:.4f} '
-#               f'Model A: {model_acc_meter / i:.4f} '
-              
-#               f'SubModel L: {submodel_loss_meter / i:.4f} '
-#               f'SubModel A: {submodel_acc_meter / i:.4f} '
 
-#               f'Generation L: {generation_loss_meter / i:.4f} '
-#               f'Generation A: {generation_acc_meter / i:.4f} '
+    trainres = {
+        'train_loss': loss_meter,
+        'train_acc': -1,#Not used so will be set to 0. Kept so that the headers don't change in excel sheet. Easier to graph
 
-#               f'({elapsed:.2f}s)', end='\r')
+        'train_make_loss': make_loss_meter,
+        'train_make_acc':make_acc_meter,
 
-#     print()
-#     loss_meter /= len(train_loader)
-#     acc_meter /= len(train_loader)
+        'train_model_loss': -1,
+        'train_model_acc':-1,
 
-#     make_loss_meter /= len(train_loader)
-#     make_acc_meter /= len(train_loader)
+        'submodel_acc_loss':-1,
+        'submodel_acc_acc':-1,
 
-#     model_loss_meter /= len(train_loader)
-#     model_acc_meter /= len(train_loader)
+        'generation_acc_loss':-1,
+        'generation_acc_acc':-1,
 
-#     generation_loss_meter /= len(train_loader)
-#     generation_acc_meter /= len(train_loader)
+        'train_time': elapsed
+    }
+    return trainres
 
-#     trainres = {
-#         'train_loss': loss_meter,
-#         'train_acc': acc_meter,
+#ML Learning but train best model for just model
+def train_v7(ep, model, optimizer, train_loader, device, config):
+    model.train()
 
-#         'train_make_loss': make_loss_meter,
-#         'train_make_acc':make_acc_meter,
+    loss_meter = 0
+    model_loss_meter = 0
+    model_acc_meter = 0
 
-#         'train_model_loss': model_loss_meter,
-#         'train_model_acc':model_acc_meter,
+    i = 0
 
-#         'submodel_acc_loss':submodel_loss_meter,
-#         'submodel_acc_acc':submodel_acc_meter,
+    start_time = time.time()
+    elapsed = 0
 
-#         'generation_acc_loss':generation_loss_meter,
-#         'generation_acc_acc':generation_acc_meter,
+    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+        data = data.to(device)
+        model_target = model_target.to(device)
 
-#         'train_time': elapsed
-#     }
+        optimizer.zero_grad()
 
-#     return trainres
+        make_pred, model_pred,submodel_pred,generation_pred = model(data)
+        
+        #Calucalate individual loss for part labels
+        model_loss = F.cross_entropy(model_pred, model_target)
+        
+        loss = config['model_loss'] * model_loss
+        loss.backward()
 
+        optimizer.step()
+        
+        model_acc = model_pred.max(1)[1].eq(model_target).float().mean()
+
+        loss_meter += loss.item()
+        model_loss_meter += model_loss.item()
+        model_acc_meter += model_acc.item()
+        i += 1
+        elapsed = time.time() - start_time
+
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+              f'Loss: {loss_meter / i:.4f} '
+              f'Model L: {model_loss_meter / i:.4f} '
+              f'Model A: {model_acc_meter / i:.4f} '
+              f'({elapsed:.2f}s)', end='\r')
+
+    print()
+
+    loss_meter /= len(train_loader)
+    model_loss_meter /= len(train_loader)
+    model_acc_meter /= len(train_loader)
+
+    trainres = {
+        'train_loss': loss_meter,
+        'train_acc': -1,#Not used so will be set to 0. Kept so that the headers don't change in excel sheet. Easier to graph
+
+        'train_make_loss': -1,
+        'train_make_acc':-1,
+
+        'train_model_loss': model_loss_meter,
+        'train_model_acc':model_acc_meter,
+
+        'submodel_acc_loss':-1,
+        'submodel_acc_acc':-1,
+
+        'generation_acc_loss':-1,
+        'generation_acc_acc':-1,
+
+        'train_time': elapsed
+    }
+
+    return trainres
+
+#ML Learning but train best model for just submodel
+def train_v8(ep, model, optimizer, train_loader, device, config):
+    model.train()
+
+    loss_meter = 0
+    submodel_loss_meter = 0
+    submodel_acc_meter = 0
+    i = 0
+
+    start_time = time.time()
+    elapsed = 0
+
+    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+        data = data.to(device)
+        submodel_target = submodel_target.to(device)
+
+        optimizer.zero_grad()
+
+        make_pred, model_pred,submodel_pred,generation_pred = model(data)
+        
+        #Calucalate individual loss for part labels
+        submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
+        
+        loss = config['submodel_loss'] * submodel_loss
+        loss.backward()
+
+        optimizer.step()
+        
+        submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().mean()
+
+        loss_meter += loss.item()
+        submodel_loss_meter += submodel_loss.item()
+        submodel_acc_meter += submodel_acc.item()
+        i += 1
+        elapsed = time.time() - start_time
+
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+              f'Loss: {loss_meter / i:.4f} '
+              f'SubModel L: {submodel_loss_meter / i:.4f} '
+              f'SubModel A: {submodel_acc_meter / i:.4f} '
+              f'({elapsed:.2f}s)', end='\r')
+
+    print()
+
+    loss_meter /= len(train_loader)
+    submodel_loss_meter /=len(train_loader)
+    submodel_acc_meter /=len(train_loader)
+
+    trainres = {
+        'train_loss': loss_meter,
+        'train_acc': -1,#Not used so will be set to 0. Kept so that the headers don't change in excel sheet. Easier to graph
+
+        'train_make_loss': -1,
+        'train_make_acc':-1,
+
+        'train_model_loss': -1,
+        'train_model_acc':-1,
+
+        'submodel_acc_loss':submodel_loss_meter,
+        'submodel_acc_acc':submodel_acc_meter,
+
+        'generation_acc_loss':-1,
+        'generation_acc_acc':-1,
+
+        'train_time': elapsed
+    }
+
+    return trainres
+
+#ML Learning but train best model for just generation
+def train_v9(ep, model, optimizer, train_loader, device, config):
+    model.train()
+
+    loss_meter = 0
+    generation_loss_meter = 0
+    generation_acc_meter = 0
+
+    i = 0
+
+    start_time = time.time()
+    elapsed = 0
+
+    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+        data = data.to(device)
+        generation_target = generation_target.to(device)
+
+        optimizer.zero_grad()
+
+        make_pred, model_pred,submodel_pred,generation_pred = model(data)
+        
+        #Calucalate individual loss for part labels
+        generation_loss = F.cross_entropy(generation_pred, generation_target)
+        
+        loss = config['generation_loss'] * generation_loss
+        loss.backward()
+
+        optimizer.step()
+        
+        generation_acc = generation_pred.max(1)[1].eq(generation_target).float().mean()
+
+        loss_meter += loss.item()
+        generation_loss_meter += generation_acc.item()
+        generation_acc_meter += generation_acc.item()
+
+        i += 1
+        elapsed = time.time() - start_time
+
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+              f'Loss: {loss_meter / i:.4f} '
+              f'Generation L: {generation_loss_meter / i:.4f} '
+              f'Generation A: {generation_acc_meter / i:.4f} '
+
+              f'({elapsed:.2f}s)', end='\r')
+
+    print()
+
+    loss_meter /= len(train_loader)
+    generation_loss_meter /= len(train_loader)
+    generation_acc_meter /= len(train_loader)
+
+    trainres = {
+        'train_loss': loss_meter,
+        'train_acc': -1,
+
+        'train_make_loss': -1,
+        'train_make_acc':-1,
+
+        'train_model_loss': -1,
+        'train_model_acc':-1,
+
+        'submodel_acc_loss':-1,
+        'submodel_acc_acc':-1,
+
+        'generation_acc_loss':generation_loss_meter,
+        'generation_acc_acc':generation_acc_meter,
+
+        'train_time': elapsed
+    }
+
+    return trainres
+
+# -------------------------------
+# Classic multitask learning END
+# -------------------------------
 
 def main(args):
     # TODO what does this do
@@ -663,6 +810,7 @@ def main(args):
         'epochs': args.epochs,
         'imgsize': (args.imgsize, args.imgsize),
         'model_version': args.model_version,
+        'train_test_version':args.train_test_version,
         'dataset_version':args.dataset_version,
         'boxcar_split':args.boxcar_split,
         'finetune': args.finetune,
@@ -685,13 +833,11 @@ def main(args):
 
     # Set up data loaders
     multi_nums, train_loader, test_loader = prepare_loader(config)
-    
-    
-    #Set up name for output files
-    csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
 
     # Create model
     model = construct_model(config, multi_nums['num_classes'],multi_nums['num_makes'],multi_nums['num_models'],multi_nums['num_submodels'],multi_nums['num_generations'])
+    
+    csv_history_filepath,model_best_filepath  = get_output_filepaths(config)
 
      # Finetune an existing model already trained
     if config['finetune']:
@@ -710,23 +856,8 @@ def main(args):
     # Addes model to GPU
     model = model.to(device)
 
-    #Check if file exists. If so increment the id and try again until a new one is generated. Will create a new file if finetuning to 
-    # ensure results are not lost. May have changes the parameters and want to keep them. Will know from the logs
-    while(os.path.isfile(csv_history_filepath)):
-        config['model_id'] = config['model_id']+1
-        csv_history_filepath,model_best_filepath  = get_output_filepaths(config['model_id'])
-    print("Current ID:",config['model_id'])
-
-    #Set up blank csv in save folder
-    if config['model_version'] in [2,8]:#Multitask learning (2 features) Boxcars or #Multitask learning 2 features Stanford
-        df = pd.DataFrame(columns=['train_loss','train_acc','train_make_loss','train_make_acc','train_model_loss','train_model_acc','train_time','val_loss','val_acc','val_make_acc','val_make_loss','val_model_acc','val_model_loss','val_time','lr','overwritten','epoch'])
-    elif config['model_version'] in [9,10]:#Multitask learning (3 features) Boxcars
-        df = pd.DataFrame(columns=['train_loss','train_acc','train_make_loss','train_make_acc','train_model_loss','train_model_acc','train_submodel_loss','train_submodel_acc','train_time','val_loss','val_acc','val_make_acc','val_make_loss','val_model_acc','val_model_loss','val_submodel_acc','val_submodel_loss','val_time','lr','overwritten','epoch'])
-    elif config['model_version'] in [11]:#Multitask learning with classifc ml format
-        df = pd.DataFrame(columns=['train_loss','train_acc','train_make_loss','train_make_acc','train_model_loss','train_model_acc','train_submodel_loss','train_submodel_acc','train_generation_loss','train_generation_acc','train_time','val_loss','val_acc','val_make_acc','val_make_loss','val_model_acc','val_model_loss','val_submodel_acc','val_submodel_loss','val_generation_acc','val_generation_loss','val_time','lr','overwritten','epoch'])
-    else:# Normal
-        df = pd.DataFrame(columns=['train_loss','train_acc','train_time','val_loss','val_acc','val_time','lr','overwritten','epoch'])
-    df.to_csv(csv_history_filepath)    
+    #Set up output files and add header to csv file
+    config,csv_history_filepath,model_best_filepath = set_up_output_filepaths(config) 
     
     if(config['adam']):
         optimizer = optim.Adam(model.parameters(),#Contains link to learnable parameters
@@ -746,28 +877,8 @@ def main(args):
     
     best_acc = 0
     res = []
-       
-    if config['model_version'] in [2]: #Multitask learning (2 features) Boxcars
-        print("Train/Test Version 2 for boxcars (Multitask learning - 2 features) ")
-        train_fn = train_v2
-        test_fn = test_v2
-    elif config['model_version'] in [9,10]: #Multitask learning (3 features) Boxcars
-        print("Train/Test Version 4 for boxcars (Multitask learning - 3 features)")
-        train_fn = train_v4
-        test_fn = test_v4
-    elif config['model_version'] in [11]: #Multitask learning with classifc ml format
-        print("Train/Test Version 5 for boxcars (Multitask learning - 3 features classic)")
-        train_fn = train_v5
-        test_fn = test_v5
-    elif config['model_version'] in [8]: #Multitask learning 2 features Stanford
-        print("Train/Test Version 3 for stanford (Multitask learning)")
-        train_fn = train_v3
-        test_fn = test_v3
-    else: #normal
-        print("Train/Test Version 1 for normal models")
-        train_fn = train_v1
-        test_fn = test_v1
 
+    train_fn,test_fn = get_train_test_methods(config)
 
     for ep in range(1, config['epochs'] + 1):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
@@ -798,7 +909,7 @@ if __name__ == '__main__':
     # training arg
     parser.add_argument('--batch-size', default=32, type=int,
                         help='training batch size (default: 32)')
-    parser.add_argument('--epochs', default=150, type=int,
+    parser.add_argument('--epochs', default=40, type=int,
                         help='training epochs (default: 60)')
     parser.add_argument('--imgsize', default=224, type=int,
                         help='Input image size (default: 224)')
@@ -806,6 +917,8 @@ if __name__ == '__main__':
                         help='Classification version (default: 1)\n'
                              '1. Full Annotation only\n'
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')
+    parser.add_argument('--train-test-version', default=1, type=int,
+                        help='Some models have more than one test_train setup giving different training and test abilities)\n')
     parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'

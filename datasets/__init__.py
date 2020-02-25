@@ -110,7 +110,7 @@ def prepare_test_loader(config):
             'num_makes':49,
             'num_models':18,
             'num_submodels':1,
-            'generation':1,
+            'num_generations':1,
         }      
 
 
@@ -127,7 +127,7 @@ def prepare_test_loader(config):
             'num_makes':16,
             'num_models':68,
             'num_submodels':6,
-            'generation':7,
+            'num_generations':7,
         }
     else:
         print("No dataset. Leaving")
