@@ -1,5 +1,5 @@
-from test import test_v1,test_v2,test_v3,test_v4,test_v5,test_v6,test_v7,test_v8,test_v9
-from train import train_v1,train_v2,train_v3,train_v4,train_v5,train_v6,train_v7,train_v8,train_v9
+from trainTest.testMethods import test_v1,test_v2,test_v3,test_v4,test_v5,test_v6,test_v7,test_v8,test_v9
+from trainTest.trainMethods import train_v1,train_v2,train_v3,train_v4,train_v5,train_v6,train_v7,train_v8,train_v9
 import os
 from config import SAVE_FOLDER
 import pandas as pd
