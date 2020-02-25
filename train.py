@@ -47,7 +47,7 @@ def main(args):
         'generation_loss':args.generation_loss,  
     }
 
-    #Save to log file on Kelvin
+    #Output so kelvin output file prints it
     pp.pprint(config)
 
     # Set up data loaders
@@ -78,6 +78,7 @@ def main(args):
     #Set up output files and add header to csv file
     config,csv_history_filepath,model_best_filepath = set_up_output_filepaths(config) 
     
+    #Decide on optimiser. Adam works best but keeping it here for later
     if(config['adam']):
         optimizer = optim.Adam(model.parameters(),#Contains link to learnable parameters
                                 betas=(0.9, 0.999), #Other parameters are other optimiser parameters
@@ -94,11 +95,11 @@ def main(args):
     #May need to use a different one. This one is not cutting it
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')    
     
-    best_acc = 0
-    res = []
-
+    #Get correct train/test methods
     train_fn,test_fn = get_train_test_methods(config)
 
+    best_acc = 0
+    res = []
     for ep in range(1, config['epochs'] + 1):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
         valres = test_fn(model, test_loader, device, config)
