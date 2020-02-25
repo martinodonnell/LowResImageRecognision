@@ -6,7 +6,7 @@ import pprint as pp
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import time
 
 def test_v1(model, test_loader, device, config):
     model.eval()

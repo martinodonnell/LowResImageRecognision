@@ -9,6 +9,7 @@ import torch.nn.functional as F
 import torch.nn as nn
 import torch
 import pandas as pd
+import time
 
 def load_weight(model, path, device):
     sd = torch.load(path,map_location=device)
