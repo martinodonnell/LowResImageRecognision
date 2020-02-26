@@ -34,6 +34,8 @@ def main(args):
         'model_id':args.model_id,
         'model_version':args.model_version,
         'dataset_version':args.dataset_version,
+        'train_test_version':args.train_test_version,
+
         'imgsize': (244,244),
         'boxcar_split':'hard',
         'test_batch_size':60,
@@ -68,6 +70,8 @@ if __name__ == '__main__':
                         help='Classification version (default: 2)\n'
                              '1. Full Annotation only\n'
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')
+    parser.add_argument('--train-test-version', default=1, type=int,
+                        help='Some models have more than one test_train setup giving different training and test abilities)\n')
     parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],required=True,
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
@@ -80,6 +84,8 @@ if __name__ == '__main__':
                         help='loss$_{model}$ lambda')
     parser.add_argument('--submodel-loss', default=0.2, type=float,
                         help='loss$_{submodel}$ lambda')
+    parser.add_argument('--generation_loss', default=0.2, type=float,
+                        help='loss$_{generation}$ lambda')
 
     #Not used but added so I didn;t need to add conditions in bash file to remove them
     parser.add_argument('--epochs', default=150, type=int,
