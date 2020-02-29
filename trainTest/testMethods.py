@@ -469,7 +469,7 @@ def test_v5(model, test_loader, device, config):
 
     valres = {
         'val_loss': loss_meter,
-        'val_acc': acc_meter,#Not used but kept to not affect output result layout
+        'val_acc': (make_acc_meter+model_acc_meter+submodel_acc_meter+generation_acc_meter)/4, #Need a value here to save the model if better
         
         'val_make_loss': make_loss_meter,
         'val_make_acc': make_acc_meter,
@@ -548,7 +548,7 @@ def test_v6(model, test_loader, device, config):
 
     valres = {
         'val_loss': loss_meter,
-        'val_acc': -1,
+        'val_acc': make_loss_meter,#Used to save model if better accuracy
         
         'val_make_loss': make_loss_meter,
         'val_make_acc': make_acc_meter,
@@ -624,7 +624,7 @@ def test_v7(model, test_loader, device, config):
 
     valres = {
         'val_loss': loss_meter,
-        'val_acc': -1,#Not used but kept to not affect output result layout
+        'val_acc': model_acc_meter,#Used to save model if better accuracy
         
         'val_make_loss': -1,
         'val_make_acc': -1,
@@ -698,7 +698,7 @@ def test_v8(model, test_loader, device, config):
 
     valres = {
         'val_loss': loss_meter,
-        'val_acc': -1,#Not used but kept to not affect output result layout
+        'val_acc': submodel_acc_meter,#Used to save model if better accuracy
         
         'val_make_loss': -1,
         'val_make_acc': -1,
@@ -776,7 +776,7 @@ def test_v9(model, test_loader, device, config):
 
     valres = {
         'val_loss': loss_meter,
-        'val_acc': -1,#Not used but kept to not affect output result layout
+        'val_acc': generation_acc_meter, #Used to save model if better accuracy
         
         'val_make_loss': -1,
         'val_make_acc': -1,

@@ -77,6 +77,7 @@ def main(args):
 
     #Set up output files and add header to csv file
     config,csv_history_filepath,model_best_filepath = set_up_output_filepaths(config) 
+    print(csv_history_filepath,model_best_filepath)
     
     #Decide on optimiser. Adam works best but keeping it here for later
     if(config['adam']):
