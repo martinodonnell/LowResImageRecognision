@@ -618,7 +618,7 @@ def test_v7(model, test_loader, device, config):
 
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_acc_meter:.4f} '
           f'({elapsed:.2f}s)')
 
 
@@ -692,7 +692,7 @@ def test_v8(model, test_loader, device, config):
 
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} '
-          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_loss_meter:.4f} '
+          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_acc_meter:.4f} '
           f'({elapsed:.2f}s)')
 
 
