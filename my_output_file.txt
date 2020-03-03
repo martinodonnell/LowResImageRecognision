@@ -1,0 +1,5 @@
+t:o:t:a:l
+m:a:k:e:s
+m:o:d:e:l:s
+s:u:b:m:o:d:e:l:s
+g:e:n:e:r:a:t:i:o:n:s

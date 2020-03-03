@@ -124,7 +124,7 @@ def main(args):
     res = []
     for ep in range(1, config['epochs'] + 1):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
-        valres = test_fn(model, test_loader, device, config,confusion_matrixes)
+        valres = test_fn(model, test_loader, device, config,None)
         trainres.update(valres)
         trainres['lr'] = optimizer.param_groups[0]['lr']
         lr_scheduler.step(trainres['val_loss'])

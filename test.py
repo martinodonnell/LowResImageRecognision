@@ -2,7 +2,8 @@ import argparse
 import json
 import os
 import pprint as pp
-
+import numpy as np
+import csv
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -48,17 +49,30 @@ def main(args):
 
     pp.pprint(config)
 
-    modelpath = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3)+'_model.pth')
+    model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3)+'_model.pth')
 
     test_loader,confusion_matrix = prepare_test_loader(config)
 
     model = construct_model(config, config['num_classes'],config['num_makes'],config['num_models'],config['num_submodels'],config['num_generations'])
-    load_weight(model, modelpath, device)
+    load_weight(model, model_path, device)
     model = model.to(device)
 
     _,test_fn = get_train_test_methods(config)
 
     test_fn(model, test_loader, device, config, confusion_matrix)
+    
+    # print confusion matrixes to kelvin log files
+    for key, value in confusion_matrix.items():
+        print('-----',key,'-----')
+        matrix_data = '['
+        for x in value:
+            matrix_data+='['
+            for y in x:
+                matrix_data += str(y.item()) +', '
+            matrix_data = matrix_data[:-2] +'],\n'
+        matrix_data = matrix_data[:-2] + ']\n'
+        print(matrix_data)
+        
 
 
 if __name__ == '__main__':

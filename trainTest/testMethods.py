@@ -8,11 +8,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 import time
 
-def update_confusion_matrix(matrix,pred,target):
-    actu_preds = pred.max(1)[1]
-    for x in range(len(actu_preds)):
-        print(actu_preds[x].item(),target[x].item())
-        matrix[actu_preds[x].item(),target[x].item()]+=1
+def update_confusion_matrix(matrix,pred,targets):
+    preds = torch.argmax(pred, 1)
+    for p, t in zip(preds, targets):
+        matrix[p, t] += 1
 
 def test_v1(model, test_loader, device, config,confusion_matrix):
     model.eval()
@@ -34,8 +33,8 @@ def test_v1(model, test_loader, device, config,confusion_matrix):
 
             loss = F.cross_entropy(pred, target) * data.size(0)
             acc = pred.max(1)[1].eq(target).float().sum()
-
-            update_confusion_matrix(confusion_matrix['total'],pred,target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['total'],pred,target)
           
             loss_meter += loss.item()
             acc_meter += acc.item()
@@ -99,10 +98,10 @@ def test_v2(model, test_loader, device, config,confusion_matrix):
             make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
             model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
 
-
-            update_confusion_matrix(confusion_matrix['total'],pred,target)
-            update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
-            update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['total'],pred,target)
+                update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
+                update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
 
 
             loss_meter += loss.item() * data.size(0)
@@ -198,10 +197,10 @@ def test_v3(model, test_loader, device, config,confusion_matrix):
             acc = pred.max(1)[1].eq(target).float().sum()
             make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
             model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
-
-            update_confusion_matrix(confusion_matrix['total'],pred,target)
-            update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
-            update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['total'],pred,target)
+                update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
+                update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
 
             loss_meter += loss.item() * data.size(0)
             acc_meter += acc.item()
@@ -298,11 +297,11 @@ def test_v4(model, test_loader, device, config,confusion_matrix):
             make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
             model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().sum()
-
-            update_confusion_matrix(confusion_matrix['total'],pred,target)
-            update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
-            update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
-            update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['total'],pred,target)
+                update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
+                update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
+                update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
             
             loss_meter += loss.item() * data.size(0)
             acc_meter += acc.item()
@@ -424,11 +423,11 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().sum()
             generation_acc = generation_pred.max(1)[1].eq(generation_target).float().sum()
 
-
-            update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
-            update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
-            update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
-            update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
+                update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
+                update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
+                update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
 
             loss_meter += loss.item() * data.size(0)
             # acc_meter += acc.item()
@@ -542,8 +541,8 @@ def test_v6(model, test_loader, device, config,confusion_matrix):
             loss = config['make_loss'] * make_loss
 
             make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-
-            update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
             
             loss_meter += loss.item() * data.size(0)
             make_loss_meter += make_loss.item()
@@ -622,8 +621,8 @@ def test_v7(model, test_loader, device, config,confusion_matrix):
             loss = config['model_loss'] * model_loss
 
             model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
-
-            update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
 
 
             loss_meter += loss.item() * data.size(0)
@@ -701,8 +700,8 @@ def test_v8(model, test_loader, device, config,confusion_matrix):
             loss = config['submodel_loss'] * submodel_loss
 
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().sum()
-
-            update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
 
             loss_meter += loss.item() * data.size(0)
             submodel_loss_meter += submodel_loss.item()
@@ -777,8 +776,8 @@ def test_v9(model, test_loader, device, config,confusion_matrix):
             generation_loss = F.cross_entropy(generation_pred, generation_target)
 
             loss = config['generation_loss'] * generation_loss
-
-            update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
+            if (not confusion_matrix==None):
+                update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
 
 
             generation_acc = generation_pred.max(1)[1].eq(generation_target).float().sum()
