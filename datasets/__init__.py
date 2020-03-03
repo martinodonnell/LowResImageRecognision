@@ -5,6 +5,7 @@ from torch.utils.data import Dataset, DataLoader
 from PIL import Image
 import pickle
 import numpy as np
+import torch
 
 from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2
 from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV2
@@ -43,13 +44,13 @@ def prepare_loader(config):
             train_dataset = CarsDatasetV2(train_imgdir, train_annopath, train_transform, config['imgsize'])
             test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])
             
-        multi_nums = {
-            'num_classes':196, 
-            'num_makes':49,
-            'num_models':18,
-            'num_submodels':1,
-            'num_generations':1,
-        }      
+        
+        config['num_classes']=196
+        config['num_makes']=49
+        config['num_models']=18
+        config['num_submodels']=1
+        config['num_generations']=1
+        
 
 
     elif(config['dataset_version']==2):#BoxCars Dataset
@@ -61,17 +62,17 @@ def prepare_loader(config):
         else:
             train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
-       
-        multi_nums = {
-            'num_classes':107, 
-            'num_makes':16,
-            'num_models':68,
-            'num_submodels':6,
-            'num_generations':7,
-        }
+    
+        config['num_classes']=107
+        config['num_makes']=16
+        config['num_models']=68
+        config['num_submodels']=6
+        config['num_generations']=7
     else:
         print("No dataset. Leaving")
         exit(1)   
+
+    confusion_matrixes = gen_confusion_matrixes(config)
 
     train_loader = DataLoader(train_dataset,
                               batch_size=config['batch_size'],
@@ -84,7 +85,7 @@ def prepare_loader(config):
                              pin_memory=False,
                              num_workers=12)
 
-    return multi_nums,train_loader, test_loader
+    return train_loader, test_loader,confusion_matrixes
 
 
 def prepare_test_loader(config):
@@ -105,13 +106,11 @@ def prepare_test_loader(config):
         else:
             test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])
             
-        multi_nums = {
-            'num_classes':196, 
-            'num_makes':49,
-            'num_models':18,
-            'num_submodels':1,
-            'num_generations':1,
-        }      
+        config['num_classes']=196
+        config['num_makes']=49
+        config['num_models']=18
+        config['num_submodels']=1
+        config['num_generations']=1
 
 
     elif(config['dataset_version']==2):#BoxCars Dataset
@@ -122,23 +121,34 @@ def prepare_test_loader(config):
         else:
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
        
-        multi_nums = {
-            'num_classes':107, 
-            'num_makes':16,
-            'num_models':68,
-            'num_submodels':6,
-            'num_generations':7,
-        }
+        config['num_classes']=107 
+        config['num_makes']=16
+        config['num_models']=68
+        config['num_submodels']=6
+        config['num_generations']=7
     else:
         print("No dataset. Leaving")
         exit(1)   
 
     
+    confusion_matrixes = gen_confusion_matrixes(config)
+
     test_loader = DataLoader(test_dataset,
                              batch_size=config['test_batch_size'],
                              shuffle=False,
                              pin_memory=False,
                              num_workers=12)
 
-    return multi_nums, test_loader    
+    return test_loader,confusion_matrixes
+
+
+def gen_confusion_matrixes(config):
+    confusion_matrix = {}
+    confusion_matrix['total'] = torch.zeros(config['num_classes'], config['num_classes'])
+    confusion_matrix['makes'] = torch.zeros(config['num_makes'], config['num_makes'])
+    confusion_matrix['models'] = torch.zeros(config['num_models'], config['num_models'])
+    confusion_matrix['submodels'] = torch.zeros(config['num_submodels'], config['num_submodels'])
+    confusion_matrix['generations'] = torch.zeros(config['num_generations'], config['num_generations'])
+
+    return confusion_matrix
 

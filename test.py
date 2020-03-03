@@ -50,15 +50,15 @@ def main(args):
 
     modelpath = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3)+'_model.pth')
 
-    multi_nums,test_loader = prepare_test_loader(config)
+    test_loader,confusion_matrix = prepare_test_loader(config)
 
-    model = construct_model(config, multi_nums['num_classes'],multi_nums['num_makes'],multi_nums['num_models'],multi_nums['num_submodels'],multi_nums['num_generations'])
+    model = construct_model(config, config['num_classes'],config['num_makes'],config['num_models'],config['num_submodels'],config['num_generations'])
     load_weight(model, modelpath, device)
     model = model.to(device)
 
     _,test_fn = get_train_test_methods(config)
 
-    test_fn(model, test_loader, device, config)
+    test_fn(model, test_loader, device, config, confusion_matrix)
 
 
 if __name__ == '__main__':
@@ -66,10 +66,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--model-id',default=15,type=int,required=True,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
-    parser.add_argument('--model-version', default=2, type=int,required=True,
-                        help='Classification version (default: 2)\n'
-                             '1. Full Annotation only\n'
-                             '2. Multitask Learning Cars Model + Make + Model + Submodel')
+    parser.add_argument('--model-version',type=int,required=True,
+                        help='Classification version \n')
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test abilities)\n')
     parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],required=True,
@@ -87,7 +85,7 @@ if __name__ == '__main__':
     parser.add_argument('--generation_loss', default=0.2, type=float,
                         help='loss$_{generation}$ lambda')
 
-    #Not used but added so I didn;t need to add conditions in bash file to remove them
+    #Not used but added so I didn;t need to add conditions in bash file to remove them which would take too long and wasting time
     parser.add_argument('--epochs', default=150, type=int,
                         help='training epochs (default: 60)')
     parser.add_argument('--batch-size', default=32, type=int,

@@ -11,26 +11,6 @@ import torch
 import pandas as pd
 import time
 
-def load_weight(model, path, device):
-    sd = torch.load(path,map_location=device)
-    model.load_state_dict(sd)
-
-def load_weight_stan_boxcars(model, path, device):
-    pretrained_dict = torch.load(path,map_location=device)
-    pretrained_dict_ids = [0,2,5,7,10,12,14,17,19,21,24,26,28]
-    #Add features
-    for i in pretrained_dict_ids:
-        key='base.features.'+str(i)
-        model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-        model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.bias'])
-
-    # #Add classififers
-    # pretrained_dict_ids = [0,3,5.1,6.1]
-
-    # for i in pretrained_dict_ids:
-    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
-
 def train_v1(ep, model, optimizer, train_loader, device, config):
 
     print("---------Training-------")

@@ -17,6 +17,27 @@ import pandas as pd
 # Classic multitask learning END
 # -------------------------------
 
+def load_weight(model, path, device):
+    sd = torch.load(path,map_location=device)
+    model.load_state_dict(sd)
+
+def load_weight_stan_boxcars(model, path, device):
+    pretrained_dict = torch.load(path,map_location=device)
+    pretrained_dict_ids = [0,2,5,7,10,12,14,17,19,21,24,26,28]
+    #Add features
+    for i in pretrained_dict_ids:
+        key='base.features.'+str(i)
+        model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+        model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.bias'])
+
+    # #Add classififers
+    # pretrained_dict_ids = [0,3,5.1,6.1]
+
+    # for i in pretrained_dict_ids:
+    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
+
+
 def main(args):
     # TODO what does this do
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -51,10 +72,10 @@ def main(args):
     pp.pprint(config)
 
     # Set up data loaders
-    multi_nums, train_loader, test_loader = prepare_loader(config)
+    train_loader, test_loader,confusion_matrixes = prepare_loader(config)
 
     # Create model
-    model = construct_model(config, multi_nums['num_classes'],multi_nums['num_makes'],multi_nums['num_models'],multi_nums['num_submodels'],multi_nums['num_generations'])
+    model = construct_model(config, config['num_classes'],config['num_makes'],config['num_models'],config['num_submodels'],config['num_generations'])
     
     csv_history_filepath,model_best_filepath  = get_output_filepaths(config)
 
@@ -103,7 +124,7 @@ def main(args):
     res = []
     for ep in range(1, config['epochs'] + 1):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
-        valres = test_fn(model, test_loader, device, config)
+        valres = test_fn(model, test_loader, device, config,confusion_matrixes)
         trainres.update(valres)
         trainres['lr'] = optimizer.param_groups[0]['lr']
         lr_scheduler.step(trainres['val_loss'])
