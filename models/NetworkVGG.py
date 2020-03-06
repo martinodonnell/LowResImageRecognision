@@ -368,7 +368,7 @@ class Network_Boxcars_Duplicate(nn.Module):
 
 #Model used in github repo ->https://github.com/JakubSochor/BoxCars/blob/master/scripts/train_eval.py but with multitask learning as done before
 #Adding new fc later and then bsed on the best ML model - (9) NetworkV2_ML_Boxcars2
-class Network_Boxcars_Duplicate_ML(nn.Module):
+class Network_Boxcars_Duplicate_ML_One_FC(nn.Module):
     def __init__(self, base, num_classes,num_makes, num_models,num_submodels):
         super().__init__()
 
@@ -385,7 +385,7 @@ class Network_Boxcars_Duplicate_ML(nn.Module):
         )
         in_features = 4096
 
-        self.brand_fc = nn.Sequential(
+        self.make_fc = nn.Sequential(
             nn.Linear(in_features, num_makes)
         )
 
@@ -403,12 +403,74 @@ class Network_Boxcars_Duplicate_ML(nn.Module):
 
     def forward(self, x):
         out = self.base(x)
-        brand_fc = self.brand_fc(out)
+        make_fc = self.make_fc(out)
         model_fc = self.model_fc(out)
         submodel_fc = self.submodel_fc(out)
 
-        concat = torch.cat([out, brand_fc, model_fc,submodel_fc], dim=1)
+        concat = torch.cat([out, make_fc, model_fc,submodel_fc], dim=1)
 
         fc = self.class_fc(concat)
 
-        return fc, brand_fc, model_fc,submodel_fc
+        return fc, make_fc, model_fc,submodel_fc
+
+#Model used in github repo ->https://github.com/JakubSochor/BoxCars/blob/master/scripts/train_eval.py but with multitask learning as done before
+#Each feature has its own fc layer instead of using the same one. 
+class Network_Boxcars_Duplicate_ML_All_own_FC(nn.Module):
+    def __init__(self, base, num_classes,num_makes, num_models,num_submodels):
+        super().__init__()
+
+        self.base = base
+        in_features = 4096
+        
+        
+        self.make_fc = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(in_features, num_makes)
+        )
+       
+        self.model_fc = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(in_features, num_models)
+        )
+
+        self.submodel_fc = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(in_features, num_submodels)
+        )
+
+        self.class_fc = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(in_features + num_makes + num_models + num_submodels, num_classes)
+        )
+
+    def forward(self, x):
+        out = self.base(x)
+        make_fc = self.make_fc(out)
+        model_fc = self.model_fc(out)
+        submodel_fc = self.submodel_fc(out)
+
+        concat = torch.cat([out, make_fc, model_fc,submodel_fc], dim=1)
+
+        fc = self.class_fc(concat)
+
+        return fc, make_fc, model_fc,submodel_fc

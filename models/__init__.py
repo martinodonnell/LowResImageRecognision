@@ -1,6 +1,7 @@
 import torchvision
-from models.NetworkVGG import NetworkV1,NetworkV1_1,NetworkV1_2,NetworkV1_3,NetworkV1_4,NetworkV1_5,NetworkV2_ML_Boxcars1,NetworkV2_ML_Stan,NetworkV2_ML_Boxcars2,NetworkV2_ML_Boxcars3,NetworkV2_ML_Boxcars4,Network_Boxcars_Duplicate,Network_Boxcars_Duplicate_ML
-
+from models.NetworkVGG import NetworkV1,NetworkV1_1,NetworkV1_2,NetworkV1_3,NetworkV1_4,NetworkV1_5
+from models.NetworkVGG import NetworkV2_ML_Boxcars1,NetworkV2_ML_Stan,NetworkV2_ML_Boxcars2,NetworkV2_ML_Boxcars3,NetworkV2_ML_Boxcars4,Network_Boxcars_Duplicate,
+from models.NetworkVGG import Network_Boxcars_Duplicate_ML_One_FC,Network_Boxcars_Duplicate_ML_All_own_FC
 
 # Set up config for other models in the future
 def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_generations):
@@ -30,7 +31,9 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_g
     elif config['model_version'] == 12:
         model = Network_Boxcars_Duplicate(base, num_classes)
     elif config['model_version'] == 13:
-        model = Network_Boxcars_Duplicate_ML(base,num_classes,num_makes,num_models,num_submodels)
+        model = Network_Boxcars_Duplicate_ML_One_FC(base,num_classes,num_makes,num_models,num_submodels)
+    elif config['model_version'] == 14:
+        model = Network_Boxcars_Duplicate_ML_All_own_FC(base,num_classes,num_makes,num_models,num_submodels)
     print(model)
     exit()
     
