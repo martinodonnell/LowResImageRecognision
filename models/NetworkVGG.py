@@ -1,7 +1,6 @@
 import torch.nn as nn
 import torch
 
-
 class NetworkV1(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__() #Running initialisation from super(NN.module)
@@ -343,3 +342,73 @@ class NetworkV2_ML_Stan(nn.Module):
         fc = self.class_fc(concat)
 
         return fc, brand_fc, type_fc
+
+#Model used in github repo ->https://github.com/JakubSochor/BoxCars/blob/master/scripts/train_eval.py
+class Network_Boxcars_Duplicate(nn.Module):
+    def __init__(self, base, num_classes):
+        super().__init__() #Running initialisation from super(NN.module)
+
+
+        self.base = base
+
+        self.base.classifier = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, num_classes)
+        )
+        
+
+    def forward(self, x):
+        fc = self.base(x)
+        return fc
+
+#Model used in github repo ->https://github.com/JakubSochor/BoxCars/blob/master/scripts/train_eval.py but with multitask learning as done before
+#Adding new fc later and then bsed on the best ML model - (9) NetworkV2_ML_Boxcars2
+class Network_Boxcars_Duplicate_ML(nn.Module):
+    def __init__(self, base, num_classes,num_makes, num_models,num_submodels):
+        super().__init__()
+
+        self.base = base
+
+        self.base.classifier = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+
+        )
+        in_features = 4096
+
+        self.brand_fc = nn.Sequential(
+            nn.Linear(in_features, num_makes)
+        )
+
+        self.model_fc = nn.Sequential(
+            nn.Linear(in_features, num_models)
+        )
+
+        self.submodel_fc = nn.Sequential(
+            nn.Linear(in_features, num_submodels)
+        )
+
+        self.class_fc = nn.Sequential(
+            nn.Linear(in_features + num_makes + num_models + num_submodels, num_classes)
+        )
+
+    def forward(self, x):
+        out = self.base(x)
+        brand_fc = self.brand_fc(out)
+        model_fc = self.model_fc(out)
+        submodel_fc = self.submodel_fc(out)
+
+        concat = torch.cat([out, brand_fc, model_fc,submodel_fc], dim=1)
+
+        fc = self.class_fc(concat)
+
+        return fc, brand_fc, model_fc,submodel_fc

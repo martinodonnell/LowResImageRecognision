@@ -150,7 +150,7 @@ def gen_confusion_matrixes(config):
     confusion_matrix['make'] = torch.zeros(config['num_makes'], config['num_makes'])
     confusion_matrix['model'] = torch.zeros(config['num_models'], config['num_models'])
     confusion_matrix['submodel'] = torch.zeros(config['num_submodels'], config['num_submodels'])
-    confusion_matrix['generation'] = torch.zeros(config['num_generations'], config['num_generations'])
+    confusion_matrix['generations'] = torch.zeros(config['num_generations'], config['num_generations'])
 
     return confusion_matrix
 
