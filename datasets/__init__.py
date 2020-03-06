@@ -13,7 +13,7 @@ from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICA
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
 
 
-fine_grain_model_ids = [2,9,10,11]
+fine_grain_model_ids = [2,9,10,11,13,14]
 def prepare_loader(config):
 
     train_transform = transforms.Compose(
@@ -51,8 +51,7 @@ def prepare_loader(config):
         config['num_makes']=49
         config['num_models']=18
         config['num_submodels']=1
-        config['num_generations']=1
-        
+        config['num_generations']=1        
 
 
     elif(config['dataset_version']==2):#BoxCars Dataset

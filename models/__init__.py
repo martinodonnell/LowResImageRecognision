@@ -1,6 +1,6 @@
 import torchvision
 from models.NetworkVGG import NetworkV1,NetworkV1_1,NetworkV1_2,NetworkV1_3,NetworkV1_4,NetworkV1_5
-from models.NetworkVGG import NetworkV2_ML_Boxcars1,NetworkV2_ML_Stan,NetworkV2_ML_Boxcars2,NetworkV2_ML_Boxcars3,NetworkV2_ML_Boxcars4,Network_Boxcars_Duplicate,
+from models.NetworkVGG import NetworkV2_ML_Boxcars1,NetworkV2_ML_Stan,NetworkV2_ML_Boxcars2,NetworkV2_ML_Boxcars3,NetworkV2_ML_Boxcars4,Network_Boxcars_Duplicate
 from models.NetworkVGG import Network_Boxcars_Duplicate_ML_One_FC,Network_Boxcars_Duplicate_ML_All_own_FC
 
 # Set up config for other models in the future
