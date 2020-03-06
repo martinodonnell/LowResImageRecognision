@@ -301,7 +301,7 @@ def test_v4(model, test_loader, device, config,confusion_matrix):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
                 update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
                 update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
-                update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
+                update_confusion_matrix(confusion_matrix['submodel'],submodel_pred,submodel_target)
             
             loss_meter += loss.item() * data.size(0)
             acc_meter += acc.item()
@@ -426,7 +426,7 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
                 update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
-                update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
+                update_confusion_matrix(confusion_matrix['submodel'],submodel_pred,submodel_target)
                 update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
 
             loss_meter += loss.item() * data.size(0)
@@ -701,7 +701,7 @@ def test_v8(model, test_loader, device, config,confusion_matrix):
 
             submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().sum()
             if (not confusion_matrix==None):
-                update_confusion_matrix(confusion_matrix['subomdel'],submodel_pred,submodel_target)
+                update_confusion_matrix(confusion_matrix['submodel'],submodel_pred,submodel_target)
 
             loss_meter += loss.item() * data.size(0)
             submodel_loss_meter += submodel_loss.item()

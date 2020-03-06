@@ -12,6 +12,8 @@ from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV2
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
 
+
+fine_grain_model_ids = [2,9,10,11]
 def prepare_loader(config):
 
     train_transform = transforms.Compose(
@@ -56,7 +58,7 @@ def prepare_loader(config):
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['model_version'] in [2,9,10,11]):
+        if(config['model_version'] in fine_grain_model_ids):
             train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
         else:
@@ -101,9 +103,9 @@ def prepare_test_loader(config):
         test_imgdir = STANFORD_CARS_TEST
         test_annopath = STANFORD_CARS_TEST_ANNOS
         
-        if(config['model_version']!=8):         
+        if(config['model_version']!=8): #Fine grain dataset
             test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
-        else:
+        else:#Full labels
             test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])
             
         config['num_classes']=196
@@ -116,9 +118,9 @@ def prepare_test_loader(config):
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['model_version']in [2,9,10]):
+        if(config['model_version']in fine_grain_model_ids):#Fine grain dataset
             test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
-        else:
+        else:#Full labels
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
        
         config['num_classes']=107 
@@ -145,10 +147,10 @@ def prepare_test_loader(config):
 def gen_confusion_matrixes(config):
     confusion_matrix = {}
     confusion_matrix['total'] = torch.zeros(config['num_classes'], config['num_classes'])
-    confusion_matrix['makes'] = torch.zeros(config['num_makes'], config['num_makes'])
-    confusion_matrix['models'] = torch.zeros(config['num_models'], config['num_models'])
-    confusion_matrix['submodels'] = torch.zeros(config['num_submodels'], config['num_submodels'])
-    confusion_matrix['generations'] = torch.zeros(config['num_generations'], config['num_generations'])
+    confusion_matrix['make'] = torch.zeros(config['num_makes'], config['num_makes'])
+    confusion_matrix['model'] = torch.zeros(config['num_models'], config['num_models'])
+    confusion_matrix['submodel'] = torch.zeros(config['num_submodels'], config['num_submodels'])
+    confusion_matrix['generation'] = torch.zeros(config['num_generations'], config['num_generations'])
 
     return confusion_matrix
 
