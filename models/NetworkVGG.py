@@ -373,7 +373,7 @@ class Network_Boxcars_Duplicate_ML_One_FC(nn.Module):
         super().__init__()
 
         self.base = base
-
+        
         self.base.classifier = nn.Sequential(
             nn.Linear(25088, 4096),
             nn.ReLU(),
@@ -420,6 +420,10 @@ class Network_Boxcars_Duplicate_ML_All_own_FC(nn.Module):
         super().__init__()
 
         self.base = base
+
+        #Remove fc layers of vgg16
+        self.base.classifier = nn.Sequential()
+        
         in_features = 4096
         
         
