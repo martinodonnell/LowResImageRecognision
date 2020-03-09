@@ -421,9 +421,10 @@ class Network_Boxcars_Duplicate_ML_All_own_FC(nn.Module):
 
         self.base = base
 
+        print(self.base.classifier)
         #Remove fc layers of vgg16
         self.base.classifier = nn.Sequential()
-        
+        print()
         in_features = 4096
         
         
@@ -458,14 +459,17 @@ class Network_Boxcars_Duplicate_ML_All_own_FC(nn.Module):
         )
 
         self.class_fc = nn.Sequential(
-            nn.Linear(25088, 4096),
+            nn.Linear(25178, 4096),
             nn.ReLU(),
             nn.Dropout(0.5),
             nn.Linear(4096, 4096),
             nn.ReLU(),
             nn.Dropout(0.5),
-            nn.Linear(in_features + num_makes + num_models + num_submodels, num_classes)
+            nn.Linear(in_features, num_classes)
         )
+        
+
+        print("\n------------\n")
 
     def forward(self, x):
         out = self.base(x)
@@ -474,7 +478,6 @@ class Network_Boxcars_Duplicate_ML_All_own_FC(nn.Module):
         submodel_fc = self.submodel_fc(out)
 
         concat = torch.cat([out, make_fc, model_fc,submodel_fc], dim=1)
-
         fc = self.class_fc(concat)
 
         return fc, make_fc, model_fc,submodel_fc
