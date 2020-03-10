@@ -65,6 +65,9 @@ def cal_loss(make,model,submodel,generation,config,metrics):
 
 
     loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
+
+    metrics['loss_meter']+=loss,
+    metrics['acc_meter']+= (metrics['make_acc_meter']+metrics['model_acc_meter']+metrics['submodel_acc_meter']+metrics['generation_acc_meter'])/4
     return loss
 
 def print_single_ep_values(ep,i,load_size,elapsed,metrics):
@@ -143,10 +146,6 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
         loss.backward()
         optimizer.step()
 
-        #Main
-        metrics['loss_meter'] += loss.item()
-        # metrics['acc_meter'] += acc.item()
-
         i += 1
         elapsed = time.time() - start_time
         print("test")
@@ -180,7 +179,7 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
             make_pred, model_pred,submodel_pred,generation_pred = model(data)
 
             #Calculate loss and add to metrics
-            loss = cal_loss((make_pred, make_target),(model_pred, model_target),(submodel_pred, submodel_target),(generation_pred, generation_target),
+            cal_loss((make_pred, make_target),(model_pred, model_target),(submodel_pred, submodel_target),(generation_pred, generation_target),
                          config,metrics)
 
             if (not confusion_matrix==None):
@@ -188,13 +187,6 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
                 update_confusion_matrix(confusion_matrix['model'],model_pred,model_target)
                 update_confusion_matrix(confusion_matrix['submodel'],submodel_pred,submodel_target)
                 update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
-
-            #TODO What does data.size(0)do
-            print('data.size(0)',data.size(0))
-
-            #Main
-            metrics['loss_meter'] += loss.item()* data.size(0)
-            # acc_meter += acc.item()
 
             runcount += data.size(0)
             i += 1
@@ -208,5 +200,5 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
         get_average_loss_accc(metrics,len(test_loader))
 
         valres = save_metrics_to_dict(metrics,elapsed,'val')
-
+        valres['val_acc'] = (valres['make_acc_meter']+valres['model_acc_meter']+valres['submodel_acc_meter']+valres['generation_acc_meter'])/4
     return valres
