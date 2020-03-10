@@ -28,7 +28,7 @@ def load_weight(model, path, device):
 
 
 def main(args):
-    device = torch.device('cpu' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device:', device)
 
     config = {
@@ -84,7 +84,7 @@ if __name__ == '__main__':
                         help='Classification version \n')
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test abilities)\n')
-    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],required=True,
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2,3],required=True,
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset')

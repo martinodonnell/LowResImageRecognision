@@ -15,6 +15,8 @@ def move_data_to_device(device,data,target,make_target,model_target,submodel_tar
     model_target = model_target.to(device)
     submodel_target = submodel_target.to(device)
     generation_target = generation_target.to(device)
+    
+    return data,target,make_target,model_target,submodel_target,generation_target
 
 def generate_fine_tune_metrics():
 
@@ -66,7 +68,7 @@ def cal_loss(make,model,submodel,generation,config,metrics):
     return loss
 
 def print_single_ep_values(ep,i,load_size,elapsed,metrics):
-        print(f'Epoch {ep:03d} [{i}/{load_size}]: '
+    print(f'Epoch {ep:03d} [{i}/{load_size}]: '
 
         f'Loss: {metrics["loss_meter"] / i:.4f} '
         f'Acc: {metrics["acc_meter"] / i:.4f} '
@@ -126,7 +128,7 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
     for data, target,make_target, model_target,submodel_target,generation_target in train_loader:
 
         #Add data to gpu
-        move_data_to_device(device,data,target,make_target,model_target,submodel_target,generation_target)
+        data,target,make_target,model_target,submodel_target,generation_target = move_data_to_device(device,data,target,make_target,model_target,submodel_target,generation_target)
 
         optimizer.zero_grad()
 
@@ -147,7 +149,7 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
 
         i += 1
         elapsed = time.time() - start_time
-
+        print("test")
         print_single_ep_values(ep,i,len(train_loader),elapsed,metrics)
 
     print()
@@ -173,7 +175,7 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
         start_time = time.time()
         for data, target, make_target, model_target, submodel_target, generation_target in test_loader:
             #Add data to gpu
-            move_data_to_device(device,data,target,make_target,model_target,submodel_target,generation_target)
+            data,target,make_target,model_target,submodel_target,generation_target = move_data_to_device(device,data,target,make_target,model_target,submodel_target,generation_target)
 
             make_pred, model_pred,submodel_pred,generation_pred = model(data)
 
