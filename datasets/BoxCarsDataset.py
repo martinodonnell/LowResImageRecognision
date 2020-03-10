@@ -6,8 +6,9 @@ from PIL import Image
 import pickle
 import numpy as np
 import pandas as pd
+import random
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
-from datasets.boxcars_image_transformations import alter_HSV, image_drop
+from datasets.boxcars_image_transformations import alter_HSV, image_drop, add_bb_noise_flip,unpack_3DBB
 
 def load_boxcar_class_names():
     ann = []
@@ -46,8 +47,8 @@ class BoxCarsDatasetV1(Dataset):
             #_______
 
             # #Added to see if this improves on the base
-            img = alter_HSV(img) # randomly alternate color
-            img = image_drop(img) # randomly remove part of the image
+            # img = alter_HSV(img) # randomly alternate color
+            # img = image_drop(img) # randomly remove part of the image
 
             #_______
             img = self.resize(img)
@@ -94,11 +95,51 @@ class BoxCarsDatasetV2(Dataset):
         img = self.transform(img)
         return img, target,make_target,model_target,submodel_target,generation_target
 
-    def calculate_full_label(make,model,submodel,generation):
-        print(make)
-        print(model)
-        print(submodel)
-        print(generation)
+class BoxCarsDatasetV3(Dataset):
+    def __init__(self, imgdir, transform, size,split,part):
+        boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
+        self.part = part
+        self.annos  = boxCarsAnnUtil.load_annotations_boxcars_v2()
+        self.imgdir = imgdir
+        self.transform = transform
+        self.resize = transforms.Resize(size)
+        self.cache = {}
+
+    def __len__(self):
+        return len(self.annos)
+
+    def __getitem__(self, idx):
+        r = self.annos[idx]
+        target = r['target']
+        make_target = r['make']
+        model_target = r['model']
+        submodel_target = r['submodel']
+        generation_target =r['generation']
+
+        if idx not in self.cache:
+            fn = r['filename']
+
+            img = Image.open(os.path.join(self.imgdir, fn))
+            #Convert from pil to cv
+            img = np.array(img)
+
+            if self.part=='train':
+                img = alter_HSV(img) # randomly alternate color
+                img = image_drop(img) # randomly remove part of the image
+                bb_noise = np.clip(np.random.randn(2) * 1.5, -5, 5) # generate random bounding box movement
+                flip = bool(random.getrandbits(1)) # random flip
+                img, bb3d = add_bb_noise_flip(img, r['bb3d'], flip, bb_noise) 
+
+            img = unpack_3DBB(img, bb3d) 
+            # img = (img.astype(np.float32) - 116)/128.
+
+            img = Image.fromarray(img)
+            self.cache[idx] = img
+        else:
+            img = self.cache[idx]
+
+        img = self.transform(img)
+        return img, target
 
 
 
@@ -152,9 +193,9 @@ class BoxCarDataSetUtil(object):
             """
             vehicle = self.dataset["samples"][vehicle_id]
             instance = vehicle["instances"][instance_id]
-        
+            bb3d = instance["3DBB"]
 
-            return vehicle, instance, 
+            return vehicle, instance, bb3d
 
     def load_annotations_boxcars_v1(self):
         
@@ -163,7 +204,7 @@ class BoxCarDataSetUtil(object):
         ret = {}
         img_counter = 0
         for car_ids in self.X[self.current_part]:
-            vehicle, instance = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
+            vehicle, instance,bb3d = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
             r = {
                 'x1': None,
                 'y1': None,
@@ -186,7 +227,7 @@ class BoxCarDataSetUtil(object):
         ret = {}
         img_counter = 0
         for car_ids in self.X[self.current_part]:
-            vehicle, instance = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
+            vehicle, instance, bb3d = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
             make,model,submodel,generation = vehicle['annotation'].split()
             r = {
                 'x1': None,
@@ -198,7 +239,8 @@ class BoxCarDataSetUtil(object):
                 'model':self.get_array_index_of_string(self.model, model),
                 'submodel':self.get_array_index_of_string(self.submodel, submodel),
                 'generation':  self.get_array_index_of_string(self.generation, generation),    
-                'filename': instance['path']
+                'filename': instance['path'],
+                'bb3d':bb3d
             }
             ret[img_counter] = r
             img_counter=img_counter+1  

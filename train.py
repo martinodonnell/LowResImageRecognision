@@ -161,10 +161,11 @@ if __name__ == '__main__':
                              '2. Multitask Learning Cars Model + Make + Model + Submodel')
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test abilities)\n')
-    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2],
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2,3],
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
-                             '2. BoxCar Dataset')
+                             '2. BoxCar Dataset\n'
+                             '3. BoxCar Dataset with Augmentation')
     parser.add_argument('--boxcar-split',default='hard',
                         help='required if set dataset-version to 2(default: hard)')
     parser.add_argument('--finetune', default=False, action='store_true',

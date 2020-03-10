@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2
-from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV2
+from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV2,BoxCarsDatasetV3
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
 
@@ -55,7 +55,7 @@ def prepare_loader(config):
 
 
     elif(config['dataset_version']==2):#BoxCars Dataset
-        imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
+        imgdir =  BOXCARS_IMAGES_IMAGES
 
         if(config['model_version'] in fine_grain_model_ids):
             train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
@@ -69,6 +69,18 @@ def prepare_loader(config):
         config['num_models']=68
         config['num_submodels']=6
         config['num_generations']=7
+    elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
+        imgdir =  BOXCARS_IMAGES_IMAGES
+        train_dataset = BoxCarsDatasetV3(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+        test_dataset = BoxCarsDatasetV3(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+
+
+        config['num_classes']=107
+        config['num_makes']=16
+        config['num_models']=68
+        config['num_submodels']=6
+        config['num_generations']=7
+
     else:
         print("No dataset. Leaving")
         exit(1)   

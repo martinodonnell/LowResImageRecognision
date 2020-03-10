@@ -322,14 +322,14 @@ def test_v4(model, test_loader, device, config,confusion_matrix):
             print(f'[{i}/{len(test_loader)}]: '
                   f'Loss: {loss_meter / runcount:.4f} '
                   f'Acc: {acc_meter / runcount:.4f} '
-                  f'Make: {make_loss_meter / runcount:.4f} '
-                  f'Make: {make_acc_meter / runcount:.4f} '
+                  f'Make L: {make_loss_meter / runcount:.4f} '
+                  f'Make A: {make_acc_meter / runcount:.4f} '
 
-                  f'Model: {model_loss_meter / runcount:.4f} '
-                  f'Model: {model_acc_meter / runcount:.4f} '
+                  f'Model L: {model_loss_meter / runcount:.4f} '
+                  f'Model A: {model_acc_meter / runcount:.4f} '
 
-                  f'SubModel: {submodel_loss_meter / runcount:.4f} '
-                  f'SubModel: {submodel_acc_meter / runcount:.4f} '
+                  f'SubModel L: {submodel_loss_meter / runcount:.4f} '
+                  f'SubModel A: {submodel_acc_meter / runcount:.4f} '
 
                   f'({elapsed:.2f}s)', end='\r')
 

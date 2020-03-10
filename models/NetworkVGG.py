@@ -421,7 +421,6 @@ class Network_Boxcars_Duplicate_ML_All_own_FC(nn.Module):
 
         self.base = base
 
-        print(self.base.classifier)
         #Remove fc layers of vgg16
         self.base.classifier = nn.Sequential()
         print()
