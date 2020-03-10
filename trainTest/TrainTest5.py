@@ -66,7 +66,7 @@ def cal_loss(make,model,submodel,generation,config,metrics):
 
     loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 
-    metrics['loss_meter']+=loss,
+    metrics['loss_meter']+=loss
     metrics['acc_meter']+= (metrics['make_acc_meter']+metrics['model_acc_meter']+metrics['submodel_acc_meter']+metrics['generation_acc_meter'])/4
     return loss
 
@@ -200,5 +200,4 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
         get_average_loss_accc(metrics,len(test_loader))
 
         valres = save_metrics_to_dict(metrics,elapsed,'val')
-        valres['val_acc'] = (valres['make_acc_meter']+valres['model_acc_meter']+valres['submodel_acc_meter']+valres['generation_acc_meter'])/4
     return valres
