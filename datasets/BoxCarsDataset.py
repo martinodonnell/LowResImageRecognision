@@ -7,20 +7,8 @@ import pickle
 import numpy as np
 import pandas as pd
 import random
-from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
+from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES,BOXCARS_HARD_MAKE_NAMES,BOXCARS_HARD_MODEL_NAMES,BOXCARS_HARD_SUBMODEL_NAMES,BOXCARS_HARD_GENERATION_NAMES
 from datasets.boxcars_image_transformations import alter_HSV, image_drop, add_bb_noise_flip,unpack_3DBB
-
-def load_boxcar_class_names():
-    ann = []
-    with open(BOXCARS_HARD_CLASS_NAMES, 'r') as filehandle:
-            for line in filehandle:
-                # remove linebreak which is the last character of the string
-                currentPlace = line[:-1]
-
-                # add item to the list
-                ann.append(currentPlace)
-
-    return ann
 
 class BoxCarsDatasetV1(Dataset):
     def __init__(self, imgdir, transform, size,split,part):
@@ -30,6 +18,8 @@ class BoxCarsDatasetV1(Dataset):
         self.transform = transform
         self.resize = transforms.Resize(size)
         self.cache = {}
+
+       
 
     def __len__(self):
         return len(self.annos)
@@ -178,12 +168,20 @@ class BoxCarDataSetUtil(object):
         self.X[self.current_part] = np.asarray(x,dtype=int)
 
         y = np.asarray(y,dtype=int)
-        y_categorical = np.zeros((y.shape[0],self.get_number_of_classes()))
+        y_categorical = np.zeros((y.shape[0],self.get_number_of_classes()['total']))
         y_categorical[np.arange(y.shape[0]), y] = 1
         self.Y[self.current_part] = y_categorical
 
     def get_number_of_classes(self):
-        return len(self.split["types_mapping"])
+        class_sizes = {
+            'total':len(self.split["types_mapping"]),
+            'make':len(self.make),
+            'model':len(self.model),
+            'submodel':len(self.submodel),
+            'generation':len(self.generation),
+        }
+
+        return class_sizes
 
     def get_vehicle_instance_data(self,vehicle_id, instance_id, original_image_coordinates=False):
             """
@@ -199,7 +197,7 @@ class BoxCarDataSetUtil(object):
 
     def load_annotations_boxcars_v1(self):
         
-        self.get_class_names()
+        self.cars_annotations = self.get_class_names(BOXCARS_HARD_CLASS_NAMES)
         self.initialize_data()
         ret = {}
         img_counter = 0
@@ -220,10 +218,14 @@ class BoxCarDataSetUtil(object):
 
     def load_annotations_boxcars_v2(self):
         
-        self.get_class_names()
+        self.cars_annotations = self.get_class_names(BOXCARS_HARD_CLASS_NAMES)
         self.initialize_data()
-        self.separate_classes()
-        
+
+        self.make = self.get_class_names(BOXCARS_HARD_MAKE_NAMES)
+        self.model = self.get_class_names(BOXCARS_HARD_MODEL_NAMES)
+        self.submodel = self.get_class_names(BOXCARS_HARD_SUBMODEL_NAMES)
+        self.generation = self.get_class_names(BOXCARS_HARD_GENERATION_NAMES)
+
         ret = {}
         img_counter = 0
         for car_ids in self.X[self.current_part]:
@@ -245,21 +247,6 @@ class BoxCarDataSetUtil(object):
             ret[img_counter] = r
             img_counter=img_counter+1  
         return ret
-
-    def separate_classes(self):     
-        for data in self.cars_annotations:
-            t_make,t_model,t_submodel,t_generation = data.split()
-            self.make.append(t_make)
-            self.model.append(t_model)
-            self.submodel.append(t_submodel)
-            self.generation.append(t_generation)
-
-        self.make = list(set(self.make))
-        self.model = list(set(self.model))
-        self.submodel = list(set(self.submodel))
-        self.generation = list(set(self.generation))
-
-
     
     def get_array_index_of_string(self,arr,ann):
         if ann not in arr:
@@ -268,11 +255,13 @@ class BoxCarDataSetUtil(object):
             arr.append(ann)
         return arr.index(ann)
 
-    def get_class_names(self):
-        with open(BOXCARS_HARD_CLASS_NAMES, 'r') as filehandle:
+    def get_class_names(self,filename):
+        ann = []
+        with open(filename, 'r') as filehandle:
             for line in filehandle:
                 # remove linebreak which is the last character of the string
                 currentPlace = line[:-1]
 
                 # add item to the list
-                self.cars_annotations.append(currentPlace)
+                ann.append(currentPlace)
+        return ann

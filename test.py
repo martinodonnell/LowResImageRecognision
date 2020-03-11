@@ -11,7 +11,6 @@ import torch.nn.functional as F
 import time
 
 from datasets import prepare_test_loader
-from datasets.BoxCarsDataset import load_boxcar_class_names
 from models import construct_model
 from config import SAVE_FOLDER
 

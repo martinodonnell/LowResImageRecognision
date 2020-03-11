@@ -1,0 +1,6 @@
+van
+sedan
+combi
+suv
+hatchback
+mpv
