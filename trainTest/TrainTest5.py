@@ -67,7 +67,7 @@ def cal_loss(make,model,submodel,generation,config,metrics):
     loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 
     metrics['loss_meter']+=loss.item()
-    metrics['acc_meter']+= (make_acc+model_acc+submodel_acc+generation_acc)/4
+    metrics['acc_meter']+= (make_acc.item()+model_acc.item()+submodel_acc.item()+generation_acc.item())/4
     return loss
 
 def print_single_ep_values(ep,i,load_size,elapsed,metrics):
