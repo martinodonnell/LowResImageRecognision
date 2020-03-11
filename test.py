@@ -59,8 +59,8 @@ def main(args):
 
     _,test_fn = get_train_test_methods(config)
 
-    test_fn(model, test_loader, device, config, confusion_matrix)
-    
+    valres = test_fn(model, test_loader, device, config, confusion_matrix)
+    print(valres)
     # print confusion matrixes to kelvin log files
     for key, value in confusion_matrix.items():
         print('-----',key,'-----')

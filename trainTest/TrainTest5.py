@@ -66,8 +66,8 @@ def cal_loss(make,model,submodel,generation,config,metrics):
 
     loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 
-    metrics['loss_meter']+=loss
-    metrics['acc_meter']+= (metrics['make_acc_meter']+metrics['model_acc_meter']+metrics['submodel_acc_meter']+metrics['generation_acc_meter'])/4
+    metrics['loss_meter']+=loss.item()
+    metrics['acc_meter']+= (make_acc+model_acc+submodel_acc+generation_acc)/4
     return loss
 
 def print_single_ep_values(ep,i,load_size,elapsed,metrics):
@@ -148,7 +148,6 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
 
         i += 1
         elapsed = time.time() - start_time
-        print("test")
         print_single_ep_values(ep,i,len(train_loader),elapsed,metrics)
 
     print()
