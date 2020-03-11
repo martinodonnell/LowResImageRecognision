@@ -17,13 +17,14 @@ from config import SAVE_FOLDER
 
 from trainTestUtil import get_train_test_methods
 
+
 # -------------------------------
 # Classic multitask learning END
 # -------------------------------
 
 
 def load_weight(model, path, device):
-    sd = torch.load(path,map_location=device)
+    sd = torch.load(path, map_location=device)
     model.load_state_dict(sd)
 
 
@@ -32,64 +33,65 @@ def main(args):
     print('Using device:', device)
 
     config = {
-        'model_id':args.model_id,
-        'model_version':args.model_version,
-        'dataset_version':args.dataset_version,
-        'train_test_version':args.train_test_version,
+        'model_id': args.model_id,
+        'model_version': args.model_version,
+        'dataset_version': args.dataset_version,
+        'train_test_version': args.train_test_version,
 
-        'imgsize': (244,244),
-        'boxcar_split':'hard',
-        'test_batch_size':60,
+        'imgsize': (244, 244),
+        'boxcar_split': 'hard',
+        'test_batch_size': 60,
 
         'make_loss': args.make_loss,
         'model_loss': args.model_loss,
-        'submodel_loss':args.submodel_loss,  
-        'generation_loss':args.generation_loss,    
+        'submodel_loss': args.submodel_loss,
+        'generation_loss': args.generation_loss,
     }
 
     pp.pprint(config)
 
-    model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3)+'_model.pth')
+    model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3) + '_model.pth')
 
-    test_loader,confusion_matrix = prepare_test_loader(config)
+    test_loader, confusion_matrix = prepare_test_loader(config)
 
-    model = construct_model(config, config['num_classes'],config['num_makes'],config['num_models'],config['num_submodels'],config['num_generations'])
+    model = construct_model(config, config['num_classes'], config['num_makes'], config['num_models'],
+                            config['num_submodels'], config['num_generations'])
     load_weight(model, model_path, device)
     model = model.to(device)
 
-    _,test_fn = get_train_test_methods(config)
+    _, test_fn = get_train_test_methods(config)
 
     valres = test_fn(model, test_loader, device, config, confusion_matrix)
     print(valres)
     # print confusion matrixes to kelvin log files
     for key, value in confusion_matrix.items():
-        print('-----',key,'-----')
+        print('-----', key, '-----')
         matrix_data = '['
         for x in value:
-            matrix_data+='['
+            matrix_data += '['
             for y in x:
-                matrix_data += str(y.item()) +', '
-            matrix_data = matrix_data[:-2] +'],\n'
+                matrix_data += str(y.item()) + ', '
+            matrix_data = matrix_data[:-2] + '],\n'
         matrix_data = matrix_data[:-2] + ']\n'
         print(matrix_data)
-        
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Testing script for Cars dataset')
 
-    parser.add_argument('--model-id',default=15,type=int,required=True,
+    parser.add_argument('--model-id', default=15, type=int, required=True,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
-    parser.add_argument('--model-version',type=int,required=True,
+    parser.add_argument('--model-version', type=int, required=True,
                         help='Classification version \n')
     parser.add_argument('--train-test-version', default=1, type=int,
-                        help='Some models have more than one test_train setup giving different training and test abilities)\n')
-    parser.add_argument('--dataset-version', default=1, type=int, choices=[1,2,3],required=True,
+                        help='Some models have more than one test_train setup giving different training and test '
+                             'abilities)\n')
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3], required=True,
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset')
 
-     # multi-task learning arg
+    # multi-task learning arg
     parser.add_argument('--make-loss', default=0.2, type=float,
                         help='loss$_{make}$ lambda')
     parser.add_argument('--model-loss', default=0.2, type=float,
@@ -99,7 +101,8 @@ if __name__ == '__main__':
     parser.add_argument('--generation_loss', default=0.2, type=float,
                         help='loss$_{generation}$ lambda')
 
-    #Not used but added so I didn;t need to add conditions in bash file to remove them which would take too long and wasting time
+    # Not used but added so I didn't need to add conditions in bash file to remove them which would take too long and
+    # wasting time
     parser.add_argument('--epochs', default=150, type=int,
                         help='training epochs (default: 60)')
     parser.add_argument('--batch-size', default=32, type=int,
