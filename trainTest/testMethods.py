@@ -147,7 +147,7 @@ def test_v2(model, test_loader, device, config,confusion_matrix):
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
           f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_acc_meter:.4f} '
           f'({elapsed:.2f}s)')
 
     valres = {
@@ -243,7 +243,7 @@ def test_v3(model, test_loader, device, config,confusion_matrix):
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
           f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_acc_meter:.4f} '
           f'({elapsed:.2f}s)')
 
 
@@ -356,8 +356,8 @@ def test_v4(model, test_loader, device, config,confusion_matrix):
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
           f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
-          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_loss_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_acc_meter:.4f} '
+          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_acc_meter:.4f} '
           f'({elapsed:.2f}s)')
 
 
@@ -492,8 +492,8 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
     print(f'Test Result: '
           f'Loss: {loss_meter:.4f} Acc: {acc_meter:.4f} '
           f'Make L: {make_loss_meter:.4f} Make A: {make_acc_meter:.4f} '
-          f'Model L: {model_loss_meter:.4f} Model A: {model_loss_meter:.4f} '
-          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_loss_meter:.4f} '
+          f'Model L: {model_loss_meter:.4f} Model A: {model_acc_meter:.4f} '
+          f'Submodel L: {submodel_loss_meter:.4f} Submodel A: {submodel_acc_meter:.4f} '
           f'Generation L: {generation_loss_meter:.4f} Generation A: {generation_acc_meter:.4f} '
           f'({elapsed:.2f}s)')
 

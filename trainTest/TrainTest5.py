@@ -93,6 +93,7 @@ def print_single_ep_values(ep,i,load_size,elapsed,metrics):
 def get_average_loss_accc(metrics,train_load_size):
     for key in metrics:
         metrics[key] /= train_load_size
+    return metrics
 
 def save_metrics_to_dict(metrics,elapsed,types):
     saves = {
@@ -152,7 +153,7 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
 
     print()
 
-    get_average_loss_accc(metrics,len(train_loader))
+    metrics = get_average_loss_accc(metrics,len(train_loader))
 
     trainres = save_metrics_to_dict(metrics,elapsed,'train')
 
@@ -166,9 +167,7 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
     #Get dictionary of metrics
     metrics = generate_fine_tune_metrics()
     runcount = 0
-
     i = 0
-
     with torch.no_grad():
         start_time = time.time()
         for data, target, make_target, model_target, submodel_target, generation_target in test_loader:
@@ -188,15 +187,15 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
                 update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
 
             runcount += data.size(0)
+            print("runcount:",runcount,'data.size(0)',data.size(0),'len(test_loader):',len(test_loader))
             i += 1
             elapsed = time.time() - start_time
-
             print_single_ep_values(1,i,len(test_loader),elapsed,metrics)
-
+            print_single_ep_values(1,i,runcount,elapsed,metrics)
 
         print()
 
-        get_average_loss_accc(metrics,len(test_loader))
+        metrics = get_average_loss_accc(metrics,len(test_loader))
 
         valres = save_metrics_to_dict(metrics,elapsed,'val')
     return valres
