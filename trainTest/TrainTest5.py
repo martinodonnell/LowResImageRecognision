@@ -70,23 +70,23 @@ def cal_loss(make,model,submodel,generation,config,metrics):
     metrics['acc_meter']+= (make_acc.item()+model_acc.item()+submodel_acc.item()+generation_acc.item())/4
     return loss
 
-def print_single_ep_values(ep,i,load_size,elapsed,metrics):
+def print_single_ep_values(ep,i,load_size,elapsed,runcount,metrics):
     print(f'Epoch {ep:03d} [{i}/{load_size}]: '
 
-        f'Loss: {metrics["loss_meter"] / i:.4f} '
-        f'Acc: {metrics["acc_meter"] / i:.4f} '
+        f'Loss: {metrics["loss_meter"] / runcount:.4f} '
+        f'Acc: {metrics["acc_meter"] / runcount:.4f} '
 
-        f'Make L: {metrics["make_loss_meter"] / i:.4f} '
-        f'Make A: {metrics["make_acc_meter"] / i:.4f} '
+        f'Make L: {metrics["make_loss_meter"] / runcount:.4f} '
+        f'Make A: {metrics["make_acc_meter"] / runcount:.4f} '
 
-        f'Model L: {metrics["model_loss_meter"] / i:.4f} '
-        f'Model A: {metrics["model_acc_meter"] / i:.4f} '
+        f'Model L: {metrics["model_loss_meter"] / runcount:.4f} '
+        f'Model A: {metrics["model_acc_meter"] / runcount:.4f} '
 
-        f'SubModel L: {metrics["submodel_loss_meter"] / i:.4f} '
-        f'SubModel A: {metrics["submodel_acc_meter"] / i:.4f} '
+        f'SubModel L: {metrics["submodel_loss_meter"] / runcount:.4f} '
+        f'SubModel A: {metrics["submodel_acc_meter"] / runcount:.4f} '
 
-        f'Generation L: {metrics["generation_loss_meter"] / i:.4f} '
-        f'Generation A: {metrics["generation_acc_meter"] / i:.4f} '
+        f'Generation L: {metrics["generation_loss_meter"] / runcount:.4f} '
+        f'Generation A: {metrics["generation_acc_meter"] / runcount:.4f} '
 
         f'({elapsed:.2f}s)', end='\r')
 
@@ -149,7 +149,7 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
 
         i += 1
         elapsed = time.time() - start_time
-        print_single_ep_values(ep,i,len(train_loader),elapsed,metrics)
+        print_single_ep_values(ep,i,len(train_loader),i,elapsed,metrics)
 
     print()
 
@@ -187,11 +187,11 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
                 update_confusion_matrix(confusion_matrix['generation'],generation_pred,generation_target)
 
             runcount += data.size(0)
-            print("runcount:",runcount,'data.size(0)',data.size(0),'len(test_loader):',len(test_loader))
             i += 1
+            print(i,':runcount:',runcount,'data.size(0)',data.size(0),'len(test_loader):',len(test_loader)," ")
+
             elapsed = time.time() - start_time
-            print_single_ep_values(1,i,len(test_loader),elapsed,metrics)
-            print_single_ep_values(1,i,runcount,elapsed,metrics)
+            print_single_ep_values(1,i,len(test_loader),runcount,elapsed,metrics)
 
         print()
 
