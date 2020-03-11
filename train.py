@@ -39,7 +39,7 @@ def load_weight_stan_boxcars(model, path, device):
     #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
 
 
-def main():
+def main(args):
     # TODO what does this do
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print('Using device:', device)
