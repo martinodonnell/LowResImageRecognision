@@ -106,10 +106,10 @@ def save_metrics_to_dict(metrics,elapsed,types):
         types+'_model_acc':metrics['model_acc_meter'],
 
         types+'_submodel_loss':metrics['submodel_loss_meter'],
-        types+'submodel_acc':metrics['submodel_acc_meter'],
+        types+'_submodel_acc':metrics['submodel_acc_meter'],
 
-        types+'generation_loss':metrics['generation_loss_meter'],
-        types+'generation_acc':metrics['generation_acc_meter'],
+        types+'_generation_loss':metrics['generation_loss_meter'],
+        types+'_generation_acc':metrics['generation_acc_meter'],
 
         types+'_time': elapsed
     }
