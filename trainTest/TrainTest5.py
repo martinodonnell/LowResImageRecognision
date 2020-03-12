@@ -207,24 +207,10 @@ def test_v5(model, test_loader, device, config, confusion_matrix):
             print(i, ':runcount:', runcount, 'data.size(0)', data.size(0), 'len(test_loader):', len(test_loader), " ")
 
             elapsed = time.time() - start_time
-            # print_single_ep_values(1, i, len(test_loader), runcount, elapsed, metrics)
-            print(f'[{i}/{len(test_loader)}]: '
-                  f'Loss: {metrics["loss_meter"] / runcount:.4f} '
-                  f'Acc: {metrics["acc_meter"] / runcount:.4f} '
 
-                  f'Make L: {metrics["make_loss_meter"] / runcount:.4f} '
-                  f'Make A: {metrics["make_acc_meter"] / runcount:.4f} '
-
-                  f'Model L: {metrics["model_loss_meter"] / runcount:.4f} '
-                  f'Model A: {metrics["model_acc_meter"] / runcount:.4f} '
-
-                  f'SubModel L: {metrics["submodel_loss_meter"] / runcount:.4f} '
-                  f'SubModel A: {metrics["submodel_acc_meter"] / runcount:.4f} '
-
-                  f'Generation L: {metrics["generation_loss_meter"] / runcount:.4f} '
-                  f'Generation A: {metrics["generation_acc_meter"] / runcount:.4f} '
-
-                  f'({elapsed:.2f}s)', end='\r')
+            #TODO SOMETHING IS WRONG WITH THE RUNCOUNT> Use other methods!!!!
+            print_single_ep_values(1, i, len(test_loader), runcount, elapsed, metrics)
+            
 
         print()
 

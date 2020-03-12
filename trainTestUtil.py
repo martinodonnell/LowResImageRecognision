@@ -30,8 +30,6 @@ def get_train_test_methods(config):
         print(config['train_test_version'], "is not a valid trainTest method")
         exit(1) 
 
-
-
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
     csv_history_filepath = os.path.join(SAVE_FOLDER, id_string + '_history.csv')

@@ -139,7 +139,6 @@ def main(args):
 
         # This should save each result as we go along instead of at the end
         res = pd.DataFrame([trainres])
-        print("saving",res)
         res.to_csv(csv_history_filepath, mode='a', header=None)
 
     print(f'Best accuracy: {best_acc:.4f}')
