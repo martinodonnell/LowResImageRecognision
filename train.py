@@ -124,11 +124,8 @@ def main(args):
     res = []
     for ep in range(1, config['epochs'] + 1):
         trainres = train_fn(ep, model, optimizer, train_loader, device, config)
-        print('trainres',trainres)
         valres = test_fn(model, test_loader, device, config, None)
-        print('valres',valres)
         trainres.update(valres)
-        print('trainres U',trainres)
         trainres['lr'] = optimizer.param_groups[0]['lr']
         lr_scheduler.step(trainres['val_loss'])
 
