@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2
-from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV2,BoxCarsDatasetV3
+from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
 
@@ -32,58 +32,9 @@ def prepare_loader(config):
         ]
     )
 
-    if(config['dataset_version']==1):#Stanford Cars Dataset
-        train_imgdir = STANFORD_CARS_TRAIN
-        test_imgdir = STANFORD_CARS_TEST
+    train_dataset,test_dataset = get_train_test_dataset(config,train_transform,test_transform)
 
-        train_annopath = STANFORD_CARS_TRAIN_ANNOS
-        test_annopath = STANFORD_CARS_TEST_ANNOS
-        
-        if(config['model_version']!=8):         
-            train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
-            test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
-        else:
-            train_dataset = CarsDatasetV2(train_imgdir, train_annopath, train_transform, config['imgsize'])
-            test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])
-            
-        
-        config['num_classes']=196
-        config['num_makes']=49
-        config['num_models']=18
-        config['num_submodels']=1
-        config['num_generations']=1        
-
-
-    elif(config['dataset_version']==2):#BoxCars Dataset
-        imgdir =  BOXCARS_IMAGES_IMAGES
-
-        if(config['model_version'] in fine_grain_model_ids):
-            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
-        else:
-            train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-            test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
-    
-        config['num_classes']=107
-        config['num_makes']=16
-        config['num_models']=68
-        config['num_submodels']=6
-        config['num_generations']=7
-    elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
-        imgdir =  BOXCARS_IMAGES_IMAGES
-        train_dataset = BoxCarsDatasetV3(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-        test_dataset = BoxCarsDatasetV3(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
-
-
-        config['num_classes']=107
-        config['num_makes']=16
-        config['num_models']=68
-        config['num_submodels']=6
-        config['num_generations']=7
-
-    else:
-        print("No dataset. Leaving")
-        exit(1)   
+    config = add_class_numbers_to_config(config) 
 
     confusion_matrixes = gen_confusion_matrixes(config)
 
@@ -100,7 +51,6 @@ def prepare_loader(config):
 
     return train_loader, test_loader,confusion_matrixes
 
-
 def prepare_test_loader(config):
 
     test_transform = transforms.Compose(
@@ -110,39 +60,9 @@ def prepare_test_loader(config):
         ]
     )
 
-    if(config['dataset_version']==1):#Stanford Cars Dataset
-        test_imgdir = STANFORD_CARS_TEST
-        test_annopath = STANFORD_CARS_TEST_ANNOS
-        
-        if(config['model_version']!=8): #Fine grain dataset
-            test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
-        else:#Full labels
-            test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])
-            
-        config['num_classes']=196
-        config['num_makes']=49
-        config['num_models']=18
-        config['num_submodels']=1
-        config['num_generations']=1
+    _,test_dataset = get_train_test_dataset(config,test_transform,test_transform)      
 
-
-    elif(config['dataset_version']==2):#BoxCars Dataset
-        imgdir = test_imgdir =  BOXCARS_IMAGES_IMAGES
-
-        if(config['model_version']in fine_grain_model_ids):#Fine grain dataset
-            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
-        else:#Full labels
-            test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'test')
-       
-        config['num_classes']=107 
-        config['num_makes']=16
-        config['num_models']=68
-        config['num_submodels']=6
-        config['num_generations']=7
-    else:
-        print("No dataset. Leaving")
-        exit(1)   
-
+    config = add_class_numbers_to_config(config)
     
     confusion_matrixes = gen_confusion_matrixes(config)
 
@@ -165,3 +85,59 @@ def gen_confusion_matrixes(config):
 
     return confusion_matrix
 
+
+def add_class_numbers_to_config(config):
+    if config['dataset_version']==1:
+        config['num_classes']=196
+        config['num_makes']=49
+        config['num_models']=18
+        config['num_submodels']=1
+        config['num_generations']=1 
+    else:
+        config['num_classes']=107
+        config['num_makes']=16
+        config['num_models']=68
+        config['num_submodels']=6
+        config['num_generations']=7
+
+    return config
+
+
+def get_train_test_dataset(config,train_transform,test_transform):
+    if(config['dataset_version']==1):#Stanford Cars Dataset
+        train_imgdir = STANFORD_CARS_TRAIN
+        test_imgdir = STANFORD_CARS_TEST
+        train_annopath = STANFORD_CARS_TRAIN_ANNOS
+        test_annopath = STANFORD_CARS_TEST_ANNOS
+        
+        if(config['model_version']!=8):         
+            train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
+            test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
+        else:
+            train_dataset = CarsDatasetV2(train_imgdir, train_annopath, train_transform, config['imgsize'])
+            test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])   
+
+    elif(config['dataset_version']==2):#BoxCars Dataset
+        imgdir =  BOXCARS_IMAGES_IMAGES
+
+        if(config['model_version'] in fine_grain_model_ids):
+            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+        else:
+            train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+            test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+    
+    elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
+        imgdir =  BOXCARS_IMAGES_IMAGES
+        train_dataset = BoxCarsDatasetV3(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+        test_dataset = BoxCarsDatasetV3(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+
+    elif(config['dataset_version']==4):#Train with a lessor amoutn of training
+        imgdir =  BOXCARS_IMAGES_IMAGES
+        train_dataset = BoxCarsDatasetV1_2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train',config['train_samples'])
+        test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation',config['train_samples'])
+    else:
+        print("No dataset. Leaving")
+        exit(1)  
+
+    return train_dataset,test_dataset

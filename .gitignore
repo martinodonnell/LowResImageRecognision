@@ -1,8 +1,0 @@
-data/StanfordCars/car*
-data/BoxCars/images
-data/BoxCars/*.pkl
-data/BoxCars/*.zip
-__pycache__/
-*.pyc
-saves
-config.py

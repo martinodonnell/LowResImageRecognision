@@ -36,6 +36,7 @@ def main(args):
         'model_version': args.model_version,
         'dataset_version': args.dataset_version,
         'train_test_version': args.train_test_version,
+        'train_samples':args.train_samples,
 
         'imgsize': (244, 244),
         'boxcar_split': 'hard',
@@ -85,10 +86,11 @@ if __name__ == '__main__':
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test '
                              'abilities)\n')
-    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3], required=True,
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3,4], required=True,
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset')
+                             
 
     # multi-task learning arg
     parser.add_argument('--make-loss', default=0.2, type=float,
@@ -106,6 +108,8 @@ if __name__ == '__main__':
                         help='training epochs (default: 60)')
     parser.add_argument('--batch-size', default=32, type=int,
                         help='training batch size (default: 32)')
+    parser.add_argument('--train-samples', default=1,
+                        help='required if set dataset-version to 4 (default: 1). Determines how many training samples to train the model with during testing from boxcars')
     # optimizer arg
     parser.add_argument('--lr', default=1e-4, type=float,
                         help='SGD learning rate (default: 0.01)')

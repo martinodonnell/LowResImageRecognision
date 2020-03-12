@@ -54,6 +54,7 @@ def main(args):
         'train_test_version': args.train_test_version,
         'dataset_version': args.dataset_version,
         'boxcar_split': args.boxcar_split,
+        'train_samples':int(args.train_samples),
         'finetune': args.finetune,
         'model_id': args.model_id,
         'finetune_stan_box': args.finetune_stan_box,
@@ -160,13 +161,15 @@ if __name__ == '__main__':
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test '
                              'abilities)\n')
-    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3],
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3, 4],
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset\n'
                              '3. BoxCar Dataset with Augmentation')
     parser.add_argument('--boxcar-split', default='hard',
-                        help='required if set dataset-version to 2(default: hard)')
+                        help='required if set dataset-version to 2 (default: hard)')
+    parser.add_argument('--train-samples', default=1,type=int,
+                        help='required if set dataset-version to 4 (default: 1). Determines how many training samples to train the model with during testing from boxcars')
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
     parser.add_argument('--finetune-stan-box', default=False, action='store_true',

@@ -9,7 +9,7 @@ import pandas as pd
 import random
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES,BOXCARS_HARD_MAKE_NAMES,BOXCARS_HARD_MODEL_NAMES,BOXCARS_HARD_SUBMODEL_NAMES,BOXCARS_HARD_GENERATION_NAMES
 from datasets.boxcars_image_transformations import alter_HSV, image_drop, add_bb_noise_flip,unpack_3DBB
-
+from collections import Counter
 class BoxCarsDatasetV1(Dataset):
     def __init__(self, imgdir, transform, size,split,part):
         boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
@@ -41,6 +41,44 @@ class BoxCarsDatasetV1(Dataset):
             # img = image_drop(img) # randomly remove part of the image
 
             #_______
+            img = self.resize(img)
+
+            self.cache[idx] = img
+        else:
+            img = self.cache[idx]
+
+        img = self.transform(img)
+
+        return img, target
+
+
+class BoxCarsDatasetV1_2(Dataset):
+    def __init__(self, imgdir, transform, size,split,part,num_train_samples):
+        boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
+        self.annos  = boxCarsAnnUtil.load_annotations_boxcars_v1()
+        if part == 'train':
+            self.annos = boxCarsAnnUtil.reduced_dataset(num_train_samples,self.annos)
+
+        self.imgdir = imgdir
+        self.transform = transform
+        self.resize = transforms.Resize(size)
+        self.cache = {}
+
+       
+
+    def __len__(self):
+        return len(self.annos)
+
+    def __getitem__(self, idx):
+        r = self.annos[idx]
+
+        target = r['target']
+
+        if idx not in self.cache:
+            fn = r['filename']
+
+            img = Image.open(os.path.join(self.imgdir, fn))
+            img = img.convert('RGB')
             img = self.resize(img)
 
             self.cache[idx] = img
@@ -132,7 +170,6 @@ class BoxCarsDatasetV3(Dataset):
         return img, target
 
 
-
 #Boxcar stuff start
 class BoxCarDataSetUtil(object):
     def __init__(self,new_split,new_part):
@@ -144,7 +181,6 @@ class BoxCarDataSetUtil(object):
         self.X[new_part] = None
         self.Y[new_part] = None # for labels as array of 0-1 flags
         self.cars_annotations = []
-        self.v2_info = []
         self.make = []
         self.model = []
         self.submodel = []
@@ -204,10 +240,6 @@ class BoxCarDataSetUtil(object):
         for car_ids in self.X[self.current_part]:
             vehicle, instance,bb3d = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
             r = {
-                'x1': None,
-                'y1': None,
-                'x2':None,
-                'y2': None,
                 'target': self.get_array_index_of_string(self.cars_annotations,vehicle['annotation']),
                 'filename': instance['path']
             }
@@ -232,10 +264,6 @@ class BoxCarDataSetUtil(object):
             vehicle, instance, bb3d = self.get_vehicle_instance_data(car_ids[0], car_ids[1])
             make,model,submodel,generation = vehicle['annotation'].split()
             r = {
-                'x1': None,
-                'y1': None,
-                'x2':None,
-                'y2': None,
                 'target': self.get_array_index_of_string(self.cars_annotations, vehicle['annotation']),  
                 'make':self.get_array_index_of_string(self.make, make),
                 'model':self.get_array_index_of_string(self.model, model),
@@ -265,3 +293,29 @@ class BoxCarDataSetUtil(object):
                 # add item to the list
                 ann.append(currentPlace)
         return ann
+    
+
+    def reduced_dataset(self,num_train_samples,full_annos):
+        #Get current list of car_annocations and convert to counter list
+        temp_cars_annotations = self.cars_annotations
+        temp_cars_annotations = { i : num_train_samples for i in temp_cars_annotations }
+        ret = {}
+
+        car_ann_counter = 0
+        img_counter = 0
+        #Run through each annoation
+
+        while not len(temp_cars_annotations) is 0:
+            target_ann = self.cars_annotations[full_annos[car_ann_counter]['target']]
+            if target_ann in temp_cars_annotations:
+                ret[img_counter] = full_annos[car_ann_counter]
+                img_counter+=1
+                temp_cars_annotations[target_ann]-=1
+                if temp_cars_annotations[target_ann] == 0:
+                    temp_cars_annotations.pop(target_ann)               
+
+
+            car_ann_counter+=1
+                
+
+        return ret    
