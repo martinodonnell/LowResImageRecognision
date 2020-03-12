@@ -10,7 +10,7 @@ def update_confusion_matrix(matrix,pred,targets):
 
 
 #Predicit each feature for label and backpropogate with combined loss
-def train_v10(ep, model, optimizer, train_loader, device, config):
+def train_v6(ep, model, optimizer, train_loader, device, config):
     model.train()
 
     loss_meter = 0
@@ -146,7 +146,7 @@ def train_v10(ep, model, optimizer, train_loader, device, config):
 
 
 #One model predicting make,model,submodel and generation seperatly
-def test_v10(model, test_loader, device, config,confusion_matrix):
+def test_v6(model, test_loader, device, config,confusion_matrix):
     model.eval()
 
     loss_meter = 0
