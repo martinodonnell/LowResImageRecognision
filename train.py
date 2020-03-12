@@ -63,7 +63,8 @@ def main(args):
         'weight_decay': args.weight_decay,
         'momentum': args.momentum,
         'adam': args.adam,
-
+        
+        'main_loss': args.main_loss,
         'make_loss': args.make_loss,
         'model_loss': args.model_loss,
         'submodel_loss': args.submodel_loss,
@@ -188,6 +189,8 @@ if __name__ == '__main__':
                         help='Use adam over SVG(SVG by default)')
 
     # multi-task learning arg 
+    parser.add_argument('--main-loss', default=1, type=float,
+                        help='loss$_{main}$ lambda')
     parser.add_argument('--make-loss', default=0.2, type=float,
                         help='loss$_{make}$ lambda')
     parser.add_argument('--model-loss', default=0.2, type=float,
