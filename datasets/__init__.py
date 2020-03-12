@@ -110,7 +110,7 @@ def get_train_test_dataset(config,train_transform,test_transform):
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
         
-        if(config['model_version']!=8):         
+        if config['train_test_version'] in [1]:         
             train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
             test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
         else:
@@ -120,12 +120,13 @@ def get_train_test_dataset(config,train_transform,test_transform):
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if(config['model_version'] in fine_grain_model_ids):
-            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
-        else:
+        if config['train_test_version'] in [1]:         
             train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+        else:
+            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+            
     
     elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
         imgdir =  BOXCARS_IMAGES_IMAGES

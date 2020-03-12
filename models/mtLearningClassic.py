@@ -109,10 +109,11 @@ class MTLC_Seperate_FC(nn.Module):
         return make_fc, model_fc,submodel_fc,generation_fc
 
 
-#Classic multitask learning. Pass fector vector from CNN/Some fc to each feacture. Then get prediction
+#Old version taht I ran test 100-17 on. This is the old way of creating the fc layers
 class Old_MTLC_Seperate_FC(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_models,num_submodels,num_generation):
         super().__init__()
+        print("Creating classic seperate feature fc model(OLD FC Version)")
         self.base = base
 
         in_features = self.base.classifier[6].in_features

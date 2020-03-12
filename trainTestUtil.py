@@ -6,9 +6,13 @@ from config import SAVE_FOLDER
 import pandas as pd
 
 def get_train_test_methods(config):
+
+    #Normal model
     if config['train_test_version'] == 1:
         print("Train/Test Version 1 for normal models")
         return train_v1, test_v1
+
+    #---- Multitask learning --- 
     #Not used. Use model 6 and change multiplications on loss
     elif config['train_test_version'] == 2:
         print("Train/Test Version 2 for BOXCARS (NON Class Multitask learning - 2 features) ")
@@ -27,7 +31,7 @@ def get_train_test_methods(config):
         print("Train/Test Version 6 for BOXCARS (Multitask learning - 4 features Non classic)")
         return train_v6, test_v6
     else:
-        print(config['train_test_version'], "is not a valid trainTest method")
+        print(config['train_test_version'], "is not a valid trainTest method(get_train_test_methods)")
         exit(1) 
 
 def get_output_filepaths(id):
@@ -55,13 +59,13 @@ def set_up_output_filepaths(config):
         df = pd.DataFrame(
             columns=['train_loss', 'train_acc', 'train_time', 'val_loss', 'val_acc', 'val_time', 'lr', 'overwritten',
                      'epoch'])
-    if config['train_test_version'] in [2,3]:
+    elif config['train_test_version'] in [2,3]:
         # Multitask learning (2 features) Boxcars or #Multitask learning 2 features Stanford
         df = pd.DataFrame(columns=['train_loss', 'train_acc', 'train_make_loss', 'train_make_acc', 'train_model_loss',
                                    'train_model_acc', 'train_time', 'val_loss', 'val_acc', 'val_make_loss',
                                    'val_make_acc', 'val_model_loss', 'val_model_acc', 'val_time', 'lr', 'overwritten',
                                    'epoch'])
-    elif config['train_test_version'] is [4]:  # Multitask learning (3 features) Boxcars
+    elif config['train_test_version'] in [4]:  # Multitask learning (3 features) Boxcars
         df = pd.DataFrame(columns=['train_loss', 'train_acc', 'train_make_loss', 'train_make_acc', 'train_model_loss',
                                    'train_model_acc', 'train_submodel_loss', 'train_submodel_acc', 'train_time',
                                    'val_loss', 'val_acc', 'val_make_loss', 'val_make_acc', 'val_model_loss',
@@ -75,7 +79,7 @@ def set_up_output_filepaths(config):
                                    'val_submodel_loss', 'val_submodel_acc', 'val_generation_loss', 'val_generation_acc',
                                    'val_time', 'lr', 'overwritten', 'epoch'])
     else:
-        print(config['train_test_version'], "is not a valid trainTest method")
+        print(config['train_test_version'], "is not a valid trainTest method(set_up_output_filepaths)")
         exit(1) 
        
     df.to_csv(csv_history_filepath)
