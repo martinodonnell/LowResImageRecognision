@@ -1,5 +1,5 @@
 import torchvision
-from models.NetworkGeneric import NetworkV1 as Base_Model 
+from models.NetworkGeneric import BoxCarsBase,StanfordBase
 from models.mtLearningClassic import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Seperate_FC
 from models.mtlearningNonClassic import MTLNC_Shared_FC,MTLNC_Seperate_FC
 
@@ -8,7 +8,7 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_g
     base = torchvision.models.vgg16(pretrained=True, progress=True)   
 
     if config['model_version'] == 1:
-        model = Base_Model(base, num_classes)
+        model = BoxCarsBase(base, num_classes)
 
     elif config['model_version'] == 2:
         model = MTLC_Shared_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
@@ -23,5 +23,7 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_g
         model = MTLNC_Shared_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif config['model_version'] == 6:
         model = MTLNC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
+    elif config['model_version'] == 7:
+        model = StanfordBase(base, num_classes)
 
     return model

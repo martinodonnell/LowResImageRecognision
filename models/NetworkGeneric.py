@@ -2,7 +2,7 @@ import torch.nn as nn
 import torch
 
 #Model used in github repo ->https://github.com/JakubSochor/BoxCars/blob/master/scripts/train_eval.py
-class NetworkV1(nn.Module):
+class BoxCarsBase(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__()
         print("Creating Base Model")
@@ -19,6 +19,26 @@ class NetworkV1(nn.Module):
             nn.Linear(4096, num_classes)
         )
         
+
+    def forward(self, x):
+        fc = self.base(x)
+        return fc
+
+
+class StanfordBase(nn.Module):
+    def __init__(self, base, num_classes):
+        super().__init__()
+
+        self.base = base
+
+        in_features = self.base.classifier[6].in_features
+
+        self.base.classifier[6] = nn.Sequential(
+            nn.Dropout(0.5),
+            nn.Linear(in_features, num_classes),
+
+        )
+
 
     def forward(self, x):
         fc = self.base(x)
