@@ -25,5 +25,8 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_g
         model = MTLNC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif config['model_version'] == 7:
         model = StanfordBase(base, num_classes)
+    else:
+        print("not a valid model")
+        exit()
 
     return model
