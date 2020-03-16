@@ -7,12 +7,12 @@ import csv
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
+import pandas as pd
 import time
 
 from datasets import prepare_test_loader
 from models import construct_model
-from config import SAVE_FOLDER
+from config import SAVE_FOLDER,CONFUSION_MATRIX
 
 from trainTestUtil import get_train_test_methods
 
@@ -51,7 +51,7 @@ def main(args):
 
     pp.pprint(config)
 
-    model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3) + '_model.pth')
+    # model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3) + '_model.pth')
 
     test_loader, confusion_matrix = prepare_test_loader(config)
 
@@ -64,17 +64,12 @@ def main(args):
 
     valres = test_fn(model, test_loader, device, config, confusion_matrix)
 
-    # print confusion matrixes to kelvin log files
-    for key, value in confusion_matrix.items():
-        print('-----', key, '-----')
-        matrix_data = '['
-        for x in value:
-            matrix_data += '['
-            for y in x:
-                matrix_data += str(y.item()) + ', '
-            matrix_data = matrix_data[:-2] + '],\n'
-        matrix_data = matrix_data[:-2] + ']\n'
-        print(matrix_data)
+    #Write confusion matrix to output  with each on in different sheet
+    writer = pd.ExcelWriter(os.path.join(CONFUSION_MATRIX, str(config['model_id']) + "_CM.xlsx") , engine='xlsxwriter')
+    for key,values in confusion_matrix.items():
+        df_cm = pd.DataFrame(values.numpy(), range(values.shape[0]), range(values.shape[1]))
+        df_cm.to_excel(writer, sheet_name=key)
+    writer.save()
 
 
 if __name__ == '__main__':

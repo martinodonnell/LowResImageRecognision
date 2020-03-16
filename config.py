@@ -6,6 +6,7 @@ import os
 BOXCARS_DATASET_ROOT = "data/BoxCars" 
 STANFORD_DATASET_ROOT = "data/StanfordCars" 
 SAVE_FOLDER = 'saves'
+CONFUSION_MATRIX = os.path.join(SAVE_FOLDER, "confusionMatrix")
 
 
 

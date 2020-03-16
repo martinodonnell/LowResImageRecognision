@@ -50,7 +50,7 @@ def set_up_output_filepaths(config):
     # if finetuning to ensure results are not lost. May have changes the parameters and want to keep them. Will know
     # from the logs
     if os.path.isfile(csv_history_filepath):
-        print(config['model_id'],"id already in use")
+        print(config['model_id'],"id already in use (set_up_output_filepaths)")
         exit(1)
     print("Current ID:", config['model_id'])
 
