@@ -49,9 +49,9 @@ def set_up_output_filepaths(config):
     # Check if file exists. If so increment the id and try again until a new one is generated. Will create a new file
     # if finetuning to ensure results are not lost. May have changes the parameters and want to keep them. Will know
     # from the logs
-    while os.path.isfile(csv_history_filepath):
-        config['model_id'] = config['model_id'] + 1
-        csv_history_filepath, model_best_filepath = get_output_filepaths(config['model_id'])
+    if os.path.isfile(csv_history_filepath):
+        print(config['model_id'],"id already in use")
+        exit(1)
     print("Current ID:", config['model_id'])
 
     # Set up blank csv in save folder

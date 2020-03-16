@@ -58,7 +58,7 @@ def main(args):
         'finetune': args.finetune,
         'model_id': args.model_id,
         'finetune_stan_box': args.finetune_stan_box,
-
+        'fine-tune-id':args.fine_tune_id,
         'lr': args.lr,
         'weight_decay': args.weight_decay,
         'momentum': args.momentum,
@@ -85,11 +85,12 @@ def main(args):
 
     # Finetune an existing model already trained
     if config['finetune']:
+        _, fine_tune_model_path = get_output_filepaths(config['fine-tune-id'])
         print("Loading existing model", )
         if config['finetune_stan_box']:
-            load_weight_stan_boxcars(model, model_best_filepath, device)
+            load_weight_stan_boxcars(model, fine_tune_model_path, device)
         else:
-            load_weight(model, model_best_filepath, device)
+            load_weight(model, fine_tune_model_path, device)
 
             # Add to multiple gpus if they are there
     if torch.cuda.device_count() > 1:
@@ -174,9 +175,12 @@ if __name__ == '__main__':
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
     parser.add_argument('--finetune-stan-box', default=False, action='store_true',
-                        help='Fix architecture for boxcars(default: False)')
-    parser.add_argument('--model-id', default=32, type=int,
+                        help='Fine tune stanfor dmodel with boxcars default: False)')                        
+    parser.add_argument('--fine-tune-id',type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
+    
+    parser.add_argument('--model-id', default=32, type=int,
+                        help='id to lined to previous model to fine tune. Required')
 
     # optimizer arg
     parser.add_argument('--lr', default=1e-4, type=float,
