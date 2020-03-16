@@ -111,9 +111,8 @@ if __name__ == '__main__':
                         help='training epochs (default: 60)')
     parser.add_argument('--batch-size', default=32, type=int,
                         help='training batch size (default: 32)')
-    parser.add_argument('--train-samples', default=1,
-                        help='required if set dataset-version to 4 (default: 1). Determines how many training samples to train the model with during testing from boxcars')
-    # optimizer arg
+    parser.add_argument('--train-samples', default=1,type=int,
+                        help='required if set dataset-version to 4 (default: 1). Determines how many training samples to train the model with during testing from boxcars')    # optimizer arg
     parser.add_argument('--lr', default=1e-4, type=float,
                         help='SGD learning rate (default: 0.01)')
     parser.add_argument('--weight-decay', default=0.0001, type=float,
