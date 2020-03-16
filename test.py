@@ -65,7 +65,7 @@ def main(args):
     valres = test_fn(model, test_loader, device, config, confusion_matrix)
 
     #Write confusion matrix to output  with each on in different sheet
-    writer = pd.ExcelWriter(os.path.join(CONFUSION_MATRIX, str(config['model_id']) + "_CM.xlsx") , engine='xlsxwriter')
+    writer = pd.ExcelWriter(os.path.join(CONFUSION_MATRIX, str(config['model_id']) + "_CM_"+time.strftime("%Y%m%d-%H%M%S")+".xlsx") , engine='xlsxwriter')
     for key,values in confusion_matrix.items():
         df_cm = pd.DataFrame(values.numpy(), range(values.shape[0]), range(values.shape[1]))
         df_cm.to_excel(writer, sheet_name=key)
