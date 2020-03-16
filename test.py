@@ -51,7 +51,7 @@ def main(args):
 
     pp.pprint(config)
 
-    # model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3) + '_model.pth')
+    model_path = os.path.join(SAVE_FOLDER, str(config['model_id']).zfill(3) + '_model.pth')
 
     test_loader, confusion_matrix = prepare_test_loader(config)
 
