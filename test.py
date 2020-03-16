@@ -128,7 +128,7 @@ if __name__ == '__main__':
                         help='fine tune an existing model (default: False)')
     parser.add_argument('--finetune-stan-box', default=False, action='store_true',
                         help='Fine tune stanfor dmodel with boxcars default: False)')                        
-    parser.add_argument('--fine-tune-id',-1, type=int,
+    parser.add_argument('--fine-tune-id', type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
                         
     args = parser.parse_args()
