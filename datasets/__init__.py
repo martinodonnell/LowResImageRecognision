@@ -110,30 +110,39 @@ def get_train_test_dataset(config,train_transform,test_transform):
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
         
-        if config['train_test_version'] in [1]:         
+        if config['train_test_version'] in [1]:  
+            print("Dataset: Stanford Normal")       
             train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
             test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
         else:
+            print("Dataset: Stanford MTL")       
+
             train_dataset = CarsDatasetV2(train_imgdir, train_annopath, train_transform, config['imgsize'])
             test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])   
 
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if config['train_test_version'] in [1]:         
+        if config['train_test_version'] in [1,7]:    
+            print("Dataset: Boxcars Normal")       
+     
             train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
         else:
+            print("Dataset: Boxcars MTL")       
+
             train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
             test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
             
     
     elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
+        print("Dataset: Boxcars Augmentation")  
         imgdir =  BOXCARS_IMAGES_IMAGES
         train_dataset = BoxCarsDatasetV3(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
         test_dataset = BoxCarsDatasetV3(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
 
     elif(config['dataset_version']==4):#Train with a lessor amoutn of training
+        print("Dataset: Boxcars Sample Limiter")  
         imgdir =  BOXCARS_IMAGES_IMAGES
         train_dataset = BoxCarsDatasetV1_2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train',config['train_samples'])
         test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation',config['train_samples'])

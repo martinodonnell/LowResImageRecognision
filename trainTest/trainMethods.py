@@ -32,9 +32,7 @@ def train_v1(ep, model, optimizer, train_loader, device, config):
 
         # forward + backward + optimize
         pred = model(data)
-        print(pred)
         loss = F.cross_entropy(pred, target)
-        print(loss.ite)
         loss.backward()#How does this instigate back propogation
         optimizer.step()#updates parameters
 

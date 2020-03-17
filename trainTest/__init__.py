@@ -5,7 +5,6 @@ from trainTest.trainMethods import train_v1, train_v2, train_v3, train_v4,train_
 from trainTest.TrainTest6 import train_v6,test_v6
 from trainTest.TrainTest7 import train_v7,test_v7
 
-
 def get_train_test_methods(config):
 
     #Normal model
@@ -32,8 +31,8 @@ def get_train_test_methods(config):
         print("Train/Test Version 6 for BOXCARS (Multitask learning - 4 features Non classic)")
         return train_v6, test_v6
     elif config['train_test_version'] == 7:
-        print("Train/Test Version 1 for normal models dual cross entropy")
-        return train_v7, test_v7
+        print("Train/Test Version 7 for normal models dual cross entropy")
+        return train_v1, test_v1
     else:
         print(config['train_test_version'], "is not a valid trainTest method(get_train_test_methods)")
         exit(1) 
