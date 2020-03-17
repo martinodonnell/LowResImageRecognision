@@ -14,7 +14,7 @@ from datasets import prepare_test_loader
 from models import construct_model
 from config import SAVE_FOLDER,CONFUSION_MATRIX
 
-from trainTestUtil import get_train_test_methods
+from trainTest import get_train_test_methods
 
 
 # -------------------------------

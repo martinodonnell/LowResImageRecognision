@@ -1,6 +1,7 @@
 from datasets import prepare_loader
 from models import construct_model
-from trainTestUtil import get_train_test_methods, set_up_output_filepaths, get_output_filepaths
+from trainTestUtil import set_up_output_filepaths, get_output_filepaths
+from trainTest import get_train_test_methods
 import argparse
 import os
 import pprint as pp

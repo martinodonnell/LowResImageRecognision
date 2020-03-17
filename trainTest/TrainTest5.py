@@ -2,11 +2,7 @@ import torch.nn.functional as F
 import time
 import torch
 
-
-def update_confusion_matrix(matrix, pred, targets):
-    preds = torch.argmax(pred, 1)
-    for p, t in zip(preds, targets):
-        matrix[p, t] += 1
+from trainTest.confusionMatrix import update_confusion_matrix
 
 
 def move_data_to_device(device, data, target, make_target, model_target, submodel_target, generation_target):

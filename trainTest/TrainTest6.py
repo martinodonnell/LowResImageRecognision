@@ -1,12 +1,7 @@
 import torch.nn.functional as F
 import time
 import torch
-
-
-def update_confusion_matrix(matrix,pred,targets):
-    preds = torch.argmax(pred, 1)
-    for p, t in zip(preds, targets):
-        matrix[p, t] += 1
+from trainTest.confusionMatrix import update_confusion_matrix
 
 
 #Predicit each feature for label and backpropogate with combined loss

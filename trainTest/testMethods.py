@@ -9,12 +9,8 @@ import torch.nn.functional as F
 import time
 
 from trainTest.TrainTest5 import generate_fine_tune_metrics,cal_loss,print_single_ep_values,get_average_loss_accc,save_metrics_to_dict,move_data_to_device
+from trainTest.confusionMatrix import update_confusion_matrix
 
-
-def update_confusion_matrix(matrix,pred,targets):
-    preds = torch.argmax(pred, 1)
-    for p, t in zip(preds, targets):
-        matrix[p, t] += 1
 
 def test_v1(model, test_loader, device, config,confusion_matrix):
     model.eval()
