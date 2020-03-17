@@ -2,6 +2,7 @@ import torchvision
 from models.NetworkGeneric import BoxCarsBase,StanfordBase
 from models.mtLearningClassic import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Seperate_FC
 from models.mtlearningNonClassic import MTLNC_Shared_FC,MTLNC_Seperate_FC
+from models.ChannelPooling import ChannelPoolingNetwork
 
 # Set up config for other models in the future
 def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_generation):
@@ -25,6 +26,8 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_g
         model = MTLNC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif config['model_version'] == 7:
         model = StanfordBase(base, num_classes)
+    elif config['model_version'] == 8:
+        model = ChannelPoolingNetwork(base, num_classes)
     else:
         print("not a valid model")
         exit()
