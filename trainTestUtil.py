@@ -30,7 +30,7 @@ def set_up_output_filepaths(config):
     print("Current ID:", config['model_id'])
 
     # Set up blank csv in save folder
-    if config['train_test_version'] in [1]:
+    if config['train_test_version'] in [1,7]:
         df = pd.DataFrame(
             columns=['train_loss', 'train_acc', 'train_time', 'val_loss', 'val_acc', 'val_time', 'lr', 'overwritten',
                      'epoch'])
