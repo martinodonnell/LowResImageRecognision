@@ -60,7 +60,7 @@ def prepare_test_loader(config):
         ]
     )
 
-    _,test_dataset = get_train_test_dataset(config,test_transform,test_transform.'test')      
+    _,test_dataset = get_train_test_dataset(config,test_transform,test_transform,'test')      
 
     config = add_class_numbers_to_config(config)
     
