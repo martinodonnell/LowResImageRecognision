@@ -26,4 +26,4 @@ STANFORD_CARS_TEST = os.path.join(STANFORD_DATASET_ROOT, 'cars_test')
 STANFORD_CARS_TRAIN_ANNOS = os.path.join(STANFORD_DATASET_ROOT, 'devkit/cars_train_annos.mat')
 STANFORD_CARS_TEST_ANNOS = os.path.join(STANFORD_DATASET_ROOT, 'devkit/cars_test_annos_withlabels.mat')
 STANFORD_CARS_CARS_META = os.path.join(STANFORD_DATASET_ROOT, 'devkit/cars_meta.mat')
-STANFORD_CARS_DOWNSAMPLE_SUFFIX = "_ds.jpeg"
+STANFORD_CARS_DOWNSAMPLE_SUFFIX = "_ds.jpg"
