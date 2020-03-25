@@ -112,13 +112,17 @@ def get_train_test_dataset(config,train_transform,test_transform):
         
         if config['train_test_version'] in [1]:  
             print("Dataset: Stanford Normal")       
-            train_dataset = CarsDatasetV1(train_imgdir, train_annopath, train_transform, config['imgsize'])
-            test_dataset = CarsDatasetV1(test_imgdir, test_annopath, test_transform, config['imgsize'])
+            train_dataset = CarsDatasetV1
+            test_dataset = CarsDatasetV1
         else:
-            print("Dataset: Stanford MTL")       
+            print("Dataset: Stanford MTL")      
 
-            train_dataset = CarsDatasetV2(train_imgdir, train_annopath, train_transform, config['imgsize'])
-            test_dataset = CarsDatasetV2(test_imgdir, test_annopath, test_transform, config['imgsize'])   
+            train_dataset = CarsDatasetV2
+            test_dataset = CarsDatasetV2  
+        
+        train_dataset = train_dataset(train_imgdir, train_annopath, train_transform, config['imgsize'],config['ds-stanford'])
+        test_dataset = test_dataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['ds-stanford'])
+
 
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir =  BOXCARS_IMAGES_IMAGES
@@ -126,14 +130,16 @@ def get_train_test_dataset(config,train_transform,test_transform):
         if config['train_test_version'] in [1,7]:    
             print("Dataset: Boxcars Normal")       
      
-            train_dataset = BoxCarsDatasetV1(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-            test_dataset = BoxCarsDatasetV1(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+            train_dataset = BoxCarsDatasetV1
+            test_dataset = BoxCarsDatasetV1
         else:
             print("Dataset: Boxcars MTL")       
 
-            train_dataset = BoxCarsDatasetV2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-            test_dataset = BoxCarsDatasetV2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
-            
+            train_dataset = BoxCarsDatasetV2
+            test_dataset = BoxCarsDatasetV2
+        
+        train_dataset = train_dataset(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
+        test_dataset = test_dataset(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
     
     elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
         print("Dataset: Boxcars Augmentation")  

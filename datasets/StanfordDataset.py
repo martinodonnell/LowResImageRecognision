@@ -6,7 +6,7 @@ from PIL import Image
 import pickle
 import numpy as np
 import pandas as pd
-from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
+from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META,STANFORD_CARS_DOWNSAMPLE_SUFFIX
 
 
 # Read ain .mat file
@@ -20,12 +20,18 @@ def load_class_names(path=STANFORD_CARS_CARS_META):
     cn = [str(c[0].item()) for c in cn]
     return cn
 
-def load_annotations(path):
+def load_annotations(path,downsample):
     ann = load_anno(path)['annotations'][0]
     ret = {}
 
     for idx in range(len(ann)):
         x1, y1, x2, y2, target, imgfn = ann[idx]
+
+        # Use downsamples stanford image if passed in
+        if downsample:
+            fn = imgfn.item()[:-4] + STANFORD_CARS_DOWNSAMPLE_SUFFIX
+        else:
+            fn = imgfn.item()
 
         r = {
             'x1': x1.item(),
@@ -33,7 +39,7 @@ def load_annotations(path):
             'x2': x2.item(),
             'y2': y2.item(),
             'target': target.item() - 1,
-            'filename': imgfn.item()
+            'filename': fn
         }
 
         ret[idx] = r
@@ -41,8 +47,8 @@ def load_annotations(path):
     return ret
 
 class CarsDatasetV1(Dataset):
-    def __init__(self, imgdir, anno_path, transform, size):        
-        self.annos = load_annotations(anno_path)     
+    def __init__(self, imgdir, anno_path, transform, size,downsample):        
+        self.annos = load_annotations(anno_path,downsample)     
         self.imgdir = imgdir
         self.transform = transform
         self.resize = transforms.Resize(size)
@@ -72,7 +78,7 @@ class CarsDatasetV1(Dataset):
         return img, target
 
 
-def load_annotations_v2(path, v2_info):
+def load_annotations_v2(path, v2_info,downsample):
     ann = load_anno(path)['annotations'][0]
     ret = {}
     make_codes = v2_info['make'].astype('category').cat.codes
@@ -80,6 +86,12 @@ def load_annotations_v2(path, v2_info):
 
     for idx in range(len(ann)):
         x1, y1, x2, y2, target, imgfn = ann[idx]
+
+        # Use downsamples stanford image if passed in
+        if downsample:
+            fn = imgfn.item()[:-4] + STANFORD_CARS_DOWNSAMPLE_SUFFIX
+        else:
+            fn = imgfn.item()
 
         r = {
             'x1': x1.item(),
@@ -89,7 +101,7 @@ def load_annotations_v2(path, v2_info):
             'target': target.item() - 1,
             'make_target': make_codes[target.item() - 1].item(),
             'type_target': type_codes[target.item() - 1].item(),
-            'filename': imgfn.item()
+            'filename': fn
         }
 
         ret[idx] = r
@@ -127,10 +139,10 @@ def separate_class(class_names):
     return arr
 
 class CarsDatasetV2(Dataset):
-    def __init__(self, imgdir, anno_path, transform, size):
+    def __init__(self, imgdir, anno_path, transform, size,downsample):
         self.class_names = load_class_names()
         self.v2_info = separate_class(self.class_names)
-        self.annos = load_annotations_v2(anno_path, self.v2_info)
+        self.annos = load_annotations_v2(anno_path, self.v2_info,downsample)
         self.imgdir = imgdir
         self.transform = transform
         self.resize = transforms.Resize(size)

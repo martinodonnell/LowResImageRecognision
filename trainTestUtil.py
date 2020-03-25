@@ -89,7 +89,9 @@ def get_args():
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
     parser.add_argument('--finetune-stan-box', default=False, action='store_true',
-                        help='Fine tune stanfor dmodel with boxcars default: False)')                        
+                        help='Fine tune stanfor dmodel with boxcars default: False)')    
+    parser.add_argument('--ds-stanford', default=False, action='store_true',
+                        help='Use the downsamples version of stanford dataset._ds.jpef as suffix')                      
     parser.add_argument('--fine-tune-id',type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
     
@@ -136,6 +138,8 @@ def get_args():
         'model_id': args.model_id,
         'finetune_stan_box': args.finetune_stan_box,
         'fine-tune-id':args.fine_tune_id,
+        'ds-stanford':args.ds_stanford,
+        
         'lr': args.lr,
         'weight_decay': args.weight_decay,
         'momentum': args.momentum,
