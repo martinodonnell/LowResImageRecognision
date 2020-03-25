@@ -60,7 +60,7 @@ def prepare_test_loader(config):
         ]
     )
 
-    _,test_dataset = get_train_test_dataset(config,test_transform,test_transform)      
+    _,test_dataset = get_train_test_dataset(config,test_transform,test_transform.'test')      
 
     config = add_class_numbers_to_config(config)
     
@@ -103,7 +103,7 @@ def add_class_numbers_to_config(config):
     return config
 
 
-def get_train_test_dataset(config,train_transform,test_transform):
+def get_train_test_dataset(config,train_transform,test_transform,part="validation"):
     if(config['dataset_version']==1):#Stanford Cars Dataset
         train_imgdir = STANFORD_CARS_TRAIN
         test_imgdir = STANFORD_CARS_TEST
@@ -139,19 +139,19 @@ def get_train_test_dataset(config,train_transform,test_transform):
             test_dataset = BoxCarsDatasetV2
         
         train_dataset = train_dataset(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-        test_dataset = test_dataset(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+        test_dataset = test_dataset(imgdir, test_transform, config['imgsize'],config['boxcar_split'],part)
     
     elif(config['dataset_version']==3):#BoxCars Dataset with augmentation
         print("Dataset: Boxcars Augmentation")  
         imgdir =  BOXCARS_IMAGES_IMAGES
         train_dataset = BoxCarsDatasetV3(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train')
-        test_dataset = BoxCarsDatasetV3(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation')
+        test_dataset = BoxCarsDatasetV3(imgdir, test_transform, config['imgsize'],config['boxcar_split'],part)
 
     elif(config['dataset_version']==4):#Train with a lessor amoutn of training
         print("Dataset: Boxcars Sample Limiter")  
         imgdir =  BOXCARS_IMAGES_IMAGES
         train_dataset = BoxCarsDatasetV1_2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train',config['train_samples'])
-        test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],'validation',config['train_samples'])
+        test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],part,config['train_samples'])
     else:
         print("No dataset. Leaving")
         exit(1)  
