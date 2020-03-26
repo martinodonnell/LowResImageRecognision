@@ -156,9 +156,9 @@ class BoxCarsDatasetV3(Dataset):
                 img = image_drop(img) # randomly remove part of the image
                 bb_noise = np.clip(np.random.randn(2) * 1.5, -5, 5) # generate random bounding box movement
                 flip = bool(random.getrandbits(1)) # random flip
-                img, bb3d = add_bb_noise_flip(img, r['bb3d'], flip, bb_noise) 
+                img, r['bb3d'] = add_bb_noise_flip(img, r['bb3d'], flip, bb_noise) 
 
-            img = unpack_3DBB(img, bb3d) 
+            img = unpack_3DBB(img, r['bb3d']) 
             # img = (img.astype(np.float32) - 116)/128.
 
             img = Image.fromarray(img)

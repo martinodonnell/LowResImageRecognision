@@ -56,6 +56,7 @@ def main(config):
     # Finetune an existing model already trained
     if config['finetune']:
         _, fine_tune_model_path = get_output_filepaths(config['fine-tune-id'])
+        print("finetune model ", fine_tune_model_path)
         print("Loading existing model", )
         if config['finetune_stan_box']:
             load_weight_stan_boxcars(model, fine_tune_model_path, device)
