@@ -159,7 +159,7 @@ class BoxCarsDatasetV3(Dataset):
                 img, r['bb3d'] = add_bb_noise_flip(img, r['bb3d'], flip, bb_noise) 
 
             img = unpack_3DBB(img, r['bb3d']) 
-            # img = (img.astype(np.float32) - 116)/128.
+            img = (img.astype(np.float32) - 116)/128.
 
             img = Image.fromarray(img)
             self.cache[idx] = img
@@ -228,6 +228,7 @@ class BoxCarDataSetUtil(object):
             vehicle = self.dataset["samples"][vehicle_id]
             instance = vehicle["instances"][instance_id]
             bb3d = instance["3DBB"]
+            bb3d = bb3d - instance["3DBB_offset"]
 
             return vehicle, instance, bb3d
 
