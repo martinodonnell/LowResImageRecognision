@@ -45,6 +45,98 @@ class MTLC_Shared_FC(nn.Module):
 
         return make_fc, model_fc,submodel_fc,generation_fc
 
+#Classic MT Learning but with boxcars fc layer
+class MTLC_Shared_FC_B(nn.Module):
+    def __init__(self, base, num_classes, num_makes, num_models,num_submodels,num_generation):
+        super().__init__()
+        print("Creating classic MTL single fc model")
+
+        self.base = base
+
+        self.base.classifier = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+        )
+
+        in_features = 4096
+        self.make_fc = nn.Sequential(
+            nn.Linear(in_features, num_makes)
+        )
+
+        self.model_fc = nn.Sequential(
+            nn.Linear(in_features+num_makes, num_models)
+        )
+
+        self.submodel_fc = nn.Sequential(
+            nn.Linear(in_features+num_models, num_submodels)
+        )
+
+        self.generation_fc = nn.Sequential(
+            nn.Linear(in_features+num_submodels, num_generation)            
+        )
+
+    def forward(self, x):
+        out = self.base(x)        
+        make_fc = self.make_fc(out)
+
+        concat = torch.cat([out, make_fc], dim=1)
+        model_fc = self.model_fc(concat)
+
+        concat = torch.cat([out,model_fc], dim=1)
+        submodel_fc = self.submodel_fc(concat)
+
+        concat = torch.cat([out,submodel_fc], dim=1)
+        generation_fc = self.generation_fc(concat)
+
+        return make_fc, model_fc,submodel_fc,generation_fc
+
+#Classic MT Learning but with boxcars fc layer
+class MTLC_Shared_FC_C(nn.Module):
+    def __init__(self, base, num_classes, num_makes, num_models,num_submodels,num_generation):
+        super().__init__()
+        print("Creating classic MTL single fc model")
+
+        self.base = base
+
+        self.base.classifier = nn.Sequential(
+            nn.Linear(25088, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(4096, 4096),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+        )
+
+        in_features = 4096
+        self.make_fc = nn.Sequential(
+            nn.Linear(in_features, num_makes)
+        )
+
+        self.model_fc = nn.Sequential(
+            nn.Linear(num_makes, num_models)
+        )
+
+        self.submodel_fc = nn.Sequential(
+            nn.Linear(num_models, num_submodels)
+        )
+
+        self.generation_fc = nn.Sequential(
+            nn.Linear(num_submodels, num_generation)            
+        )
+
+    def forward(self, x):
+        out = self.base(x)
+        
+        make_fc = self.make_fc(out)
+        model_fc = self.model_fc(make_fc)
+        submodel_fc = self.submodel_fc(model_fc)
+        generation_fc = self.generation_fc(submodel_fc)
+        return make_fc, model_fc,submodel_fc,generation_fc
+
 #Classic MT Learning but boxcars each feature has own fc layer
 class MTLC_Seperate_FC(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_models,num_submodels,num_generation):

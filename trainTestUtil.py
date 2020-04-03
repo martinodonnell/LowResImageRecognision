@@ -94,7 +94,8 @@ def get_args():
     parser.add_argument('--model-version', default=1, type=int,
                         help='Classification version (default: 1)\n'
                              '1. Full Annotation only\n'
-                             '2. Multitask Learning Cars Model + Make + Model + Submodel')
+                             '2. Multitask Learning Cars Model + Make + Model + Submodel\n'
+                             'Loads more. See docs')
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test '
                              'abilities)\n')
@@ -140,7 +141,7 @@ def get_args():
                         help='loss$_{model}$ lambda')
     parser.add_argument('--submodel-loss', default=0.2, type=float,
                         help='loss$_{submodel}$ lambda')
-    parser.add_argument('', default=0.2, type=float,
+    parser.add_argument('--generation_loss', default=0.2, type=float,
                         help='loss$_{generation}$ lambda')
 
     args = parser.parse_args()
