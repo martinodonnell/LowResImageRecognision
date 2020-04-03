@@ -12,17 +12,7 @@ from datasets import prepare_test_loader
 from models import construct_model
 from config import SAVE_FOLDER,CONFUSION_MATRIX
 from trainTest import get_train_test_methods
-from trainTestUtil import get_args
-
-
-# -------------------------------
-# Classic multitask learning END
-# -------------------------------
-
-
-def load_weight(model, path, device):
-    sd = torch.load(path, map_location=device)
-    model.load_state_dict(sd)
+from trainTestUtil import get_args,load_weight
 
 
 def main(config):

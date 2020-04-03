@@ -45,8 +45,8 @@ def train_v1(ep, model, optimizer, train_loader, device, config):
         elapsed = time.time() - start_time
     
 
-    #Moved this out of for as I don't watch it all the time and will speed up performace
-    print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+        #Moved this out of for as I don't watch it all the time and will speed up performace
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
         f'Loss: {loss_meter / i:.4f} '
         f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
         ,end='\r')

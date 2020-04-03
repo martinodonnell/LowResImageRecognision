@@ -3,7 +3,7 @@ from config import SAVE_FOLDER
 import pandas as pd
 import pprint as pp
 import argparse
-
+import torch
 
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
@@ -61,6 +61,27 @@ def set_up_output_filepaths(config):
 
     return config, csv_history_filepath, model_best_filepath
 
+def load_weight(model, path, device):
+    sd = torch.load(path, map_location=device)
+    model.load_state_dict(sd)
+
+
+def load_weight_stan_boxcars(model, path, device):
+    pretrained_dict = torch.load(path, map_location=device)
+    pretrained_dict_ids = [0, 2, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26, 28]
+    # Add features
+    for i in pretrained_dict_ids:
+        key = 'base.features.' + str(i)
+        model.state_dict()[key + '.weight'].data.copy_(pretrained_dict[key + '.weight'])
+        model.state_dict()[key + '.bias'].data.copy_(pretrained_dict[key + '.bias'])
+
+    # #Add classifiers
+    # pretrained_dict_ids = [0,3,5.1,6.1]
+
+    # for i in pretrained_dict_ids:
+    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
+
 def get_args(): 
     parser = argparse.ArgumentParser(description='Training/Testing and finetuning script for Cars classification task')
 
@@ -95,7 +116,7 @@ def get_args():
     parser.add_argument('--fine-tune-id',type=int,
                         help='id to lined to previous model to fine tune. Required if it is a fine tune task')
     
-    parser.add_argument('--model-id', default=32, type=int,
+    parser.add_argument('--model-id', type=int,
                         help='id to lined to previous model to fine tune. Required')
     
     parser.add_argument('--testing', default=False, action='store_true',
@@ -119,7 +140,7 @@ def get_args():
                         help='loss$_{model}$ lambda')
     parser.add_argument('--submodel-loss', default=0.2, type=float,
                         help='loss$_{submodel}$ lambda')
-    parser.add_argument('--generation_loss', default=0.2, type=float,
+    parser.add_argument('', default=0.2, type=float,
                         help='loss$_{generation}$ lambda')
 
     args = parser.parse_args()

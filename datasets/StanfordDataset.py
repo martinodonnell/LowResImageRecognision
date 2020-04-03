@@ -6,7 +6,7 @@ from PIL import Image
 import pickle
 import numpy as np
 import pandas as pd
-from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META,STANFORD_CARS_DOWNSAMPLE_SUFFIX
+from config import STANFORD_CARS_CARS_META,STANFORD_CARS_DOWNSAMPLE_SUFFIX
 
 
 # Read ain .mat file

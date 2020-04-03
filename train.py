@@ -1,7 +1,7 @@
 from datasets import prepare_loader
 from models import construct_model
 from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args
-from trainTest import get_train_test_methods
+from trainTest import get_train_test_methods,load_weight,load_weight_stan_boxcars
 import os
 import pprint as pp
 import time
@@ -17,26 +17,6 @@ import pandas as pd
 # Classic multitask learning END
 # -------------------------------
 
-def load_weight(model, path, device):
-    sd = torch.load(path, map_location=device)
-    model.load_state_dict(sd)
-
-
-def load_weight_stan_boxcars(model, path, device):
-    pretrained_dict = torch.load(path, map_location=device)
-    pretrained_dict_ids = [0, 2, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26, 28]
-    # Add features
-    for i in pretrained_dict_ids:
-        key = 'base.features.' + str(i)
-        model.state_dict()[key + '.weight'].data.copy_(pretrained_dict[key + '.weight'])
-        model.state_dict()[key + '.bias'].data.copy_(pretrained_dict[key + '.bias'])
-
-    # #Add classifiers
-    # pretrained_dict_ids = [0,3,5.1,6.1]
-
-    # for i in pretrained_dict_ids:
-    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
 
 
 def main(config):
@@ -114,7 +94,8 @@ def main(config):
         res = pd.DataFrame([trainres])
         res.to_csv(csv_history_filepath, mode='a', header=None)
 
-    print(f'Best accuracy: {best_acc:.4f}')
+    print("Best accuracy: {:,.4f}".format(1.234455))
+
 
 
 if __name__ == '__main__':
