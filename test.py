@@ -1,7 +1,5 @@
 import json
 import os
-import numpy as np
-import csv
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,7 +8,7 @@ import time
 
 from datasets import prepare_test_loader
 from models import construct_model
-from config import SAVE_FOLDER,CONFUSION_MATRIX
+from config import SAVE_FOLDER,CONFUSION_MATRIX 
 from trainTest import get_train_test_methods
 from trainTestUtil import get_args,load_weight
 
