@@ -8,8 +8,7 @@ from models.Pooling import ChannelPoolingNetwork,SpatiallyWeightedPoolingNetwork
 def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_generation):
     base = torchvision.models.vgg16(pretrained=True, progress=True) 
     model = StanfordBase(base, num_classes)  
-    print(model)
-    exit()
+
     if config['model_version'] == 1:
         model = BoxCarsBase(base, num_classes)
     elif config['model_version'] == 2:
@@ -19,7 +18,6 @@ def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_g
     
     elif config['model_version'] == 4:
         model = Old_MTLC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
-
     elif config['model_version'] == 5:
         model = MTLNC_Shared_FC_B(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif config['model_version'] == 6:
