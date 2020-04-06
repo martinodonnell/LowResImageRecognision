@@ -7,7 +7,6 @@ from models.Pooling import ChannelPoolingNetwork,SpatiallyWeightedPoolingNetwork
 # Set up config for other models in the future
 def construct_model(config, num_classes,num_makes,num_models,num_submodels,num_generation):
     base = torchvision.models.vgg16(pretrained=True, progress=True) 
-    model = StanfordBase(base, num_classes)  
 
     if config['model_version'] == 1:
         model = BoxCarsBase(base, num_classes)

@@ -1,6 +1,6 @@
 from datasets import prepare_loader
 from models import construct_model
-from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars
+from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars,load_weight_stan_boxcars2
 from trainTest import get_train_test_methods
 import os
 import pprint as pp
@@ -38,8 +38,17 @@ def main(config):
         _, fine_tune_model_path = get_output_filepaths(config['fine-tune-id'])
         print("finetune model ", fine_tune_model_path)
         print("Loading existing model", )
+        # if config['finetune_stan_box']:
+        #     load_weight_stan_boxcars(model, fine_tune_model_path, device)
+        # el
         if config['finetune_stan_box']:
+            #TODO Hard coded in to get it working
+            model = construct_model(config,196, -1, -1,-1,-1)
             load_weight_stan_boxcars(model, fine_tune_model_path, device)
+            model.base.classifier[6] = nn.Sequential(
+                nn.Dropout(0.5),
+                nn.Linear(4096, config['num_classes']),
+            )
         else:
             load_weight(model, fine_tune_model_path, device)
 
@@ -50,7 +59,7 @@ def main(config):
 
     # Adds model to GPU
     model = model.to(device)
-
+  
     # Set up output files and add header to csv file
     config, csv_history_filepath, model_best_filepath = set_up_output_filepaths(config)
     print(csv_history_filepath, model_best_filepath)

@@ -82,6 +82,23 @@ def load_weight_stan_boxcars(model, path, device):
     #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
     #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
 
+
+def load_weight_stan_boxcars2(model, path, device):
+    pretrained_dict = torch.load(path, map_location=device)
+    pretrained_dict_ids = [0, 2, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26, 28]
+    # Add features
+    for i in pretrained_dict_ids:
+        key = 'base.features.' + str(i)
+        model.state_dict()[key + '.weight'].data.copy_(pretrained_dict[key + '.weight'])
+        model.state_dict()[key + '.bias'].data.copy_(pretrained_dict[key + '.bias'])
+
+    # #Add classifiers
+    # pretrained_dict_ids = [0,3,5.1,6.1]
+
+    # for i in pretrained_dict_ids:
+    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
+    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
+
 def get_args(): 
     parser = argparse.ArgumentParser(description='Training/Testing and finetuning script for Cars classification task')
 
