@@ -103,7 +103,7 @@ def main(config):
         res = pd.DataFrame([trainres])
         res.to_csv(csv_history_filepath, mode='a', header=None)
 
-    print("Best accuracy: {:,.4f}".format(1.234455))
+    print("Best accuracy: {:,.4f}".format(best_acc))
 
 
 
