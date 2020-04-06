@@ -182,7 +182,7 @@ class CarsDatasetV3(Dataset):
         self.annos_downsample = load_annotations(anno_path,True)
 
         next_key = len(self.annos)
-        for value in self.annos_downsample:
+        for value in self.annos_downsample.values():
             self.annos[next_key] = value
             next_key+=1
 
@@ -196,7 +196,6 @@ class CarsDatasetV3(Dataset):
 
     def __getitem__(self, idx):
         r = self.annos[idx]
-
         target = r['target']
 
         if idx not in self.cache:
