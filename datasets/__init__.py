@@ -87,18 +87,12 @@ def gen_confusion_matrixes(config):
 
 
 def add_class_numbers_to_config(config):
-    if config['dataset_version']==1:
+    if config['dataset_version'] in [1,5]:
         config['num_classes']=196
         config['num_makes']=49
         config['num_models']=18
         config['num_submodels']=1
         config['num_generations']=1 
-    elif config['dataset_version']==5:
-        config['num_classes']=392
-        config['num_makes']=99
-        config['num_models']=36
-        config['num_submodels']=2
-        config['num_generations']=2
     else:
         config['num_classes']=107
         config['num_makes']=16
