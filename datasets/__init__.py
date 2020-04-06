@@ -7,7 +7,7 @@ import pickle
 import numpy as np
 import torch
 
-from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2
+from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2,CarsDatasetV3
 from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
 from config import BOXCARS_DATASET_ROOT,BOXCARS_IMAGES_IMAGES,BOXCARS_CLASSIFICATION_SPLITS,BOXCARS_DATASET,BOXCARS_HARD_CLASS_NAMES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS,STANFORD_CARS_CARS_META
@@ -93,6 +93,12 @@ def add_class_numbers_to_config(config):
         config['num_models']=18
         config['num_submodels']=1
         config['num_generations']=1 
+    elif config['dataset_version']==5:
+        config['num_classes']=392
+        config['num_makes']=99
+        config['num_models']=36
+        config['num_submodels']=2
+        config['num_generations']=2
     else:
         config['num_classes']=107
         config['num_makes']=16
@@ -152,6 +158,14 @@ def get_train_test_dataset(config,train_transform,test_transform,part="validatio
         imgdir =  BOXCARS_IMAGES_IMAGES
         train_dataset = BoxCarsDatasetV1_2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train',config['train_samples'])
         test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],part,config['train_samples'])
+    elif(config['dataset_version']==5):#Mixed Stanford Dataset
+        train_imgdir = STANFORD_CARS_TRAIN
+        test_imgdir = STANFORD_CARS_TEST
+        train_annopath = STANFORD_CARS_TRAIN_ANNOS
+        test_annopath = STANFORD_CARS_TEST_ANNOS
+
+        train_dataset = CarsDatasetV3(train_imgdir, train_annopath, train_transform, config['imgsize'],config['ds-stanford'])
+        test_dataset = CarsDatasetV3(test_imgdir, test_annopath, test_transform, config['imgsize'],config['ds-stanford'])
     else:
         print("No dataset. Leaving")
         exit(1)  

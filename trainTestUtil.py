@@ -116,7 +116,7 @@ def get_args():
     parser.add_argument('--train-test-version', default=1, type=int,
                         help='Some models have more than one test_train setup giving different training and test '
                              'abilities)\n')
-    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3, 4],
+    parser.add_argument('--dataset-version', default=1, type=int, choices=[1, 2, 3, 4,5],
                         help='Classification version (default: 1)\n'
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset\n'

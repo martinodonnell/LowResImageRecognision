@@ -174,3 +174,43 @@ class CarsDatasetV2(Dataset):
 
         return img, target, make_target, type_target
 
+
+#Mixed dataset
+class CarsDatasetV3(Dataset):
+    def __init__(self, imgdir, anno_path, transform, size,downsample):        
+        self.annos = load_annotations(anno_path,False)
+        self.annos_downsample = load_annotations(anno_path,True)
+
+        next_key = len(self.annos)
+        for value in self.annos_downsample:
+            self.annos[next_key] = value
+            next_key+=1
+
+        self.imgdir = imgdir
+        self.transform = transform
+        self.resize = transforms.Resize(size)
+        self.cache = {}
+
+    def __len__(self):
+        return len(self.annos)
+
+    def __getitem__(self, idx):
+        r = self.annos[idx]
+
+        target = r['target']
+
+        if idx not in self.cache:
+            fn = r['filename']
+
+            img = Image.open(os.path.join(self.imgdir, fn))
+            img = img.convert('RGB')
+            img = self.resize(img)
+
+            self.cache[idx] = img
+        else:
+            img = self.cache[idx]
+
+        img = self.transform(img)
+
+        return img, target
+
