@@ -2,7 +2,6 @@ import torch.nn as nn
 import torch
 
 
-
 class AuxillaryLearning_A(nn.Module):
     def __init__(self, base, num_classes, num_makes, num_models,num_submodels,num_generation):
         super().__init__()
