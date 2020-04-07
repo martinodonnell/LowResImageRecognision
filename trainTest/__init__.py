@@ -15,7 +15,7 @@ def get_train_test_methods(config):
     #---- Multitask learning --- 
     #Not used. Use model 6 and change multiplications on loss
     elif config['train_test_version'] == 2:
-        print("Train/Test Version 2 for BOXCARS (NON Class Multitask learning - 2 features) ")
+        print("Train/Test Version 2 for BOXCARS (Auxillary Multitask learning - 2 features) ")
         return train_v2, test_v2
     elif config['train_test_version'] == 3: 
         print("Train/Test Version 3 for STANFORD (Multitask learning)")
@@ -25,10 +25,10 @@ def get_train_test_methods(config):
         print("Train/Test Version 4 for BOXCARS (Multitask learning - 3 features)")
         return train_v4, test_v4
     elif config['train_test_version'] == 5:
-        print("Train/Test Version 5 for BOXCARS (Multitask learning - 4 features classic)")
+        print("Train/Test Version 5 for BOXCARS (Multitask learning - 4 features)")
         return train_v5, test_v5
     elif config['train_test_version'] == 6:
-        print("Train/Test Version 6 for BOXCARS (Multitask learning - 4 features Non classic)")
+        print("Train/Test Version 6 for BOXCARS (Auxillary learning - 4 features")
         return train_v6, test_v6
     elif config['train_test_version'] == 7:
         print("Train/Test Version 7 for normal models dual cross entropy")
