@@ -9,14 +9,16 @@ class ChannelPoolingNetwork(nn.Module):
         
         self.base.features = nn.Sequential(
             self.base.features,
-            ChannelPool(compression=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+            ChannelPool(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
         )        
 
         self.base.classifier[0] =  nn.Linear(12544, 4096)
         self.base.classifier[6] = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(4096, num_classes)
-        )   
+        )  
+
+
 
     def forward(self, x):
         fc = self.base(x)
@@ -24,19 +26,19 @@ class ChannelPoolingNetwork(nn.Module):
 
 class ChannelPool(nn.MaxPool1d):
 
-    def __init__(self,compression, stride, padding, dilation, ceil_mode):
-        super().__init__(stride, padding, dilation, ceil_mode)
-        self.compression = compression
+    # def __init__(self,compression, stride, padding, dilation, ceil_mode):
+    #     super().__init__(stride, padding, dilation, ceil_mode)
+    #     self.compression = compression
 
 
     def forward(self, input):
         n, c, w, h = input.size()
-        c = int(c/self.compression)
+        c = int(c/2)
         output = torch.zeros(n, c, w, h)
 
         index_pos = 0
         #Compress input to output tensor
-        for index in range(0,input.size()[1],self.compression):
+        for index in range(0,input.size()[1],2):
             output[0][index_pos] = torch.max(input[0][index],input[0][index+1])     
             index_pos +=1 
         return output
