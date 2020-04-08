@@ -32,7 +32,7 @@ def get_train_test_methods(config):
         return train_v6, test_v6
     elif config['train_test_version'] == 7:
         print("Train/Test Version 7 for normal models dual cross entropy")
-        return train_v1, test_v1
+        return train_v7, test_v7
     else:
         print(config['train_test_version'], "is not a valid trainTest method(get_train_test_methods)")
         exit(1) 
