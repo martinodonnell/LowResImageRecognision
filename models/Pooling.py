@@ -11,16 +11,12 @@ class ChannelPoolingNetwork(nn.Module):
             self.base.features,
             ChannelPool(compression=2, stride=2, padding=0, dilation=1, ceil_mode=False)
         )        
-                
+
         self.base.classifier[0] =  nn.Linear(12544, 4096)
         self.base.classifier[6] = nn.Sequential(
             nn.Dropout(0.5),
             nn.Linear(4096, num_classes)
-        )
-
-       
-
-        
+        )   
 
     def forward(self, x):
         fc = self.base(x)
@@ -69,11 +65,6 @@ class SpatiallyWeightedPoolingNetwork(nn.Module):
             nn.Dropout(0.5),
             nn.Linear(fc_num_neurons, num_classes)
         )
-
-        print(self.base)
-        exit()
-
-
         
 
     def forward(self, x):
