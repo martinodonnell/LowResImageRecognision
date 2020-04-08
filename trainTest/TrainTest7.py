@@ -41,7 +41,7 @@ def train_v7(ep, model, optimizer, train_loader, device, config):
 
         # forward + backward + optimize
         pred = model(data)
-        loss = F.cross_entropy(pred, target)
+        loss = dual_cross_entropy(pred, target)
         loss.backward()#How does this instigate back propogation
         optimizer.step()#updates parameters
 
@@ -90,7 +90,7 @@ def test_v7(model, test_loader, device, config,confusion_matrix):
 
             pred = model(data)
 
-            loss = F.cross_entropy(pred, target) * data.size(0)
+            loss = dual_cross_entropy(pred, target) * data.size(0)
             acc = pred.max(1)[1].eq(target).float().sum()
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
