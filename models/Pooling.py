@@ -34,7 +34,7 @@ class ChannelPool(nn.MaxPool1d):
     def forward(self, input):
         n, c, w, h = input.size()
         c = int(c/2)
-        output = torch.zeros(n, c, w, h)
+        output = torch.zeros(n, c, w, h).cuda()
 
         index_pos = 0
         #Compress input to output tensor
