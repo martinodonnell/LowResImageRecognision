@@ -99,7 +99,7 @@ class ChannelPool(nn.Module):
                             for x in range(n)]) #Do work for each image in batch
 
         print(time.time()-start_time)
-        return output
+        return output.cuda()
 
 class SpatiallyWeightedPoolingNetwork(nn.Module):
     def __init__(self, base, num_classes):
