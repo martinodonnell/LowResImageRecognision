@@ -83,7 +83,6 @@ class ChannelPool(nn.Module):
 
 
     def forward(self, input):
-        start_time = time.time()
 
         n, c, w, h = input.size()
         #Add padding to input so work with kernal size
@@ -98,7 +97,6 @@ class ChannelPool(nn.Module):
                             for index in range(0,input.size()[1]-self.kernel_size,self.stride)]) #Move stride
                             for x in range(n)]) #Do work for each image in batch
 
-        print(time.time()-start_time)
         return output.cuda()
 
 class SpatiallyWeightedPoolingNetwork(nn.Module):
