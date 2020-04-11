@@ -1,5 +1,6 @@
 import torch.nn as nn
 import torch
+import time
 class ChannelPoolingNetwork(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__()
@@ -68,7 +69,7 @@ class ChannelPoolingNetwork(nn.Module):
 
 class ChannelPool(nn.Module):
 
-    def __init__(self, kernel_size, stride=None, padding=0, dilation=1,
+    def __init__(self, kernel_size=7, stride=None, padding=0, dilation=1,
                  return_indices=False, ceil_mode=False):
         super().__init__()
         self.kernel_size = kernel_size
@@ -82,24 +83,13 @@ class ChannelPool(nn.Module):
 
 
     def forward(self, input):
-        if(self.output is None):
-            n, c, w, h = input.size()
-            c = int(c/self.compression)
-            output = torch.empty(n, c, w, h).cuda()
-
-
         #Add padding to input so work with kernal size
         input = torch.nn.functional.pad(input, (0, 0, 0, 0, self.padding, self.padding), "constant", 0)
+        
+        #Get output
+        output = [torch.max(input[0][index:index+self.kernel_size-1],axis=0) 
+                  for index in range(0,input.size()[1]-self.kernel_size,self.stride)]
 
-        index_pos = 0
-        #Compress input to output tensor
-        for index in range(0,input.size()[1]-self.kernel_size,self.stride):
-            pooled_channels = input[0][index]
-            for x in range(1,self.kernel_size):
-                pooled_channels = torch.max(pooled_channels,input[0][index+x]) 
-            
-            output[0][index_pos] = pooled_channels
-            index_pos +=1
         return output
 
 class SpatiallyWeightedPoolingNetwork(nn.Module):
