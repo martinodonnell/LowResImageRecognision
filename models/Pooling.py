@@ -87,11 +87,11 @@ class ChannelPool(nn.Module):
         input = torch.nn.functional.pad(input, (0, 0, 0, 0, self.padding, self.padding), "constant", 0)
         
         #Get output
-        output = [torch.max(input[0][index:index+self.kernel_size-1],axis=0) 
-                  for index in range(0,input.size()[1]-self.kernel_size,self.stride)]
+        output = torch.empty(1,256,7,7).cuda()
+        output[0] = torch.stack([torch.max(input[0][index:index+self.kernel_size-1],axis=0)[0]
+                  for index in range(0,input.size()[1]-self.kernel_size,self.stride)])
 
         return output
-
 class SpatiallyWeightedPoolingNetwork(nn.Module):
     def __init__(self, base, num_classes):
         super().__init__()
