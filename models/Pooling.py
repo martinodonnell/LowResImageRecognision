@@ -9,7 +9,8 @@ class ChannelPoolingNetwork(nn.Module):
         
         self.base.features = nn.Sequential(
             self.base.features,
-            ChannelPool(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+            #Currently only works for this configuration
+            ChannelPool(kernel_size=7, stride=2, padding=3, dilation=1, ceil_mode=False)
         )        
 
         self.base.classifier[0] =  nn.Linear(12544, 4096)
@@ -24,25 +25,82 @@ class ChannelPoolingNetwork(nn.Module):
         fc = self.base(x)
         return fc
 
-class ChannelPool(nn.MaxPool1d):
+# class ChannelPool(nn.Module):
 
-    # def __init__(self,compression, stride, padding, dilation, ceil_mode):
-    #     super().__init__(stride, padding, dilation, ceil_mode)
-    #     self.compression = compression
+
+#     def __init__(self, kernel_size, stride=None, padding=0, dilation=1,
+#                  return_indices=False, ceil_mode=False):
+#         super().__init__()
+
+#         self.kernel_size = kernel_size
+#         self.stride = stride or kernel_size
+#         self.padding = padding
+#         self.dilation = dilation
+#         self.return_indices = return_indices
+#         self.ceil_mode = ceil_mode
+
+#         self.compression = 2#Hard coded but can be calcualted
+
+#     def foward(self,input):
+#         #Get output tensor dimensions depending on compressions
+#         print(1)
+#         n, c, w, h = input.size()
+#         print(2)
+#         c = int(c/self.compression)
+#         # output = torch.empty(n, c, w, h).cuda()
+#         output = torch.zeros(n, c, w, h)
+#         print(3)
+
+#         #Add padding to input so work with kernal size
+#         input = torch.nn.functional.pad(input, (0, 0, 0, 0, self.padding, self.padding), "constant", 0)
+
+#         index_pos = 0
+#         count = 1
+#         #Compress input to output tensor
+#         for index in range(0,input.size()[1]-self.stride):
+#             pooled_channels = input[0][index]
+#             for x in range(1,self.kernal_size):
+#                 pooled_channels = torch.max(pooled_channels,input[0][index+x]) 
+            
+#             output[0][index_pos] = pooled_channels
+#             index_pos +=1
+#         return output
+
+class ChannelPool(nn.Module):
+
+    def __init__(self, kernel_size, stride=None, padding=0, dilation=1,
+                 return_indices=False, ceil_mode=False):
+        super().__init__()
+        self.kernel_size = kernel_size
+        self.stride = stride or kernel_size
+        self.padding = padding
+        self.dilation = dilation
+        self.return_indices = return_indices
+        self.ceil_mode = ceil_mode
+        self.compression = 2
+        self.output = None
 
 
     def forward(self, input):
-        n, c, w, h = input.size()
-        c = int(c/2)
-        output = torch.zeros(n, c, w, h).cuda()
+        if(self.output is None):
+            n, c, w, h = input.size()
+            c = int(c/self.compression)
+            output = torch.empty(n, c, w, h).cuda()
+
+
+        #Add padding to input so work with kernal size
+        input = torch.nn.functional.pad(input, (0, 0, 0, 0, self.padding, self.padding), "constant", 0)
 
         index_pos = 0
         #Compress input to output tensor
-        for index in range(0,input.size()[1],2):
-            output[0][index_pos] = torch.max(input[0][index],input[0][index+1])     
-            index_pos +=1 
+        for index in range(0,input.size()[1]-self.kernel_size,self.stride):
+            pooled_channels = input[0][index]
+            for x in range(1,self.kernel_size):
+                pooled_channels = torch.max(pooled_channels,input[0][index+x]) 
+            
+            output[0][index_pos] = pooled_channels
+            index_pos +=1
         return output
-
 
 class SpatiallyWeightedPoolingNetwork(nn.Module):
     def __init__(self, base, num_classes):
