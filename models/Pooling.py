@@ -83,17 +83,23 @@ class ChannelPool(nn.Module):
 
 
     def forward(self, input):
+        start_time = time.time()
 
         n, c, w, h = input.size()
         #Add padding to input so work with kernal size
         input = torch.nn.functional.pad(input, (0, 0, 0, 0, self.padding, self.padding), "constant", 0)
         
         #Get output
-        output = torch.empty(n, int(c/self.compression), w, h)
-        for x in range(n):
-            output[x] = torch.stack([torch.max(input[x][index:index+self.kernel_size-1],axis=0)[0]
-                  for index in range(0,input.size()[1]-self.kernel_size,self.stride)])
-        return output.cuda()
+        # output = torch.empty(n, int(c/self.compression), w, h)
+        # for x in range(n):
+        output = torch.stack([ 
+                        torch.stack(
+                            [torch.max(input[x][index:index+self.kernel_size-1],axis=0)[0] #Get max from kernal size
+                            for index in range(0,input.size()[1]-self.kernel_size,self.stride)]) #Move stride
+                            for x in range(n)]) #Do work for each image in batch
+
+        print(time.time()-start_time)
+        return output
 
 class SpatiallyWeightedPoolingNetwork(nn.Module):
     def __init__(self, base, num_classes):
