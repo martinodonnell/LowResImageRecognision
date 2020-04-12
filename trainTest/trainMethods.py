@@ -79,7 +79,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config,loss_function):
     start_time = time.time()
     elapsed = 0
 
-    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+    for data, target,make_target,model_target,_,_ in train_loader:
         data = data.to(device)
         target = target.to(device)
         make_target = make_target.to(device)
@@ -99,9 +99,9 @@ def train_v2(ep, model, optimizer, train_loader, device, config,loss_function):
         optimizer.step()
 
         #Save accuracy/loss for each feature
-        acc = torch.max(pred,1).eq(target).float().mean()
-        make_acc = make_torch.max(pred,1).eq(make_target).float().mean()
-        model_acc = model_torch.max(pred,1).eq(model_target).float().mean()
+        acc = torch.max(pred,1).indices.eq(target).float().mean()
+        make_acc = torch.max(make_pred,1).indices.eq(make_target).float().mean()
+        model_acc = torch.max(model_pred,1).indices.eq(model_target).float().mean()
 
         
         loss_meter += loss.item()
@@ -188,9 +188,9 @@ def train_v3(ep, model, optimizer, train_loader, device, config,loss_function):
 
         optimizer.step()
         
-        acc = torch.max(pred,1).eq(target).float().mean()
-        make_acc = make_torch.max(pred,1).eq(make_target).float().mean()
-        model_acc = model_torch.max(pred,1).eq(model_target).float().mean()
+        acc = torch.max(pred,1).indices.eq(target).float().mean()
+        make_acc = torch.max(make_pred,1).indices.eq(make_target).float().mean()
+        model_acc = torch.max(model_pred,1).indices.eq(model_target).float().mean()
 
 
         #Save accuracy/loss for each feature
@@ -262,7 +262,7 @@ def train_v4(ep, model, optimizer, train_loader, device, config,loss_function):
     start_time = time.time()
     elapsed = 0
 
-    for data, target,make_target,model_target,submodel_target,generation_target in train_loader:
+    for data, target,make_target,model_target,submodel_target,_ in train_loader:
         data = data.to(device)
         target = target.to(device)
         make_target = make_target.to(device)
@@ -283,10 +283,10 @@ def train_v4(ep, model, optimizer, train_loader, device, config,loss_function):
 
         optimizer.step()
 
-        acc = torch.max(pred,1).eq(target).float().mean()
-        make_acc = make_torch.max(pred,1).eq(make_target).float().mean()
-        model_acc = model_torch.max(pred,1).eq(model_target).float().mean()
-        submodel_acc = submodel_torch.max(pred,1).eq(submodel_target).float().mean()
+        acc = torch.max(pred,1).indices.eq(target).float().mean()
+        make_acc = torch.max(make_pred,1).indices.eq(make_target).float().mean()
+        model_acc = torch.max(model_pred,1).indices.eq(model_target).float().mean()
+        submodel_acc = torch.max(submodel_pred,1).indices.eq(submodel_target).float().mean()
 
         #Main
         loss_meter += loss.item()
@@ -403,10 +403,10 @@ def train_v5(ep, model, optimizer, train_loader, device, config,loss_function):
 
         optimizer.step()
         
-        make_acc = make_torch.max(pred,1).eq(make_target).float().mean()
-        model_acc = model_torch.max(pred,1).eq(model_target).float().mean()
-        submodel_acc = submodel_torch.max(pred,1).eq(submodel_target).float().mean()
-        generation_acc = generation_torch.max(pred,1).eq(generation_target).float().mean()
+        make_acc = torch.max(make_pred,1).indices.eq(make_target).float().mean()
+        model_acc = torch.max(model_pred,1).indices.eq(model_target).float().mean()
+        submodel_acc = torch.max(submodel_pred,1).indices.eq(submodel_target).float().mean()
+        generation_acc = torch.max(generation_pred,1).indices.eq(generation_target).float().mean()
 
         #Main
         loss_meter += loss.item()

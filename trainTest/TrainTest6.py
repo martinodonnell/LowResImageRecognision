@@ -52,11 +52,11 @@ def train_v6(ep, model, optimizer, train_loader, device, config, loss_function):
 
         optimizer.step()
         
-        main_acc = main_torch.max(pred,1).eq(main_target).float().mean()
-        make_acc = make_torch.max(pred,1).eq(make_target).float().mean()
-        model_acc = model_torch.max(pred,1).eq(model_target).float().mean()
-        submodel_acc = submodel_torch.max(pred,1).eq(submodel_target).float().mean()
-        generation_acc = generation_torch.max(pred,1).eq(generation_target).float().mean()
+        main_acc = torch.max(main_pred,1).indices.eq(main_target).float().mean()
+        make_acc = torch.max(make_pred,1).indices.eq(make_target).float().mean()
+        model_acc = torch.max(model_pred,1).indices.eq(model_target).float().mean()
+        submodel_acc = torch.max(submodel_pred,1).indices.eq(submodel_target).float().mean()
+        generation_acc = torch.max(generation_pred,1).indices.eq(generation_target).float().mean()
 
         #Main
         loss_meter += loss.item()
@@ -141,7 +141,7 @@ def train_v6(ep, model, optimizer, train_loader, device, config, loss_function):
 
 
 #One model predicting make,model,submodel and generation seperatly
-def test_v6(model, test_loader, device, config,confusion_matrix):
+def test_v6(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -178,11 +178,11 @@ def test_v6(model, test_loader, device, config,confusion_matrix):
             
             loss = main_loss * config['main_loss'] + config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 
-            main_acc = main_torch.max(pred,1).eq(main_target).float().sum()
-            make_acc = make_torch.max(pred,1).eq(make_target).float().sum()
-            model_acc = model_torch.max(pred,1).eq(model_target).float().sum()
-            submodel_acc = submodel_torch.max(pred,1).eq(submodel_target).float().sum()
-            generation_acc = generation_torch.max(pred,1).eq(generation_target).float().sum()
+            main_acc = torch.max(main_pred,1).indices.eq(main_target).float().sum()
+            make_acc = torch.max(make_pred,1).indices.eq(make_target).float().sum()
+            model_acc = torch.max(model_pred,1).indices.eq(model_target).float().sum()
+            submodel_acc = torch.max(submodel_pred,1).indices.eq(submodel_target).float().sum()
+            generation_acc = torch.max(generation_pred,1).indices.eq(generation_target).float().sum()
 
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],main_pred,main_target)

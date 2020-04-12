@@ -33,16 +33,16 @@ def generate_fine_tune_metrics():
     return metrics
 
 
-def cal_loss(make, model, submodel, generation, config, metrics):
-    make_loss = F.cross_entropy(make[0], make[1])
-    model_loss = F.cross_entropy(model[0], model[1])
-    submodel_loss = F.cross_entropy(submodel[0], submodel[1])
-    generation_loss = F.cross_entropy(generation[0], generation[1])
+def cal_loss(make, model, submodel, generation, config, metrics,loss_function):
+    make_loss = loss_function(make[0], make[1])
+    model_loss = loss_function(model[0], model[1])
+    submodel_loss = loss_function(submodel[0], submodel[1])
+    generation_loss = loss_function(generation[0], generation[1])
 
-    make_acc = make[0].max(1)[1].eq(make[1]).float().mean()
-    model_acc = model[0].max(1)[1].eq(model[1]).float().mean()
-    submodel_acc = submodel[0].max(1)[1].eq(submodel[1]).float().mean()
-    generation_acc = generation[0].max(1)[1].eq(generation[1]).float().mean()
+    make_acc = torch.max(make[0],1).indices.eq(make[1]).float().mean()
+    model_acc = torch.max(model[0],1).indices.eq(model[1]).float().mean()
+    submodel_acc = torch.max(submodel[0],1).indices.eq(submodel[1]).float().mean()
+    generation_acc = torch.max(generation[0],1).indices.eq(generation[1]).float().mean()
 
     # Make
     metrics['make_loss_meter'] += make_loss.item()
@@ -119,7 +119,7 @@ def save_metrics_to_dict(metrics, elapsed, types):
 
 
 # Predict each feature for label and back propogate with combined loss
-def train_v5(ep, model, optimizer, train_loader, device, config):
+def train_v5(ep, model, optimizer, train_loader, device, config,loss_function):
     model.train()
 
     # Get dictionary of metrics
@@ -146,7 +146,7 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
         # Calculate loss and add to metrics
         loss = cal_loss((make_pred, make_target), (model_pred, model_target), (submodel_pred, submodel_target),
                         (generation_pred, generation_target),
-                        config, metrics)
+                        config, metrics,loss_function)
 
         # Back propagation
         loss.backward()
@@ -166,7 +166,7 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
 
 
 # One model predicting make,model,submodel and generation separably
-def test_v5(model, test_loader, device, config, confusion_matrix):
+def test_v5(model, test_loader, device, config, confusion_matrix,loss_function):
     model.eval()
 
     # Get dictionary of metrics
@@ -190,7 +190,7 @@ def test_v5(model, test_loader, device, config, confusion_matrix):
             # Calculate loss and add to metrics
             cal_loss((make_pred, make_target), (model_pred, model_target), (submodel_pred, submodel_target),
                      (generation_pred, generation_target),
-                     config, metrics)
+                     config, metrics,loss_function)
 
             if not confusion_matrix is None:
                 update_confusion_matrix(confusion_matrix['make'], make_pred, make_target)
