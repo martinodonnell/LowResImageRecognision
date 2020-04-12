@@ -31,7 +31,7 @@ def test_v1(model, test_loader, device, config,confusion_matrix,loss_function):
             pred = model(data)
 
             loss = loss_function(pred, target) * data.size(0)
-            acc = pred.max(1)[1].eq(target).float().sum()
+            acc = torch.max(pred,1).eq(target).float().sum()
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
           
@@ -93,9 +93,9 @@ def test_v2(model, test_loader, device, config,confusion_matrix,loss_function):
 
             loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss
 
-            acc = pred.max(1)[1].eq(target).float().sum()
-            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-            model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
+            acc = torch.max(pred,1).eq(target).float().sum()
+            make_acc = make_torch.max(pred,1).eq(make_target).float().sum()
+            model_acc = model_torch.max(pred,1).eq(model_target).float().sum()
 
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
@@ -193,9 +193,9 @@ def test_v3(model, test_loader, device, config,confusion_matrix,loss_function):
 
             loss = main_loss + config['make_loss'] * make_loss + config['make_loss'] * model_loss
 
-            acc = pred.max(1)[1].eq(target).float().sum()
-            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-            model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
+            acc = torch.max(pred,1).eq(target).float().sum()
+            make_acc = make_torch.max(pred,1).eq(make_target).float().sum()
+            model_acc = model_torch.max(pred,1).eq(model_target).float().sum()
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
                 update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
@@ -292,10 +292,10 @@ def test_v4(model, test_loader, device, config,confusion_matrix,loss_function):
 
             loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss  + config['submodel_loss'] * submodel_loss
 
-            acc = pred.max(1)[1].eq(target).float().sum()
-            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-            model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
-            submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().sum()
+            acc = torch.max(pred,1).eq(target).float().sum()
+            make_acc = make_torch.max(pred,1).eq(make_target).float().sum()
+            model_acc = model_torch.max(pred,1).eq(model_target).float().sum()
+            submodel_acc = submodel_torch.max(pred,1).eq(submodel_target).float().sum()
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
                 update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
@@ -417,10 +417,10 @@ def test_v5(model, test_loader, device, config,confusion_matrix,loss_function):
 
             loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss  + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 
-            make_acc = make_pred.max(1)[1].eq(make_target).float().sum()
-            model_acc = model_pred.max(1)[1].eq(model_target).float().sum()
-            submodel_acc = submodel_pred.max(1)[1].eq(submodel_target).float().sum()
-            generation_acc = generation_pred.max(1)[1].eq(generation_target).float().sum()
+            make_acc = make_torch.max(pred,1).eq(make_target).float().sum()
+            model_acc = model_torch.max(pred,1).eq(model_target).float().sum()
+            submodel_acc = submodel_torch.max(pred,1).eq(submodel_target).float().sum()
+            generation_acc = generation_torch.max(pred,1).eq(generation_target).float().sum()
 
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['make'],make_pred,make_target)
