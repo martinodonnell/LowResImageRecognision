@@ -10,7 +10,7 @@ from datasets import prepare_test_loader
 from models import construct_model
 from config import SAVE_FOLDER,CONFUSION_MATRIX 
 from trainTest import get_train_test_methods
-from trainTestUtil import get_args,load_weight
+from trainTestUtil import get_args,load_weight,get_loss_function
 
 
 def main(config):
@@ -27,8 +27,11 @@ def main(config):
     model = model.to(device)
 
     _, test_fn = get_train_test_methods(config)
+    
+    #Get loss function
+    loss_function = get_loss_function(config)
 
-    valres = test_fn(model, test_loader, device, config, confusion_matrix)
+    valres = test_fn(model, test_loader, device, config, confusion_matrix,loss_function)
 
     #Write confusion matrix to output  with each on in different sheet
     writer = pd.ExcelWriter(os.path.join(CONFUSION_MATRIX, str(config['model_id']) + "_CM_"+time.strftime("%Y%m%d-%H%M%S")+".xlsx") , engine='xlsxwriter')

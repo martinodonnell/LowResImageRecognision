@@ -13,14 +13,18 @@ import time
 
 from trainTest.confusionMatrix import update_confusion_matrix
 
-def dual_cross_entropy(pred, target,alpha=1,beta=4.5):
+# pred = torch.max(pred,1).indices CHANGE TO SPEED UP TIMES
+
+def dual_cross_entropy(pred, target,alpha=1,beta=4.5):    
     Lce = F.cross_entropy(pred, target)
-    Lr = (alpha*((1-target)*torch.log(alpha + pred)))/target.shape[1]
-    
-    return Lce+ Lr
+    target = torch.eye(107)[target]
+    logsoftmax = nn.LogSoftmax()
+    lr = torch.mean(torch.sum(-(1-target) * logsoftmax(alpha*pred), dim=1))
+   
+    return Lce + (beta * lr)
     
 
-def train_v7(ep, model, optimizer, train_loader, device, config):
+def train_v7(ep, model, optimizer, train_loader, device, config,loss_function):
 
     print("---------Training-------")
 
@@ -54,8 +58,8 @@ def train_v7(ep, model, optimizer, train_loader, device, config):
         elapsed = time.time() - start_time
     
 
-    #Moved this out of for as I don't watch it all the time and will speed up performace
-    print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
+        #Moved this out of for as I don't watch it all the time and will speed up performace
+        print(f'Epoch {ep:03d} [{i}/{len(train_loader)}]: '
         f'Loss: {loss_meter / i:.4f} '
         f'Acc: {acc_meter / i:.4f} ({elapsed:.2f}s)'
         ,end='\r')
@@ -90,7 +94,7 @@ def test_v7(model, test_loader, device, config,confusion_matrix):
 
             pred = model(data)
 
-            loss = dual_cross_entropy(pred, target) * data.size(0)
+            loss = loss_function(pred, target) * data.size(0)
             acc = pred.max(1)[1].eq(target).float().sum()
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)

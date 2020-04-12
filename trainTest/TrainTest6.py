@@ -5,7 +5,7 @@ from trainTest.confusionMatrix import update_confusion_matrix
 
 
 #Predicit each feature for label and backpropogate with combined loss
-def train_v6(ep, model, optimizer, train_loader, device, config):
+def train_v6(ep, model, optimizer, train_loader, device, config, loss_function):
     model.train()
 
     loss_meter = 0
@@ -41,11 +41,11 @@ def train_v6(ep, model, optimizer, train_loader, device, config):
         main_pred, make_pred, model_pred,submodel_pred,generation_pred = model(data)
         
         #Calucalate individual loss for part labels
-        main_loss = F.cross_entropy(main_pred, main_target)
-        make_loss = F.cross_entropy(make_pred, make_target)
-        model_loss = F.cross_entropy(model_pred, model_target)
-        submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
-        generation_loss = F.cross_entropy(generation_pred, generation_target)
+        main_loss = loss_function(main_pred, main_target)
+        make_loss = loss_function(make_pred, make_target)
+        model_loss = loss_function(model_pred, model_target)
+        submodel_loss = loss_function(submodel_pred, submodel_target)
+        generation_loss = loss_function(generation_pred, generation_target)
         
         loss = main_loss * config['main_loss'] + config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
         loss.backward()
@@ -170,11 +170,11 @@ def test_v6(model, test_loader, device, config,confusion_matrix):
 
             main_pred, make_pred, model_pred,submodel_pred,generation_pred = model(data)
 
-            main_loss = F.cross_entropy(main_pred, main_target)
-            make_loss = F.cross_entropy(make_pred, make_target)
-            model_loss = F.cross_entropy(model_pred, model_target)
-            submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
-            generation_loss = F.cross_entropy(generation_pred, generation_target)
+            main_loss = loss_function(main_pred, main_target)
+            make_loss = loss_function(make_pred, make_target)
+            model_loss = loss_function(model_pred, model_target)
+            submodel_loss = loss_function(submodel_pred, submodel_target)
+            generation_loss = loss_function(generation_pred, generation_target)
             
             loss = main_loss * config['main_loss'] + config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 

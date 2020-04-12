@@ -121,6 +121,10 @@ def get_args():
                              '1. Stanford Dataset\n'
                              '2. BoxCar Dataset\n'
                              '3. BoxCar Dataset with Augmentation')
+    parser.add_argument('--loss-function', default=1, type=int, choices=[1, 2],
+                        help='Classification version (default: 1)\n'
+                             '1. Cross Entropy\n'
+                             '2. Dual Cross Entropy\n')
     parser.add_argument('--boxcar-split', default='hard',
                         help='required if set dataset-version to 2 (default: hard)')
     parser.add_argument('--train-samples', default=1,type=int,
@@ -178,6 +182,7 @@ def get_args():
         'finetune_stan_box': args.finetune_stan_box,
         'fine-tune-id':args.fine_tune_id,
         'ds-stanford':args.ds_stanford,
+        'loss-function':args.loss_function,
         
         'lr': args.lr,
         'weight_decay': args.weight_decay,
@@ -196,3 +201,27 @@ def get_args():
 
 
     return config
+
+
+#Loss functions
+import torch.nn.functional as F
+def dual_cross_entropy(pred, target,alpha=1,beta=4.5):
+    Lce = F.cross_entropy(pred, target)
+    print(target)
+    sd = (alpha*((1-target)*torch.log(alpha + pred)))
+    Lr = (alpha*((1-target)*torch.log(alpha + pred)))/target.shape[1]
+    
+    return Lce+ Lr
+
+
+def get_loss_function(config):
+     #Get loss function
+    if(config['loss-function'] is 1):
+        print("Loss Function: F.cross_entropy")
+        return F.cross_entropy
+    if(config['loss-function'] is 2):
+        print("Loss Function: dual_cross_entropy")
+        return dual_cross_entropy
+    else:
+        print("There is no loss function under that id:",config['loss-function'])
+        exit()

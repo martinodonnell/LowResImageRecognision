@@ -11,7 +11,7 @@ import torch
 import pandas as pd
 import time
 
-def train_v1(ep, model, optimizer, train_loader, device, config):
+def train_v1(ep, model, optimizer, train_loader, device, config,loss_function):
 
     print("---------Training-------")
 
@@ -32,7 +32,7 @@ def train_v1(ep, model, optimizer, train_loader, device, config):
 
         # forward + backward + optimize
         pred = model(data)
-        loss = F.cross_entropy(pred, target)
+        loss = loss_function(pred, target)
         loss.backward()#How does this instigate back propogation
         optimizer.step()#updates parameters
 
@@ -63,7 +63,7 @@ def train_v1(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-def train_v2(ep, model, optimizer, train_loader, device, config):
+def train_v2(ep, model, optimizer, train_loader, device, config,loss_function):
     model.train()
 
     loss_meter = 0
@@ -90,9 +90,9 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
         pred, make_pred, model_pred = model(data)
         
-        main_loss = F.cross_entropy(pred, target)
-        make_loss = F.cross_entropy(make_pred, make_target)
-        model_loss = F.cross_entropy(model_pred, model_target)
+        main_loss = loss_function(pred, target)
+        make_loss = loss_function(make_pred, make_target)
+        model_loss = loss_function(model_pred, model_target)
 
         loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss
         loss.backward()
@@ -153,7 +153,7 @@ def train_v2(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-def train_v3(ep, model, optimizer, train_loader, device, config):
+def train_v3(ep, model, optimizer, train_loader, device, config,loss_function):
     model.train()
 
     loss_meter = 0
@@ -180,9 +180,9 @@ def train_v3(ep, model, optimizer, train_loader, device, config):
 
         pred, make_pred, model_pred = model(data)
         
-        main_loss = F.cross_entropy(pred, target)
-        make_loss = F.cross_entropy(make_pred, make_target)
-        model_loss = F.cross_entropy(model_pred, model_target)
+        main_loss = loss_function(pred, target)
+        make_loss = loss_function(make_pred, make_target)
+        model_loss = loss_function(model_pred, model_target)
 
         loss = main_loss + config['make_loss'] * make_loss + config['make_loss'] * model_loss
         loss.backward()
@@ -244,7 +244,7 @@ def train_v3(ep, model, optimizer, train_loader, device, config):
 
     return trainres
 
-def train_v4(ep, model, optimizer, train_loader, device, config):
+def train_v4(ep, model, optimizer, train_loader, device, config,loss_function):
     model.train()
 
     loss_meter = 0
@@ -274,10 +274,10 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
 
         pred, make_pred, model_pred,submodel_pred = model(data)
         
-        main_loss = F.cross_entropy(pred, target)
-        make_loss = F.cross_entropy(make_pred, make_target)
-        model_loss = F.cross_entropy(model_pred, model_target)
-        submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
+        main_loss = loss_function(pred, target)
+        make_loss = loss_function(make_pred, make_target)
+        model_loss = loss_function(model_pred, model_target)
+        submodel_loss = loss_function(submodel_pred, submodel_target)
 
         loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss
         loss.backward()
@@ -358,7 +358,7 @@ def train_v4(ep, model, optimizer, train_loader, device, config):
 # ---------------------------
 
 #Predicit each feature for label and backpropogate with combined loss
-def train_v5(ep, model, optimizer, train_loader, device, config):
+def train_v5(ep, model, optimizer, train_loader, device, config,loss_function):
     model.train()
 
     loss_meter = 0
@@ -394,10 +394,10 @@ def train_v5(ep, model, optimizer, train_loader, device, config):
         make_pred, model_pred,submodel_pred,generation_pred = model(data)
         
         #Calucalate individual loss for part labels
-        make_loss = F.cross_entropy(make_pred, make_target)
-        model_loss = F.cross_entropy(model_pred, model_target)
-        submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
-        generation_loss = F.cross_entropy(generation_pred, generation_target)
+        make_loss = loss_function(make_pred, make_target)
+        model_loss = loss_function(model_pred, model_target)
+        submodel_loss = loss_function(submodel_pred, submodel_target)
+        generation_loss = loss_function(generation_pred, generation_target)
         
         loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
         loss.backward()

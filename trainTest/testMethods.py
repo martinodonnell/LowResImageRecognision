@@ -12,7 +12,7 @@ from trainTest.TrainTest5 import generate_fine_tune_metrics,cal_loss,print_singl
 from trainTest.confusionMatrix import update_confusion_matrix
 
 
-def test_v1(model, test_loader, device, config,confusion_matrix):
+def test_v1(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -30,7 +30,7 @@ def test_v1(model, test_loader, device, config,confusion_matrix):
 
             pred = model(data)
 
-            loss = F.cross_entropy(pred, target) * data.size(0)
+            loss = loss_function(pred, target) * data.size(0)
             acc = pred.max(1)[1].eq(target).float().sum()
             if (not confusion_matrix==None):
                 update_confusion_matrix(confusion_matrix['total'],pred,target)
@@ -61,7 +61,7 @@ def test_v1(model, test_loader, device, config,confusion_matrix):
 
     return valres
 
-def test_v2(model, test_loader, device, config,confusion_matrix):
+def test_v2(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -87,9 +87,9 @@ def test_v2(model, test_loader, device, config,confusion_matrix):
 
             pred, make_pred, model_pred = model(data)
 
-            main_loss = F.cross_entropy(pred, target)
-            make_loss = F.cross_entropy(make_pred, make_target)
-            model_loss = F.cross_entropy(model_pred, model_target)
+            main_loss = loss_function(pred, target)
+            make_loss = loss_function(make_pred, make_target)
+            model_loss = loss_function(model_pred, model_target)
 
             loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss
 
@@ -161,7 +161,7 @@ def test_v2(model, test_loader, device, config,confusion_matrix):
 
     return valres
 
-def test_v3(model, test_loader, device, config,confusion_matrix):
+def test_v3(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -187,9 +187,9 @@ def test_v3(model, test_loader, device, config,confusion_matrix):
 
             pred, make_pred, model_pred = model(data)
 
-            main_loss = F.cross_entropy(pred, target)
-            make_loss = F.cross_entropy(make_pred, make_target)
-            model_loss = F.cross_entropy(model_pred, model_target)
+            main_loss = loss_function(pred, target)
+            make_loss = loss_function(make_pred, make_target)
+            model_loss = loss_function(model_pred, model_target)
 
             loss = main_loss + config['make_loss'] * make_loss + config['make_loss'] * model_loss
 
@@ -258,7 +258,7 @@ def test_v3(model, test_loader, device, config,confusion_matrix):
 
     return valres
 
-def test_v4(model, test_loader, device, config,confusion_matrix):
+def test_v4(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -285,10 +285,10 @@ def test_v4(model, test_loader, device, config,confusion_matrix):
 
             pred, make_pred, model_pred,submodel_pred = model(data)
 
-            main_loss = F.cross_entropy(pred, target)
-            make_loss = F.cross_entropy(make_pred, make_target)
-            model_loss = F.cross_entropy(model_pred, model_target)
-            submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
+            main_loss = loss_function(pred, target)
+            make_loss = loss_function(make_pred, make_target)
+            model_loss = loss_function(model_pred, model_target)
+            submodel_loss = loss_function(submodel_pred, submodel_target)
 
             loss = main_loss + config['make_loss'] * make_loss + config['model_loss'] * model_loss  + config['submodel_loss'] * submodel_loss
 
@@ -380,7 +380,7 @@ def test_v4(model, test_loader, device, config,confusion_matrix):
 # ---------------------------
 
 #One model predicting make,model,submodel and generation seperatly
-def test_v5(model, test_loader, device, config,confusion_matrix):
+def test_v5(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -410,10 +410,10 @@ def test_v5(model, test_loader, device, config,confusion_matrix):
 
             make_pred, model_pred,submodel_pred,generation_pred = model(data)
 
-            make_loss = F.cross_entropy(make_pred, make_target)
-            model_loss = F.cross_entropy(model_pred, model_target)
-            submodel_loss = F.cross_entropy(submodel_pred, submodel_target)
-            generation_loss = F.cross_entropy(generation_pred, generation_target)
+            make_loss = loss_function(make_pred, make_target)
+            model_loss = loss_function(model_pred, model_target)
+            submodel_loss = loss_function(submodel_pred, submodel_target)
+            generation_loss = loss_function(generation_pred, generation_target)
 
             loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss  + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 

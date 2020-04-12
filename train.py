@@ -1,6 +1,6 @@
 from datasets import prepare_loader
 from models import construct_model
-from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars,load_weight_stan_boxcars2
+from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars,load_weight_stan_boxcars2,get_loss_function
 from trainTest import get_train_test_methods
 import os
 import pprint as pp
@@ -12,10 +12,6 @@ import torch.nn as nn
 import torch
 import pandas as pd
 
-
-# -------------------------------
-# Classic multitask learning END
-# -------------------------------
 
 
 
@@ -82,11 +78,15 @@ def main(config):
     # Get correct train/test methods
     train_fn, test_fn = get_train_test_methods(config)
 
+    #Get loss function
+    loss_function = get_loss_function(config)
+    
+
     best_acc = 0
     res = []
     for ep in range(1, config['epochs'] + 1):
-        trainres = train_fn(ep, model, optimizer, train_loader, device, config)
-        valres = test_fn(model, test_loader, device, config, None)
+        trainres = train_fn(ep, model, optimizer, train_loader, device, config,loss_function)
+        valres = test_fn(model, test_loader, device, config, None,loss_function)
         trainres.update(valres)
         trainres['lr'] = optimizer.param_groups[0]['lr']
         lr_scheduler.step(trainres['val_loss'])
