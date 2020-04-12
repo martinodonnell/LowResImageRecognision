@@ -208,9 +208,11 @@ import torch.nn.functional as F
 import torch.nn as nn
 def dual_cross_entropy(pred, target,alpha=1,beta=4.5):    
     Lce = F.cross_entropy(pred, target)
-    target = torch.eye(pred.shape[1])[target]
+    target = torch.eye(pred.shape[1])[target].cuda()
     logsoftmax = nn.LogSoftmax()
     lr = torch.mean(torch.sum(-(1-target) * logsoftmax(alpha*pred), dim=1))
+
+    print(target.is_cuda)
    
     return Lce + (beta * lr)
 
