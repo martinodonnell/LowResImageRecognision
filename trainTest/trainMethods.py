@@ -38,8 +38,6 @@ def train_v1(ep, model, optimizer, train_loader, device, config,loss_function):
     
         acc = torch.max(pred,1).indices.eq(target).float().mean()
 
-        print(acc.item(),acc2.item(),(acc==acc2).item(),end1,end2)    
-
         loss_meter += loss.item()
         acc_meter += acc.item()
         i += 1
