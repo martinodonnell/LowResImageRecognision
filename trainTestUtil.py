@@ -4,6 +4,8 @@ import pandas as pd
 import pprint as pp
 import argparse
 import torch
+import torch.nn.functional as F
+import torch.nn as nn
 
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
@@ -203,16 +205,12 @@ def get_args():
     return config
 
 
-#Loss functions
-import torch.nn.functional as F
-import torch.nn as nn
 def dual_cross_entropy(pred, target,alpha=1,beta=4.5):    
     Lce = F.cross_entropy(pred, target)
     target = torch.eye(pred.shape[1])[target].cuda()
+    # target = torch.eye(pred.shape[1])[target]
     logsoftmax = nn.LogSoftmax()
     lr = torch.mean(torch.sum(-(1-target) * logsoftmax(alpha*pred), dim=1))
-
-    print(target.is_cuda)
    
     return Lce + (beta * lr)
 

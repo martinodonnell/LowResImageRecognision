@@ -37,7 +37,8 @@ def train_v1(ep, model, optimizer, train_loader, device, config,loss_function):
         optimizer.step()#updates parameters
     
         acc = pred.max(1)[1].eq(target).float().mean()
-        # acc = torch.max(pred,1).indices.eq(target).float().mean()    
+        acc2 = torch.max(pred,1).indices.eq(target).float().mean()
+        print(acc,acc2,(acc==acc2))    
 
         loss_meter += loss.item()
         acc_meter += acc.item()
