@@ -205,13 +205,14 @@ def get_args():
 
 #Loss functions
 import torch.nn.functional as F
-def dual_cross_entropy(pred, target,alpha=1,beta=4.5):
+import torch.nn as nn
+def dual_cross_entropy(pred, target,alpha=1,beta=4.5):    
     Lce = F.cross_entropy(pred, target)
-    print(target)
-    sd = (alpha*((1-target)*torch.log(alpha + pred)))
-    Lr = (alpha*((1-target)*torch.log(alpha + pred)))/target.shape[1]
-    
-    return Lce+ Lr
+    target = torch.eye(pred.shape[1])[target]
+    logsoftmax = nn.LogSoftmax()
+    lr = torch.mean(torch.sum(-(1-target) * logsoftmax(alpha*pred), dim=1))
+   
+    return Lce + (beta * lr)
 
 
 def get_loss_function(config):
