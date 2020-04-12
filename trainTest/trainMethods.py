@@ -35,9 +35,9 @@ def train_v1(ep, model, optimizer, train_loader, device, config,loss_function):
         loss = loss_function(pred, target)
         loss.backward()#How does this instigate back propogation
         optimizer.step()#updates parameters
-
+    
         acc = pred.max(1)[1].eq(target).float().mean()
-        
+        # acc = torch.max(pred,1).indices.eq(target).float().mean()    
 
         loss_meter += loss.item()
         acc_meter += acc.item()
