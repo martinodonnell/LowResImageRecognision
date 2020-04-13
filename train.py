@@ -47,6 +47,7 @@ def main(config):
                     nn.Linear(4096, config['num_classes']),
                 )
             elif(config['model_version'] in [15,16,17]):
+                print("finetune from model 7 to auxillary learning")
                 #TODO Hard coded in to get it working                
                 #Make mode look like 320 and load weights
                 model.base.classifier[6] = nn.Sequential(
