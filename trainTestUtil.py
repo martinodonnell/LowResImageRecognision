@@ -101,6 +101,14 @@ def load_weight_stan_boxcars2(model, path, device):
     #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
     #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
 
+def load_weight_auxillary(model,path,device):
+    pretrained_dict = torch.load(path, map_location=device)
+
+    for key,weights in pretrained_dict.items():
+        model.state_dict()[key].data.copy_(weights)
+    
+    return model
+
 def get_args(): 
     parser = argparse.ArgumentParser(description='Training/Testing and finetuning script for Cars classification task')
 

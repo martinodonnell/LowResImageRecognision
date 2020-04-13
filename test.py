@@ -21,7 +21,7 @@ def main(config):
 
     test_loader, confusion_matrix = prepare_test_loader(config)
 
-    model = construct_model(config, config['num_classes'], config['num_makes'], config['num_models'],
+    model = construct_model(config['model_version'], config['num_classes'], config['num_makes'], config['num_models'],
                             config['num_submodels'], config['num_generations'])
     load_weight(model, model_path, device)
     model = model.to(device)

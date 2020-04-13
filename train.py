@@ -1,6 +1,6 @@
 from datasets import prepare_loader
 from models import construct_model
-from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars,load_weight_stan_boxcars2,get_loss_function
+from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars,load_weight_stan_boxcars2,load_weight_auxillary,get_loss_function
 from trainTest import get_train_test_methods
 import os
 import pprint as pp
@@ -24,9 +24,9 @@ def main(config):
     train_loader, test_loader, confusion_matrixes = prepare_loader(config)
 
     # Create model
-    model = construct_model(config, config['num_classes'], config['num_makes'], config['num_models'],
+    model = construct_model(config['model_version'], config['num_classes'], config['num_makes'], config['num_models'],
                             config['num_submodels'], config['num_generations'])
-
+    
     csv_history_filepath, model_best_filepath = get_output_filepaths(config)
 
     # Finetune an existing model already trained
@@ -38,13 +38,28 @@ def main(config):
         #     load_weight_stan_boxcars(model, fine_tune_model_path, device)
         # el
         if config['finetune_stan_box']:
-            #TODO Hard coded in to get it working
-            model = construct_model(config,196, -1, -1,-1,-1)
-            load_weight_stan_boxcars(model, fine_tune_model_path, device)
-            model.base.classifier[6] = nn.Sequential(
-                nn.Dropout(0.5),
-                nn.Linear(4096, config['num_classes']),
-            )
+            if(config['model_version'] is 7):
+                #TODO Hard coded in to get it working
+                model = construct_model(config['model_version'],196, -1, -1,-1,-1)
+                load_weight_stan_boxcars(model, fine_tune_model_path, device)
+                model.base.classifier[6] = nn.Sequential(
+                    nn.Dropout(0.5),
+                    nn.Linear(4096, config['num_classes']),
+                )
+            elif(config['model_version'] in [15,16,17]):
+                #TODO Hard coded in to get it working                
+                #Make mode look like 320 and load weights
+                model.base.classifier[6] = nn.Sequential(
+                    nn.Dropout(0.5),
+                    nn.Linear(4096, 196),
+                )
+                load_weight_auxillary(model, fine_tune_model_path, device)
+
+                #Remove final layer to allow auxillary layers to do all the work
+                model.base.classifier[6] = nn.Sequential(
+                    nn.Dropout(0.5),
+                )
+                
         else:
             load_weight(model, fine_tune_model_path, device)
 
