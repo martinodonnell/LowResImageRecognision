@@ -1,6 +1,6 @@
 from datasets import prepare_loader
 from models import construct_model
-from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stan_boxcars,load_weight_stan_boxcars2,load_weight_auxillary,get_loss_function
+from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stanford,get_loss_function
 from trainTest import get_train_test_methods
 import os
 import pprint as pp
@@ -33,38 +33,30 @@ def main(config):
     if config['finetune']:
         _, fine_tune_model_path = get_output_filepaths(config['fine-tune-id'])
         print("finetune model ", fine_tune_model_path)
-        print("Loading existing model", )
-        # if config['finetune_stan_box']:
-        #     load_weight_stan_boxcars(model, fine_tune_model_path, device)
-        # el
         if config['finetune_stan_box']:
+            #Match the last layers of boxcars to stanford
+            model.base.classifier[6] = nn.Sequential(
+                nn.Dropout(0.5),
+                nn.Linear(4096, 196),
+            )
+            #Load weights
+            load_weight_stanford(model, fine_tune_model_path, device)
+            #Revert model to the same as before with random weights
             if(config['model_version'] is 7):
-                #TODO Hard coded in to get it working
-                model = construct_model(config['model_version'],196, -1, -1,-1,-1)
-                load_weight_stan_boxcars(model, fine_tune_model_path, device)
+                #Change 
                 model.base.classifier[6] = nn.Sequential(
                     nn.Dropout(0.5),
                     nn.Linear(4096, config['num_classes']),
                 )
             elif(config['model_version'] in [15,16,17]):
-                print("finetune from model 7 to auxillary learning")
-                #TODO Hard coded in to get it working                
-                #Make mode look like 320 and load weights
-                model.base.classifier[6] = nn.Sequential(
-                    nn.Dropout(0.5),
-                    nn.Linear(4096, 196),
-                )
-                load_weight_auxillary(model, fine_tune_model_path, device)
-
                 #Remove final layer to allow auxillary layers to do all the work
                 model.base.classifier[6] = nn.Sequential(
                     nn.Dropout(0.5),
-                )
-                
+                )                
         else:
             load_weight(model, fine_tune_model_path, device)
 
-            # Add to multiple gpus if they are there
+    # Add to multiple gpus if they are there
     if torch.cuda.device_count() > 1:
         print("Using", torch.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
@@ -73,7 +65,7 @@ def main(config):
     model = model.to(device)
   
     # Set up output files and add header to csv file
-    config, csv_history_filepath, model_best_filepath = set_up_output_filepaths(config)
+    csv_history_filepath, model_best_filepath = set_up_output_filepaths(config['testing'],config['model_id'],config['train_test_version'])
     print(csv_history_filepath, model_best_filepath)
 
     # Decide on optimiser. Adam works best but keeping it here for later
@@ -92,10 +84,10 @@ def main(config):
     lr_scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min')
 
     # Get correct train/test methods
-    train_fn, test_fn = get_train_test_methods(config)
+    train_fn, test_fn = get_train_test_methods(config['train_test_version'])
 
     #Get loss function
-    loss_function = get_loss_function(config)
+    loss_function = get_loss_function(config['loss-function'])
     
 
     best_acc = 0

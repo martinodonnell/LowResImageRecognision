@@ -26,10 +26,10 @@ def main(config):
     load_weight(model, model_path, device)
     model = model.to(device)
 
-    _, test_fn = get_train_test_methods(config)
+    _, test_fn = get_train_test_methods(config['train_test_version'])
     
     #Get loss function
-    loss_function = get_loss_function(config)
+    loss_function = get_loss_function(config['loss-function'])
 
     valres = test_fn(model, test_loader, device, config, confusion_matrix,loss_function)
 

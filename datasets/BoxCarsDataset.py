@@ -285,7 +285,7 @@ class BoxCarDataSetUtil(object):
         if ann not in arr:
             print("Ann not in array. Check this. \nError occured",ann,arr)
             exit(1)
-            arr.append(ann)
+            # arr.append(ann)
         return arr.index(ann)
 
     def get_class_names(self,filename):

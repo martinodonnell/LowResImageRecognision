@@ -41,9 +41,7 @@ def load_annotations(path,downsample):
             'target': target.item() - 1,
             'filename': fn
         }
-
         ret[idx] = r
-
     return ret
 
 class CarsDatasetV1(Dataset):

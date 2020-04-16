@@ -1,11 +1,13 @@
 import os
 from config import SAVE_FOLDER
+from exceptions.exceptions import OutputFileExistsException,InValidTestTrainMethod,InvalidLossFunction
 import pandas as pd
 import pprint as pp
 import argparse
 import torch
 import torch.nn.functional as F
 import torch.nn as nn
+
 
 def get_output_filepaths(id):
     id_string = str(id).zfill(3)
@@ -14,41 +16,39 @@ def get_output_filepaths(id):
 
     return csv_history_filepath, model_best_filepath
 
-
-def set_up_output_filepaths(config):
+def set_up_output_filepaths(testing,model_id,train_test_version):
     
     #Stops the checcking for used ids. Will just give back testing file paths
-    if(config['testing']):
-        return config,"Testing_csv","Testing_Model"
+    if(testing):
+        return "Testing_csv","Testing_Model"
     # Set up name for output files
-    csv_history_filepath, model_best_filepath = get_output_filepaths(config['model_id'])
+    csv_history_filepath, model_best_filepath = get_output_filepaths(model_id)
 
     # Check if file exists. If so increment the id and try again until a new one is generated. Will create a new file
     # if finetuning to ensure results are not lost. May have changes the parameters and want to keep them. Will know
     # from the logs
     if os.path.isfile(csv_history_filepath):
-        print(config['model_id'],"id already in use (set_up_output_filepaths)")
-        exit(1)
-    print("Current ID:", config['model_id'])
+        raise OutputFileExistsException(str(model_id) + " id already in use (set_up_output_filepaths)")
+    print("Current ID:", model_id)
 
     # Set up blank csv in save folder
-    if config['train_test_version'] in [1,7]:
+    if train_test_version in [1,7]:
         df = pd.DataFrame(
             columns=['train_loss', 'train_acc', 'train_time', 'val_loss', 'val_acc', 'val_time', 'lr', 'overwritten',
                      'epoch'])
-    elif config['train_test_version'] in [2,3]:
+    elif train_test_version in [2,3]:
         # Multitask learning (2 features) Boxcars or #Multitask learning 2 features Stanford
         df = pd.DataFrame(columns=['train_loss', 'train_acc', 'train_make_loss', 'train_make_acc', 'train_model_loss',
                                    'train_model_acc', 'train_time', 'val_loss', 'val_acc', 'val_make_loss',
                                    'val_make_acc', 'val_model_loss', 'val_model_acc', 'val_time', 'lr', 'overwritten',
                                    'epoch'])
-    elif config['train_test_version'] in [4]:  # Multitask learning (3 features) Boxcars
+    elif train_test_version in [4]:  # Multitask learning (3 features) Boxcars
         df = pd.DataFrame(columns=['train_loss', 'train_acc', 'train_make_loss', 'train_make_acc', 'train_model_loss',
                                    'train_model_acc', 'train_submodel_loss', 'train_submodel_acc', 'train_time',
                                    'val_loss', 'val_acc', 'val_make_loss', 'val_make_acc', 'val_model_loss',
                                    'val_model_acc', 'val_submodel_loss', 'val_submodel_acc', 'val_time', 'lr',
                                    'overwritten', 'epoch'])
-    elif config['train_test_version'] in [5,6]:  # Multitask learning with classifc ml format
+    elif train_test_version in [5,6]:  # Multitask learning with classifc ml format
         df = pd.DataFrame(columns=['train_loss', 'train_acc', 'train_make_loss', 'train_make_acc', 'train_model_loss',
                                    'train_model_acc', 'train_submodel_loss', 'train_submodel_acc',
                                    'train_generation_loss', 'train_generation_acc', 'train_time', 'val_loss', 'val_acc',
@@ -56,52 +56,19 @@ def set_up_output_filepaths(config):
                                    'val_submodel_loss', 'val_submodel_acc', 'val_generation_loss', 'val_generation_acc',
                                    'val_time', 'lr', 'overwritten', 'epoch'])
     else:
-        print(config['train_test_version'], "is not a valid trainTest method(set_up_output_filepaths)")
-        exit(1) 
+        raise InValidTestTrainMethod(str(train_test_version) + " is not a valid trainTest method(set_up_output_filepaths)")
        
     df.to_csv(csv_history_filepath)
 
-    return config, csv_history_filepath, model_best_filepath
+    return csv_history_filepath, model_best_filepath
 
 def load_weight(model, path, device):
     sd = torch.load(path, map_location=device)
     model.load_state_dict(sd)
+    return model
 
 
-def load_weight_stan_boxcars(model, path, device):
-    pretrained_dict = torch.load(path, map_location=device)
-    pretrained_dict_ids = [0, 2, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26, 28]
-    # Add features
-    for i in pretrained_dict_ids:
-        key = 'base.features.' + str(i)
-        model.state_dict()[key + '.weight'].data.copy_(pretrained_dict[key + '.weight'])
-        model.state_dict()[key + '.bias'].data.copy_(pretrained_dict[key + '.bias'])
-
-    # #Add classifiers
-    # pretrained_dict_ids = [0,3,5.1,6.1]
-
-    # for i in pretrained_dict_ids:
-    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
-
-
-def load_weight_stan_boxcars2(model, path, device):
-    pretrained_dict = torch.load(path, map_location=device)
-    pretrained_dict_ids = [0, 2, 5, 7, 10, 12, 14, 17, 19, 21, 24, 26, 28]
-    # Add features
-    for i in pretrained_dict_ids:
-        key = 'base.features.' + str(i)
-        model.state_dict()[key + '.weight'].data.copy_(pretrained_dict[key + '.weight'])
-        model.state_dict()[key + '.bias'].data.copy_(pretrained_dict[key + '.bias'])
-
-    # #Add classifiers
-    # pretrained_dict_ids = [0,3,5.1,6.1]
-
-    # for i in pretrained_dict_ids:
-    #     model.state_dict()[key+'.weight'].data.copy_(pretrained_dict[key+'.weight'])
-    #     model.state_dict()[key+'.bias'].data.copy_(pretrained_dict[key+'.weight'])
-
-def load_weight_auxillary(model,path,device):
+def load_weight_stanford(model,path,device):
     pretrained_dict = torch.load(path, map_location=device)
 
     for key,weights in pretrained_dict.items():
@@ -223,14 +190,13 @@ def dual_cross_entropy(pred, target,alpha=1,beta=4.5):
     return Lce + (beta * lr)
 
 
-def get_loss_function(config):
+def get_loss_function(loss_function):
      #Get loss function
-    if(config['loss-function'] is 1):
+    if(loss_function is 1):
         print("Loss Function: F.cross_entropy")
         return F.cross_entropy
-    if(config['loss-function'] is 2):
+    if(loss_function is 2):
         print("Loss Function: dual_cross_entropy")
         return dual_cross_entropy
     else:
-        print("There is no loss function under that id:",config['loss-function'])
-        exit()
+        raise InvalidLossFunction("There is no loss function under that id:"+str(loss_function))

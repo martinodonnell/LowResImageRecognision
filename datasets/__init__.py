@@ -11,6 +11,7 @@ from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2,CarsDatasetV3
 from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
 from config import BOXCARS_IMAGES_IMAGES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
+from exceptions.exceptions import InvalidDatasetVersion
 
 
 fine_grain_model_ids = [2,9,10,11,13,14]
@@ -91,7 +92,7 @@ def add_class_numbers_to_config(config):
         config['num_classes']=196
         config['num_makes']=49
         config['num_models']=18
-        config['num_submodels']=1
+        config['num_submodels']=16
         config['num_generations']=1 
     else:
         config['num_classes']=107
@@ -161,7 +162,6 @@ def get_train_test_dataset(config,train_transform,test_transform,part="validatio
         train_dataset = CarsDatasetV3(train_imgdir, train_annopath, train_transform, config['imgsize'],config['ds-stanford'])
         test_dataset = CarsDatasetV3(test_imgdir, test_annopath, test_transform, config['imgsize'],config['ds-stanford'])
     else:
-        print("No dataset. Leaving")
-        exit(1)  
+        raise InvalidDatasetVersion("Invalid dataset version") 
 
     return train_dataset,test_dataset

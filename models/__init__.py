@@ -4,6 +4,7 @@ from models.mtLearningClassic import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Se
 from models.mtlearningNonClassic import MTLNC_Shared_FC_B,MTLNC_Seperate_FC,MTLNC_Shared_FC_A,MTLNC_Shared_FC_C
 from models.Pooling import ChannelPoolingNetwork,SpatiallyWeightedPoolingNetwork
 from models.AuxillaryLearning import AuxillaryLearning_A,AuxillaryLearning_B,AuxillaryLearning_C
+from exceptions.exceptions import InvalidModelVersion
 
 # Set up config for other models in the future
 def construct_model(model_version, num_classes,num_makes,num_models,num_submodels,num_generation):
@@ -14,8 +15,7 @@ def construct_model(model_version, num_classes,num_makes,num_models,num_submodel
     elif model_version == 2:
         model = MTLC_Shared_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif model_version == 3:
-        model = MTLC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
-    
+        model = MTLC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)    
     elif model_version == 4:
         model = Old_MTLC_Seperate_FC(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif model_version == 5:
@@ -47,7 +47,6 @@ def construct_model(model_version, num_classes,num_makes,num_models,num_submodel
         model = AuxillaryLearning_C(base, num_classes, num_makes, num_models,num_submodels,num_generation)
 
     else:
-        print("not a valid model")
-        exit()
+        raise InvalidModelVersion(str(model_version) + " is not a valid model version")
 
     return model
