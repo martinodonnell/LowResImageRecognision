@@ -104,8 +104,12 @@ def get_args():
                              '2. Dual Cross Entropy\n')
     parser.add_argument('--boxcar-split', default='hard',
                         help='required if set dataset-version to 2 (default: hard)')
-    parser.add_argument('--train-samples', default=1,type=int,
+
+    parser.add_argument('--train-samples', default=1,type=float,
                         help='required if set dataset-version to 4 (default: 1). Determines how many training samples to train the model with during testing from boxcars')
+    parser.add_argument('--train-samples-percent', default=False, action='store_true',
+                        help='Converts the train-samples to percent instead of distinct values')
+
     parser.add_argument('--finetune', default=False, action='store_true',
                         help='fine tune an existing model (default: False)')
     parser.add_argument('--finetune-stan-box', default=False, action='store_true',
@@ -153,7 +157,9 @@ def get_args():
         'train_test_version': args.train_test_version,
         'dataset_version': args.dataset_version,
         'boxcar_split': args.boxcar_split,
-        'train_samples':int(args.train_samples),
+        'train_samples':args.train_samples,
+        'train_samples_percent':args.train_samples_percent,
+
         'finetune': args.finetune,
         'model_id': args.model_id,
         'finetune_stan_box': args.finetune_stan_box,

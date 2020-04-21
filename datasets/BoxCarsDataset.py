@@ -53,11 +53,11 @@ class BoxCarsDatasetV1(Dataset):
 
 
 class BoxCarsDatasetV1_2(Dataset):
-    def __init__(self, imgdir, transform, size,split,part,num_train_samples):
+    def __init__(self, imgdir, transform, size,split,part,num_train_samples,num_train_samples_percent):
         boxCarsAnnUtil = BoxCarDataSetUtil(split,part)
         self.annos  = boxCarsAnnUtil.load_annotations_boxcars_v1()
         if part == 'train':
-            self.annos = boxCarsAnnUtil.reduced_dataset(num_train_samples,self.annos)
+            self.annos = boxCarsAnnUtil.reduced_dataset(num_train_samples,self.annos,num_train_samples_percent)
 
         self.imgdir = imgdir
         self.transform = transform
@@ -300,10 +300,25 @@ class BoxCarDataSetUtil(object):
         return ann
     
 
-    def reduced_dataset(self,num_train_samples,full_annos):
+    def reduced_dataset(self,num_train_samples,full_annos,num_train_samples_percent):
+        
+        
         #Get current list of car_annocations and convert to counter list
         temp_cars_annotations = self.cars_annotations
-        temp_cars_annotations = { i : num_train_samples for i in temp_cars_annotations }
+
+        temp_cars_annotations = {'skoda fabia combi mk1': 4056,'skoda fabia hatchback mk2': 1383, 'skoda octavia combi mk2': 4298, 'skoda fabia combi mk2': 3087, 'skoda octavia sedan mk3': 1159, 'skoda octavia combi mk3': 794, 'skoda octavia combi mk1': 2751, 'volkswagen passat combi mk6': 341, 'skoda fabia hatchback mk1': 2947, 'skoda superb sedan mk2': 198, 'skoda rapid sedan mk1': 273, 'skoda octavia sedan mk1': 2738, 'skoda octavia sedan mk2': 2185, 'skoda superb combi mk2': 239, 'volkswagen passat combi mk7': 88, 'volkswagen golf hatchback mk6': 178, 'volkswagen passat sedan mk6': 227, 'volkswagen passat sedan mk5': 89, 'skoda superb sedan mk1': 187, 'volkswagen passat combi mk5': 668, 'skoda fabia sedan mk1': 189, 'skoda yeti suv mk1': 592, 'volkswagen caddy van mk3': 538, 'skoda citigo hatchback mk1': 1157, 'ford focus combi mk1': 807, 'peugeot 206 hatchback mk1': 569, 'skoda felicia combi mk2': 265, 'skoda felicia hatchback mk1': 925, 'fiat panda hatchback mk2': 336, 'citroen berlingo van mk2': 495, 'bmw x5 suv mk2': 121, 'audi a6 combi mk4': 101, 'hyundai i20 hatchback mk1': 290, 'bmw x3 suv mk2': 133, 'porsche cayenne suv mk2': 60, 'citroen berlingo van mk1': 597, 'ford fiesta hatchback mk6': 145, 'skoda felicia hatchback mk2': 958, 'peugeot partner van mk2': 218, 'skoda favorit hatchback mk1': 195, 'audi a6 sedan mk4': 294, 'toyota auris combi mk2': 121, 'toyota yaris hatchback mk3': 228, 'hyundai ix20 mpv mk1': 420, 'renault megane combi mk3': 381, 'opel corsa hatchback mk4': 164, 'ford mondeo combi mk3': 242, 'seat alhambra mpv mk1': 69, 'skoda felicia combi mk1': 117, 'bmw 1 hatchback mk1': 75, 'ford focus combi mk3': 140, 'volkswagen golf combi mk4': 105, 'volkswagen touareg suv mk2': 171, 'volkswagen sharan mpv mk1': 401, 'kia ceed combi mk1': 417, 'fiat punto hatchback mk1': 190, 'audi q7 suv mk1': 135, 'renault kangoo van mk1': 141, 'volkswagen golf hatchback mk4': 523, 'volkswagen tiguan suv mk1': 86, 'hyundai i30 hatchback mk1': 133, 'ford focus combi mk2': 312, 'opel corsa hatchback mk3': 175, 'hyundai i30 combi mk2': 381, 'skoda roomster van mk1': 1206, 'peugeot 107 hatchback mk1': 223, 'opel astra combi mk2': 171, 'renault megane combi mk2': 251, 'citroen c1 hatchback mk1': 293, 'hyundai i30 hatchback mk2': 211, 'renault clio hatchback mk2': 315, 'renault trafic van mk2': 388, 'ford s-max mpv mk1': 223, 'seat cordoba sedan mk2': 112, 'seat leon hatchback mk2': 109, 'ford fusion mpv mk1': 550, 'renault laguna combi mk2': 94, 'volkswagen touran mpv mk1': 254, 'ford focus hatchback mk1': 329, 'fiat punto hatchback mk2': 141, 'peugeot 207 hatchback mk1': 76, 'renault megane hatchback mk3': 124, 'ford focus hatchback mk2': 194, 'renault thalia sedan mk1': 145, 'hyundai getz hatchback mk1': 125, 'renault scenic mpv mk1': 121, 'volvo xc90 suv mk1': 122, 'opel vivaro van mk2': 134, 'ford transit van mk6': 438, 'peugeot partner van mk1': 175, 'volkswagen transporter van mk5': 417, 'kia sportage suv mk3': 143, 'renault master van mk2': 153, 'citroen c3 hatchback mk1': 187, 'volvo xc60 suv mk1': 114, 'volkswagen transporter van mk4': 383, 'ford mondeo combi mk4': 157, 'peugeot 308 combi mk1': 81, 'renault kangoo van mk2': 145, 'peugeot boxer van mk3': 117, 'peugeot 307 combi mk1': 161, 'ford transit van mk7': 265, 'fiat ducato van mk3': 192, 'hyundai ix35 suv mk1': 178, 'fiat doblo van mk1': 163, 'skoda fabia hatchback mk3': 139, 'renault master van mk3': 174}
+
+        #Distinct samples from each
+        if(not num_train_samples_percent):
+            for x in temp_cars_annotations:
+                if temp_cars_annotations[x] > num_train_samples:
+                    temp_cars_annotations[x] = num_train_samples
+        else:#Percentage from each class
+            if(num_train_samples<=0 or num_train_samples > 1):
+                print("The percentage number must be between 1 and 100")
+                exit()
+            for x in temp_cars_annotations:    
+                temp_cars_annotations[x] = round(temp_cars_annotations[x]*num_train_samples)
         ret = {}
 
         car_ann_counter = 0
@@ -320,7 +335,6 @@ class BoxCarDataSetUtil(object):
                     temp_cars_annotations.pop(target_ann)               
 
 
-            car_ann_counter+=1
-                
+            car_ann_counter+=1  
 
         return ret    

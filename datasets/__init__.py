@@ -151,8 +151,8 @@ def get_train_test_dataset(config,train_transform,test_transform,part="validatio
     elif(config['dataset_version']==4):#Train with a lessor amoutn of training
         print("Dataset: Boxcars Sample Limiter")  
         imgdir =  BOXCARS_IMAGES_IMAGES
-        train_dataset = BoxCarsDatasetV1_2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train',config['train_samples'])
-        test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],part,config['train_samples'])
+        train_dataset = BoxCarsDatasetV1_2(imgdir, train_transform, config['imgsize'],config['boxcar_split'],'train',config['train_samples'],config['train_samples_percent'])
+        test_dataset = BoxCarsDatasetV1_2(imgdir, test_transform, config['imgsize'],config['boxcar_split'],part,config['train_samples'],config['train_samples_percent'])
     elif(config['dataset_version']==5):#Mixed Stanford Dataset
         train_imgdir = STANFORD_CARS_TRAIN
         test_imgdir = STANFORD_CARS_TEST
