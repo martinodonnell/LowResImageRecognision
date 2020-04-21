@@ -7,7 +7,7 @@ import pickle
 import numpy as np
 import torch
 
-from datasets.StanfordDataset import CarsDatasetV1,CarsDatasetV2,CarsDatasetV3
+from datasets.StanfordDataset import StanfordCarsDatasetV1,StanfordCarsDatasetV2,StanfordCarsDatasetV3
 from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
 from config import BOXCARS_IMAGES_IMAGES
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
@@ -113,13 +113,13 @@ def get_train_test_dataset(config,train_transform,test_transform,part="validatio
         
         if config['train_test_version'] in [1]:  
             print("Dataset: Stanford Normal")       
-            train_dataset = CarsDatasetV1
-            test_dataset = CarsDatasetV1
+            train_dataset = StanfordCarsDatasetV1
+            test_dataset = StanfordCarsDatasetV1
         else:
             print("Dataset: Stanford MTL")      
 
-            train_dataset = CarsDatasetV2
-            test_dataset = CarsDatasetV2  
+            train_dataset = StanfordCarsDatasetV2
+            test_dataset = StanfordCarsDatasetV2  
         
         train_dataset = train_dataset(train_imgdir, train_annopath, train_transform, config['imgsize'],config['ds-stanford'])
         test_dataset = test_dataset(test_imgdir, test_annopath, test_transform, config['imgsize'],config['ds-stanford'])
@@ -159,8 +159,8 @@ def get_train_test_dataset(config,train_transform,test_transform,part="validatio
         train_annopath = STANFORD_CARS_TRAIN_ANNOS
         test_annopath = STANFORD_CARS_TEST_ANNOS
 
-        train_dataset = CarsDatasetV3(train_imgdir, train_annopath, train_transform, config['imgsize'],config['ds-stanford'])
-        test_dataset = CarsDatasetV3(test_imgdir, test_annopath, test_transform, config['imgsize'],config['ds-stanford'])
+        train_dataset = StanfordCarsDatasetV3(train_imgdir, train_annopath, train_transform, config['imgsize'],config['ds-stanford'])
+        test_dataset = StanfordCarsDatasetV3(test_imgdir, test_annopath, test_transform, config['imgsize'],config['ds-stanford'])
     else:
         raise InvalidDatasetVersion("Invalid dataset version") 
 

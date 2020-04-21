@@ -52,8 +52,6 @@ class AlexnetBase(nn.Module):
         print("Creating Alexnet Base Model")
 
         self.base = base
-
-        print(self.base)
         in_features = self.base.classifier[6].in_features
 
         self.base.classifier[6] = nn.Linear(in_features, num_classes)

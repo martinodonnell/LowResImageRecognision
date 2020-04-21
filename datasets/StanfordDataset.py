@@ -44,7 +44,7 @@ def load_annotations(path,downsample):
         ret[idx] = r
     return ret
 
-class CarsDatasetV1(Dataset):
+class StanfordCarsDatasetV1(Dataset):
     def __init__(self, imgdir, anno_path, transform, size,downsample):        
         self.annos = load_annotations(anno_path,downsample)     
         self.imgdir = imgdir
@@ -136,7 +136,7 @@ def separate_class(class_names):
     arr = pd.DataFrame(arr, columns=['target', 'make', 'model', 'model_type', 'year'])
     return arr
 
-class CarsDatasetV2(Dataset):
+class StanfordCarsDatasetV2(Dataset):
     def __init__(self, imgdir, anno_path, transform, size,downsample):
         self.class_names = load_class_names()
         self.v2_info = separate_class(self.class_names)
@@ -174,7 +174,7 @@ class CarsDatasetV2(Dataset):
 
 
 #Mixed dataset
-class CarsDatasetV3(Dataset):
+class StanfordCarsDatasetV3(Dataset):
     def __init__(self, imgdir, anno_path, transform, size,downsample):        
         self.annos = load_annotations(anno_path,False)
         self.annos_downsample = load_annotations(anno_path,True)
