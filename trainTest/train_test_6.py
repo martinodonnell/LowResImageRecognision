@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 import time
 import torch
-from trainTest.confusionMatrix import update_confusion_matrix
+from trainTest.confusion_matrix import update_confusion_matrix
 
 
 #Predicit each feature for label and backpropogate with combined loss
