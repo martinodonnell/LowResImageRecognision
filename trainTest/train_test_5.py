@@ -269,7 +269,6 @@ def test_v5(model, test_loader, device, config,confusion_matrix,loss_function):
         'val_generation_loss':generation_loss_meter,
         'val_generation_acc':generation_acc_meter,
 
-
         'val_time': elapsed
     }
 
