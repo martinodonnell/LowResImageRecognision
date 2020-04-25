@@ -13,5 +13,5 @@ for subdir, dirs, files in os.walk(folder):
 
         if filepath.endswith(".jpg"):
             img = cv2.imread(filepath)
-            res = cv2.resize(img, dsize=(124,125), interpolation=cv2.INTER_CUBIC)
+            res = cv2.resize(img, dsize=(50,50), interpolation=cv2.INTER_CUBIC)
             cv2.imwrite(filepath[:-4] + "_ds.jpg", res)

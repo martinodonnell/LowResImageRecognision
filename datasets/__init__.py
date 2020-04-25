@@ -1,16 +1,11 @@
-import os
-import scipy.io
 from torchvision import transforms
-from torch.utils.data import Dataset, DataLoader
-from PIL import Image
-import pickle
-import numpy as np
+from torch.utils.data import DataLoader
 import torch
 
-from datasets.StanfordDataset import StanfordCarsDatasetV1,StanfordCarsDatasetV2,StanfordCarsDatasetV3
-from datasets.BoxCarsDataset import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
-from config import BOXCARS_IMAGES_IMAGES
-from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
+from datasets.stanford.StanfordDataset import StanfordCarsDatasetV1,StanfordCarsDatasetV2,StanfordCarsDatasetV3
+from datasets.boxcars.boxcars_datasets import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
+
+from config import BOXCARS_IMAGES_IMAGES,STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
 from exceptions.exceptions import InvalidDatasetVersion
 
 
