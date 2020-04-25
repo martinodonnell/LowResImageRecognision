@@ -123,7 +123,7 @@ def get_train_test_dataset(config,train_transform,test_transform,part="validatio
     elif(config['dataset_version']==2):#BoxCars Dataset
         imgdir =  BOXCARS_IMAGES_IMAGES
 
-        if config['train_test_version'] in [1,7]:    
+        if config['train_test_version'] in [1]:    
             print("Dataset: Boxcars Normal")       
      
             train_dataset = BoxCarsDatasetV1

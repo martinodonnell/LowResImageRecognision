@@ -136,91 +136,10 @@ def train_v5(ep, model, optimizer, train_loader, device, config,loss_function):
 
 
 
-def printTopK(predictions,k,target):
-    _, predicted = torch.topk(predictions, k=k)
-    make_acc = torch.max(predictions,1).indices
-    print(predicted,make_acc,target)
 
 
 #One model predicting make,model,submodel and generation seperatly
 def test_v5(model, test_loader, device, config,confusion_matrix,loss_function):
-    model.eval()
-
-    acc_meter = 0
-    runcount = 0
-    i = 0
-
-    start_time = time.time()
-    elapsed = 0
-    k=1
-    with torch.no_grad():
-        for data, target, make_target, model_target, submodel_target, generation_target in test_loader:
-            data = data.to(device)
-            target = target.to(device)
-            make_target = make_target.to(device)
-            model_target = model_target.to(device)
-            submodel_target = submodel_target.to(device)
-            generation_target = generation_target.to(device)
-
-            make_pred, model_pred,submodel_pred,generation_pred = model(data)
-
-            #Get top predictions (k number)
-            make_pred = torch.topk(make_pred, k=k)
-            model_pred = torch.topk(model_pred, k=k)
-            submodel_pred = torch.topk(submodel_pred, k=k)
-            generation_pred = torch.topk(generation_pred, k=k)
-
-            if (make_target in make_pred.indices and 
-                model_target in model_pred.indices and 
-                submodel_target in submodel_pred.indices and
-                generation_target in generation_pred.indices ):
-                acc_meter += 1
-        
-            runcount += data.size(0)
-            i += 1
-            elapsed = time.time() - start_time
-
-            print(f'[{i}/{len(test_loader)}]: '
-                  f'Total Label accurcy: {acc_meter / runcount:.4f} when k is {k}'
-                  f'({elapsed:.2f}s)', end='\r')
-
-        print()
-
-
-        acc_meter /= runcount
-
-
-    print(f'Test Result: '
-          f'Acc: {acc_meter:.4f} '
-          f'({elapsed:.2f}s)')
-
-
-    valres = {
-        'val_loss': -1,
-        'val_acc': acc_meter, #Need a value here to save the model if better
-        
-        'val_make_loss': -1,
-        'val_make_acc': -1,
-
-        'val_model_loss': -1,
-        'val_model_acc': -1,
-
-        'val_submodel_loss':-1,
-        'val_submodel_acc':-1,
-
-        'val_generation_loss':-1,
-        'val_generation_acc':-1,
-
-
-        'val_time': elapsed
-    }
-
-    return valres
-
-
-
-#One model predicting make,model,submodel and generation seperatly
-def test_v5_2(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
 
     loss_meter = 0
@@ -257,9 +176,6 @@ def test_v5_2(model, test_loader, device, config,confusion_matrix,loss_function)
 
             loss = config['make_loss'] * make_loss + config['model_loss'] * model_loss  + config['submodel_loss'] * submodel_loss + config['generation_loss'] * generation_loss
 
-
-            print("hello")
-            exit()
             make_acc = torch.max(make_pred,1).indices.eq(make_target).float().sum()
             model_acc = torch.max(model_pred,1).indices.eq(model_target).float().sum()
             submodel_acc = torch.max(submodel_pred,1).indices.eq(submodel_target).float().sum()
@@ -358,3 +274,79 @@ def test_v5_2(model, test_loader, device, config,confusion_matrix,loss_function)
     }
 
     return valres
+
+#One model predicting make,model,submodel and generation seperatly
+def test_v5_concat_multtlabels(model, test_loader, device, config,confusion_matrix,loss_function):
+    model.eval()
+
+    acc_meter = 0
+    runcount = 0
+    i = 0
+
+    start_time = time.time()
+    elapsed = 0
+    k=1
+    with torch.no_grad():
+        for data, target, make_target, model_target, submodel_target, generation_target in test_loader:
+            data = data.to(device)
+            target = target.to(device)
+            make_target = make_target.to(device)
+            model_target = model_target.to(device)
+            submodel_target = submodel_target.to(device)
+            generation_target = generation_target.to(device)
+
+            make_pred, model_pred,submodel_pred,generation_pred = model(data)
+
+            #Get top predictions (k number)
+            make_pred = torch.topk(make_pred, k=k)
+            model_pred = torch.topk(model_pred, k=k)
+            submodel_pred = torch.topk(submodel_pred, k=k)
+            generation_pred = torch.topk(generation_pred, k=k)
+
+            if (make_target in make_pred.indices and 
+                model_target in model_pred.indices and 
+                submodel_target in submodel_pred.indices and
+                generation_target in generation_pred.indices ):
+                acc_meter += 1
+        
+            runcount += data.size(0)
+            i += 1
+            elapsed = time.time() - start_time
+
+            print(f'[{i}/{len(test_loader)}]: '
+                  f'Total Label accurcy: {acc_meter / runcount:.4f} when k is {k}'
+                  f'({elapsed:.2f}s)', end='\r')
+
+        print()
+
+
+        acc_meter /= runcount
+
+
+    print(f'Test Result: '
+          f'Acc: {acc_meter:.4f} '
+          f'({elapsed:.2f}s)')
+
+
+    valres = {
+        'val_loss': -1,
+        'val_acc': acc_meter, #Need a value here to save the model if better
+        
+        'val_make_loss': -1,
+        'val_make_acc': -1,
+
+        'val_model_loss': -1,
+        'val_model_acc': -1,
+
+        'val_submodel_loss':-1,
+        'val_submodel_acc':-1,
+
+        'val_generation_loss':-1,
+        'val_generation_acc':-1,
+
+
+        'val_time': elapsed
+    }
+
+    return valres
+

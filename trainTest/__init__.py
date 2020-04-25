@@ -3,7 +3,7 @@ from trainTest.train_test_1 import train_v1,test_v1
 from trainTest.train_test_2 import train_v2,test_v2
 from trainTest.train_test_3 import train_v3,test_v3
 from trainTest.train_test_4 import train_v4,test_v4
-from trainTest.train_test_5 import train_v5,test_v5
+from trainTest.train_test_5 import train_v5,test_v5,test_v5_concat_multtlabels
 from trainTest.train_test_6 import train_v6,test_v6
 from exceptions.exceptions import InValidTestTrainMethod
 
@@ -33,6 +33,10 @@ def get_train_test_methods(train_test_version):
     elif train_test_version == 6:
         print("Train/Test Version 6 for BOXCARS (Auxillary learning - 4 features")
         return train_v6, test_v6
+    elif train_test_version == 7:
+        print("Train/Test Version 7 for BOXCARS (Multitask learning - 4 Features) Will concateinate the multitask to get overall accuracy. Only use on testing")
+        return test_v5_concat_multtlabels,test_v5_concat_multtlabels
+
     else:
 
         raise InValidTestTrainMethod(str(train_test_version) + "is not a valid trainTest method")
