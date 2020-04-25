@@ -1,7 +1,7 @@
 import torchvision
 import sys
 sys.path.append("..")
-from models.AuxillaryLearning import AuxillaryLearning_A,AuxillaryLearning_B,AuxillaryLearning_C
+from models.auxillary_learning import AuxillaryLearning_A,AuxillaryLearning_B,AuxillaryLearning_C
 from unitTests.models.testUtil import check_layers_multitask
 
 

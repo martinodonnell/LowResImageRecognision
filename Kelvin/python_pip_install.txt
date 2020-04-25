@@ -1,8 +1,0 @@
-#Install python3
-module load apps/python3/3.6.4/gcc-4.8.5
-
-#Packages needed to be installed
-pip3 install scipy
-pip3 install torch
-pip3 install torchvision
-pip install Pillow==6.2.0
