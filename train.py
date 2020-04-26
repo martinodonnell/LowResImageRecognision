@@ -48,7 +48,7 @@ def main(config):
                     nn.Dropout(0.5),
                     nn.Linear(4096, config['num_classes']),
                 )
-            elif(config['model_version'] in [15,16,17]):
+            elif(config['model_version'] in [15,16,17,18,19,20]):
                 #Remove final layer to allow auxillary layers to do all the work
                 model.base.classifier[6] = nn.Sequential(
                     nn.Dropout(0.5),
