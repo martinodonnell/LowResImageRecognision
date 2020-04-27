@@ -26,7 +26,7 @@ class BoxCarsDatasetV1(Dataset):
         r = self.annos[idx]
 
         target = r['target']
-
+        print("taget ", target)
         if idx not in self.cache:
             fn = r['filename']
 

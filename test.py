@@ -9,8 +9,8 @@ import time
 from datasets import prepare_test_loader
 from models import construct_model
 from config import SAVE_FOLDER,CONFUSION_MATRIX 
-from trainTest import get_train_test_methods
-from trainTestUtil import get_args,load_weight,get_loss_function
+from train_test import get_train_test_methods
+from train_test_util import get_args,load_weight,get_loss_function
 
 
 def main(config):

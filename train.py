@@ -1,7 +1,7 @@
 from datasets import prepare_loader
 from models import construct_model
-from trainTestUtil import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stanford,get_loss_function
-from trainTest import get_train_test_methods
+from train_test_util import set_up_output_filepaths, get_output_filepaths,get_args,load_weight,load_weight_stanford,get_loss_function
+from train_test import get_train_test_methods
 import os
 import pprint as pp
 import time

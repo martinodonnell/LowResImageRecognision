@@ -1,7 +1,7 @@
 import torch.nn.functional as F
 import time
 import torch
-from trainTest.confusionMatrix import update_confusion_matrix
+from train_test.confusion_matrix import update_confusion_matrix
 
 
 #Predicit each feature for label and backpropogate with combined loss
@@ -138,8 +138,6 @@ def train_v6(ep, model, optimizer, train_loader, device, config, loss_function):
 
     return trainres
 
-
-
 #One model predicting make,model,submodel and generation seperatly
 def test_v6(model, test_loader, device, config,confusion_matrix,loss_function):
     model.eval()
@@ -160,7 +158,10 @@ def test_v6(model, test_loader, device, config,confusion_matrix,loss_function):
 
     with torch.no_grad():
         start_time = time.time()
+        print("hello")
         for data, main_target, make_target, model_target, submodel_target, generation_target in test_loader:
+            print("hello")
+
             data = data.to(device)
             main_target = main_target.to(device)
             make_target = make_target.to(device)

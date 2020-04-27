@@ -2,10 +2,10 @@ import sys
 sys.path.append("..")
 import pytest
 import torchvision
-from models.NetworkGeneric import BoxCarsBase,StanfordBase,AlexnetBase
-from models.mtLearningClassic import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Seperate_FC,MTLC_Shared_FC_B,MTLC_Shared_FC_C
-from models.mtlearningNonClassic import MTLNC_Shared_FC_B,MTLNC_Seperate_FC,MTLNC_Shared_FC_A,MTLNC_Shared_FC_C
-from models.Pooling import ChannelPoolingNetwork,SpatiallyWeightedPoolingNetwork
+from models.generic_networks import BoxCarsBase,StanfordBase,AlexnetBase
+from models.multitask_networks import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Seperate_FC,MTLC_Shared_FC_B,MTLC_Shared_FC_C
+from models.old_auxiliary_networks import MTLNC_Shared_FC_B,MTLNC_Seperate_FC,MTLNC_Shared_FC_A,MTLNC_Shared_FC_C
+from models.pooling_networks import ChannelPoolingNetwork,SpatiallyWeightedPoolingNetwork
 from models.auxillary_learning import AuxillaryLearning_A,AuxillaryLearning_B,AuxillaryLearning_C
 from exceptions.exceptions import InvalidModelVersion
 from models import construct_model

@@ -1,5 +1,5 @@
 import torch
-from trainTest.confusion_matrix import update_confusion_matrix
+from train_test.confusion_matrix import update_confusion_matrix
 import time
 
 def train_v1(ep, model, optimizer, train_loader, device, config,loss_function):
