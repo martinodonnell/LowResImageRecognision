@@ -92,7 +92,6 @@ class BoxCarDataSetUtil(object):
         self.submodel = self.get_class_names(BOXCARS_HARD_SUBMODEL_NAMES)
         self.generation = self.get_class_names(BOXCARS_HARD_GENERATION_NAMES)
         
-        # count_cars_annotations = { i : 0 for i in self.cars_annotations }
         
         ret = {}
         img_counter = 0
@@ -108,7 +107,6 @@ class BoxCarDataSetUtil(object):
                 'filename': instance['path'],
                 'bb3d':bb3d
             }
-            # count_cars_annotations[vehicle['annotation']]+=1
             ret[img_counter] = r
             img_counter=img_counter+1  
 
