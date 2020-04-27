@@ -26,7 +26,6 @@ class BoxCarsDatasetV1(Dataset):
         r = self.annos[idx]
 
         target = r['target']
-        print("taget ", target)
         if idx not in self.cache:
             fn = r['filename']
 
@@ -133,10 +132,6 @@ class BoxCarsDatasetV3(Dataset):
     def __getitem__(self, idx):
         r = self.annos[idx]
         target = r['target']
-        # make_target = r['make']
-        # model_target = r['model']
-        # submodel_target = r['submodel']
-        # generation_target =r['generation']
 
         if idx not in self.cache:
             fn = r['filename']

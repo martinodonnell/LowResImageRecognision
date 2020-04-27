@@ -2,7 +2,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 import torch
 
-from datasets.stanford.StanfordDataset import StanfordCarsDatasetV1,StanfordCarsDatasetV2,StanfordCarsDatasetV3
+from datasets.stanford.stanford_datasets import StanfordCarsDatasetV1,StanfordCarsDatasetV2,StanfordCarsDatasetV3
 from datasets.boxcars.boxcars_datasets import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
 
 from config import BOXCARS_IMAGES_IMAGES,STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
