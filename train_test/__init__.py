@@ -11,10 +11,8 @@ def get_train_test_methods(train_test_version):
     if train_test_version == 1:
         print("Train/Test Version 1 for normal models")
         return train_v1, test_v1
-    #TODO the model to use this has been deleted. Add it back from git
     elif train_test_version == 3: 
         print("Train/Test Version 3 for STANFORD (Multitask learning)")
-        exit("Not model for this atm. Deleted it but on git")
         return train_v3, test_v3
     elif train_test_version == 5:
         print("Train/Test Version 5 for BOXCARS (Multitask learning - 4 features)")

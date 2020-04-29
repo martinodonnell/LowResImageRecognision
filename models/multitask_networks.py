@@ -241,3 +241,39 @@ class Old_MTLC_Seperate_FC(nn.Module):
         generation_fc = self.generation_fc(out)
 
         return make_fc, model_fc,submodel_fc,generation_fc
+
+
+class MTLC_Stanford(nn.Module):
+    def __init__(self, base, num_classes, num_makes, num_types):
+        super().__init__()
+        self.base = base
+
+        in_features = self.base.classifier[6].in_features
+        self.base.classifier[6] = nn.Sequential()
+
+        self.brand_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_makes)
+        )
+
+        self.type_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.Linear(in_features, num_types)
+        )
+
+        self.class_fc = nn.Sequential(
+            nn.Dropout(0.2),
+            nn.ReLU(),
+            nn.Linear(in_features + num_makes + num_types, num_classes)
+        )
+
+    def forward(self, x):
+        out = self.base(x)
+        brand_fc = self.brand_fc(out)
+        type_fc = self.type_fc(out)
+
+        concat = torch.cat([out, brand_fc, type_fc], dim=1)
+
+        fc = self.class_fc(concat)
+
+        return fc, brand_fc, type_fc

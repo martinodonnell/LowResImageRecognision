@@ -1,6 +1,6 @@
 import torchvision
 from models.generic_networks import BoxCarsBase,StanfordBase,AlexnetBase
-from models.multitask_networks import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Seperate_FC,MTLC_Shared_FC_B,MTLC_Shared_FC_C
+from models.multitask_networks import MTLC_Shared_FC,MTLC_Seperate_FC,Old_MTLC_Seperate_FC,MTLC_Shared_FC_B,MTLC_Shared_FC_C,MTLC_Stanford
 from models.old_auxiliary_networks import MTLNC_Shared_FC_B,MTLNC_Seperate_FC,MTLNC_Shared_FC_A,MTLNC_Shared_FC_C
 from models.pooling_networks import ChannelPoolingNetwork,SpatiallyWeightedPoolingNetwork
 from models.auxillary_learning import AuxillaryLearning_A,AuxillaryLearning_B,AuxillaryLearning_C,AuxillaryLearning_A_B,AuxillaryLearning_B_B,AuxillaryLearning_C_B
@@ -51,7 +51,8 @@ def construct_model(model_version, num_classes,num_makes,num_models,num_submodel
         model = AuxillaryLearning_B_B(base, num_classes, num_makes, num_models,num_submodels,num_generation)
     elif model_version == 20:
         model = AuxillaryLearning_C_B(base, num_classes, num_makes, num_models,num_submodels,num_generation)
-
+    elif model_version == 21:
+        model = MTLC_Stanford(base,num_classes,num_makes,num_models)
     else:
         raise InvalidModelVersion(str(model_version) + " is not a valid model version")
 
