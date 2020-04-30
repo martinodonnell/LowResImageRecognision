@@ -9,7 +9,7 @@ import torch
 
 def setup_module(module):
     """ setup any state specific to the execution of the given module."""
-    if os.getcwd().split('/')[-1] != 'LowResImageRecognision' : os.chdir("..")
+    if os.getcwd().split('/')[-1].lower() != 'lowresimagerecognision' : os.chdir("..")
     print('after',os.getcwd())
 
 
