@@ -4,6 +4,7 @@ This system was designed to investigate different approaches that can boost the 
 To link the dataset to the system, ensure that the config file is correctly configured
 
 The boxcars dataset can be found at https://github.com/JakubSochor/BoxCars
+
 The stanford cars dataset can be found at https://ai.stanford.edu/~jkrause/cars/car_dataset.html
 
 To create the down sampled version of stanford, run the `jupyter_files/DownsampleImages.py`. Ensure the path is correct in the file
