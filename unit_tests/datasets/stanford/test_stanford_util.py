@@ -1,14 +1,21 @@
 import torchvision
 import sys
 import os
-sys.path.append("..")
+if ('..' not in sys.path) : sys.path.append("..")
 from config import STANFORD_CARS_TEST_ANNOS,BOXCARS_HARD_CLASS_NAMES,STANFORD_CARS_TRAIN_ANNOS
 from datasets.stanford.stanford_util import load_anno,load_class_names,load_annotations
 
 from torchvision import transforms
 import torch
 
-os.chdir("..")
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+    if os.getcwd().split('/')[-1] != 'LowResImageRecognision' : os.chdir("..")
+    print('after',os.getcwd())
+    
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+    print("os", os.getcwd())
 
 def test_load_anno():
     ann = load_anno(STANFORD_CARS_TEST_ANNOS)

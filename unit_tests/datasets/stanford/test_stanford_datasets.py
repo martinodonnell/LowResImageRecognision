@@ -1,13 +1,16 @@
 import torchvision
 import sys
 import os
-sys.path.append("..")
+if ('..' not in sys.path) : sys.path.append("..")
 from config import STANFORD_CARS_TRAIN,STANFORD_CARS_TEST,STANFORD_CARS_TRAIN_ANNOS,STANFORD_CARS_TEST_ANNOS
 from datasets.stanford.stanford_datasets import StanfordCarsDatasetV1,StanfordCarsDatasetV2,StanfordCarsDatasetV3
 from torchvision import transforms
 import torch
 
-os.chdir("..")
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+    if os.getcwd().split('/')[-1] != 'LowResImageRecognision' : os.chdir("..")
+    print('after',os.getcwd())
 
 def test_check_stanford_v1_dataset_split_low_version():
 

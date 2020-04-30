@@ -9,7 +9,11 @@ import numpy as np
 from torchvision import transforms
 import torch
 
-os.chdir("..")
+
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+    if os.getcwd().split('/')[-1] != 'LowResImageRecognision' : os.chdir("..")
+    print('after',os.getcwd())
 
 def test_load_util_object():
     boxcars_util = BoxCarDataSetUtil('hard','train')

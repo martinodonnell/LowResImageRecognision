@@ -1,13 +1,17 @@
 import torchvision
 import sys
 import os
-sys.path.append("..")
+if ('..' not in sys.path) : sys.path.append("..")
 from config import BOXCARS_IMAGES_IMAGES
 from datasets.boxcars.boxcars_datasets import BoxCarsDatasetV1,BoxCarsDatasetV1_2,BoxCarsDatasetV2,BoxCarsDatasetV3
 from torchvision import transforms
 import torch
 
-os.chdir("..")
+def setup_module(module):
+    """ setup any state specific to the execution of the given module."""
+    if os.getcwd().split('/')[-1] != 'LowResImageRecognision' : os.chdir("..")
+    print('after',os.getcwd())
+
 
 def test_check_boxcars_v1_dataset_split():
 

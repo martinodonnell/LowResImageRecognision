@@ -106,9 +106,6 @@ def test_load_weight_stanford():
     for model1_key, model2_key in zip(model1.state_dict(),model2.state_dict()):
         assert (model1.state_dict()[model1_key] == model2.state_dict()[model2_key]).all()
 
-# def test_get_args():
-#     assert True == False
-
 
 def test_get_loss_function_cross_entropy():
     loss_function = get_loss_function(1)

@@ -2,7 +2,7 @@
 import torch
 import sys
 sys.path.append("..")
-from train_testconfusionMatrix import update_confusion_matrix
+from train_test.confusion_matrix import update_confusion_matrix
 
 print(sys.path)
 

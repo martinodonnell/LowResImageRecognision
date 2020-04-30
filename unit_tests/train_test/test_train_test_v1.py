@@ -60,17 +60,17 @@ def test_test_v1():
         'submodel_loss':1,
         'generation_loss':1,
         'num_classes':num_classes,
-        'num_makes':num_makes,
-        'num_models':num_models,
-        'num_submodels':num_submodels,
-        'num_generations':num_generations 
+        'num_makes':1,
+        'num_models':1,
+        'num_submodels':1,
+        'num_generations':1 
     }
 
     confusion_matrix = gen_confusion_matrixes(config)
-    train_loader = DataLoader(TestingRandomDatasetSingle(1),batch_size=1)   
+    test_loader = DataLoader(TestingRandomDatasetSingle(1),batch_size=1)   
 
     #use train method to update weights in model and get results
-    results = t_test_v1(ep, model1, optimizer, train_loader, device, None,loss_function)
+    results = t_test_v1(model1, test_loader, device, config,confusion_matrix,loss_function)
 
 
     #Checking the number of results are all equal to zero
