@@ -1,5 +1,6 @@
 # LowResImageRecognision
-This system was designed to investigate different approaches that can boost the performance of a low resolution dataset. The approaches used will be fine-to-coarse knowledge transfer, multitask learning and auxiliary learning
+This system was designed to investigate different approaches that can boost the performance of a low resolution dataset. The approaches used will be fine-to-coarse knowledge transfer, multitask learning and auxiliary learning. The dissertation can be read [here](reports/dissertation.pdf)
+
 # Datasets
 To link the dataset to the system, ensure that the config file is correctly configured
 
